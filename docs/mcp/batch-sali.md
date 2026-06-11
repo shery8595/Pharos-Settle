@@ -23,6 +23,29 @@ BATCH_SIZE=100 npm run demo:batch    # SALI FastPay on Atlantic
 
 Output includes `maxParallelInBlock` and `endToEndDealsPerSec` — proof of parallel settlement.
 
+## Production split (batch = manifest, MCP = single identity)
+
+> **Batch = coordination (manifest). MCP = single identity. Never mix keys in one env.**
+
+```mermaid
+flowchart LR
+  PayerMCP[Payer_MCP_PRIVATE_KEY]
+  Manifest[manifest_JSON]
+  PayeeA[Payee_MCP_A]
+  PayeeB[Payee_MCP_B]
+  PayerMCP -->|batch:fund_or_fund_deals_batch| Manifest
+  Manifest --> PayeeA
+  Manifest --> PayeeB
+  PayeeA -->|batch:claim_filtered| ClaimA[claims_for_A]
+  PayeeB -->|batch:claim_filtered| ClaimB[claims_for_B]
+```
+
+| Tool / CLI | Role | Keys |
+|------------|------|------|
+| `fund_deals_batch` / `npm run batch:fund` | Lock escrow for N payees | `PRIVATE_KEY` only |
+| `complete_claims_batch` / `npm run batch:claim` | Claim filtered manifest rows | `AGENT_B_PRIVATE_KEY` only (one payee per MCP) |
+| `execute_batch_settlement` / `npm run pay:batch` | Demo shortcut | Both keys |
+
 ## Two-MCP split batch
 
 ### SALI FastPay (`saliFast`)
@@ -40,16 +63,26 @@ Output includes `maxParallelInBlock` and `endToEndDealsPerSec` — proof of para
 
 ## Demo shortcut
 
-One MCP with both keys: `execute_batch_settlement` with `batchMode` `saliFast` or `hybridWork`.
+One MCP with both keys: `execute_batch_settlement` with `batchMode` `saliFast` or `hybridWork`. CLI equivalent: `npm run pay:batch` (prints demo banner).
 
 ## CLI
 
-**Custom payees / amounts (SDK wrapper — prefer MCP when connected):**
+**Production (split — prefer MCP when connected):**
+
+```bash
+# Payer only — writes manifest
+npm run batch:fund -- --payees 0xA,0xB,0xC --amount 1 --work-prefix "label-batch"
+npm run batch:fund -- --jobs-file ./jobs.json --out ./manifest.json
+
+# Payee only — filters manifest to AGENT_B_PRIVATE_KEY address
+npm run batch:claim -- --manifest ./manifest.json
+```
+
+**Demo (both keys in one process):**
 
 ```bash
 npm run pay:batch -- --payees 0xA,0xB,0xC --amount 1 --work-prefix "label-batch"
 npm run pay:batch -- --payee 0x... --count 10 --amount 2 --mode saliFast
-npm run pay:batch -- --jobs-file ./jobs.json --mode hybridWork
 ```
 
 **Fixed demos:**
@@ -62,7 +95,7 @@ npm run demo:batch:split        # two-MCP payer/payee handoff
 npm run demo:batch:split:simulate
 ```
 
-Agents must **not** create `pay-batch-custom.ts` — use `pay:batch` or MCP tools above.
+Agents must **not** create `pay-batch-custom.ts` — use `batch:fund` / `batch:claim`, MCP split tools, or `pay:batch` for demos only.
 
 ## Metrics
 

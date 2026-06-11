@@ -45,11 +45,17 @@ See [batch-sali.md](batch-sali.md) for `saliFast` vs `hybridWork` batch modes.
 
 ## Batch two-MCP flow
 
+| Step | MCP tool | CLI |
+|------|----------|-----|
+| Fund (payer) | `fund_deals_batch` | `npm run batch:fund` |
+| Claim (payee) | `complete_claims_batch` | `npm run batch:claim -- --manifest ...` |
+| Demo (both keys) | `execute_batch_settlement` | `npm run pay:batch` |
+
 ### saliFast (SALI throughput)
 
-1. Payer: `fund_deals_batch` (`batchMode: saliFast`)
+1. Payer: `fund_deals_batch` (`batchMode: saliFast`) or `batch:fund`
 2. Handoff: `manifest`
-3. Payee: `complete_claims_batch`
+3. Payee: `complete_claims_batch` or `batch:claim` (auto-filters to payee signer)
 
 ### hybridWork (full commerce)
 

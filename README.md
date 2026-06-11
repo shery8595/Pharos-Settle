@@ -177,17 +177,22 @@ Legacy HTTP bridge: `npm run mcp:http`
 - **Payer-sponsored onboarding** — `registerRecipients` before first payment
 - **Registered agents + allowlisted tokens + hybrid escrow**
 
+```bash
+# Production CLI — payer funds, payees claim from manifest
+npm run batch:fund -- --payees 0xA,0xB --amount 1 --work-prefix payroll
+npm run batch:claim -- --manifest .pharos-settle/batch-manifest-....json
+
+# Demo only — both keys in one process
+npm run pay:batch -- --payee 0x... --count 5 --amount 1
+```
+
 ```typescript
-import { executeBatchSettlement, fundDealsBatch, claimDealsBatch } from "./src/trustedAgentSettlement.js";
+import { fundDealsBatch, claimDealsBatch, filterManifestForPayee, manifestToClaims } from "./src/trustedAgentSettlement.js";
 
-// SALI FastPay — demo shortcut (both keys)
-const batch = await executeBatchSettlement(jobs, { batchMode: "saliFast", deploymentNetwork: "atlantic" });
-
-// Two-agent split: payer funds → workers claim from manifest
-const funded = await fundDealsBatch(jobs, { batchMode: "saliFast" });
-const claimed = await claimDealsBatch(funded.manifest.map((m) => ({
-  dealId: m.dealId, fundTx: m.fundTx, amount: m.amount, agentB: m.agentB,
-})));
+const funded = await fundDealsBatch(jobs, { batchMode: "saliFast", payerSigner: PRIVATE_KEY });
+// hand off funded.manifest — each payee MCP filters and claims its rows
+const { matched } = filterManifestForPayee(funded.manifest, payeeAddress);
+await claimDealsBatch(manifestToClaims(matched), { payeeSigner: AGENT_B_KEY });
 ```
 
 ---

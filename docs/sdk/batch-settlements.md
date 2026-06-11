@@ -26,12 +26,13 @@ const batch = await executeBatchSettlement(jobs, {
 
 ### Phase functions (two-agent split)
 
-| Function | Role | Mode |
+| Function | Role | Keys |
 |----------|------|------|
-| `fundDealsBatch(jobs, config)` | Payer | both |
-| `submitDeliveriesBatch(manifest, config)` | Payee | hybridWork |
-| `attestReleasesBatch(manifest, config)` | Payer | hybridWork |
-| `claimDealsBatch(manifest, config)` | Payee | both |
+| `fundDealsBatch(jobs, config)` | Payer | `PRIVATE_KEY` / `payerSigner` |
+| `submitDeliveriesBatch(manifest, config)` | Payee | `AGENT_B_PRIVATE_KEY` / `payeeSigner` |
+| `attestReleasesBatch(manifest, config)` | Payer | payer key |
+| `claimDealsBatch(manifest, config)` | Payee | payee key (one identity per call) |
+| `filterManifestForPayee(manifest, address)` | Helper | Filter multi-payee manifest for one payee MCP |
 
 `fundDealsBatch` returns a **manifest** (`dealId`, `fundTx`, `amount`, `agentB`, …) for payee handoff.
 

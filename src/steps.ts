@@ -14,6 +14,8 @@ export {
   submitDeliveriesBatch,
   attestReleasesBatch,
   claimDealsBatch,
+  filterManifestForPayee,
+  manifestToClaims,
   resultHashFromWork,
 } from "./internal/settle/index.js";
 export { getAgentReadiness, detectAgentRole, allowedToolsForRole } from "./internal/agent/readiness.js";

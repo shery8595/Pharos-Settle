@@ -5,6 +5,8 @@ import {
   attestReleasesBatch,
   claimDealsBatch,
   executeBatchSettlement,
+  filterManifestForPayee,
+  manifestToClaims,
 } from "../../src/trustedAgentSettlement.js";
 
 const agentA = "0x1111111111111111111111111111111111111111";
@@ -88,5 +90,31 @@ describe("batch split phases (mock)", () => {
     expect(batch.success).toBe(true);
     expect(batch.succeeded).toBe(3);
     expect(batch.maxParallelInBlock).toBe(3);
+  });
+
+  it("filterManifestForPayee keeps matching rows only", async () => {
+    const funded = await fundDealsBatch(
+      [
+        { ...jobs(1, false)[0]!, agentB: agentA },
+        { ...jobs(1, false)[0]!, agentB },
+        { ...jobs(1, false)[0]!, agentB: "0x4444444444444444444444444444444444444444" },
+      ],
+      { mock: true, batchMode: "saliFast" }
+    );
+    const { matched, skipped } = filterManifestForPayee(funded.manifest, agentB);
+    expect(matched).toHaveLength(1);
+    expect(skipped).toBe(2);
+    expect(matched[0]?.agentB.toLowerCase()).toBe(agentB.toLowerCase());
+  });
+
+  it("manifestToClaims maps claim fields", async () => {
+    const funded = await fundDealsBatch(jobs(2, false), { mock: true, batchMode: "saliFast" });
+    const claims = manifestToClaims(funded.manifest);
+    expect(claims[0]).toMatchObject({
+      dealId: funded.manifest[0]?.dealId,
+      fundTx: funded.manifest[0]?.fundTx,
+      amount: funded.manifest[0]?.amount,
+      agentB: funded.manifest[0]?.agentB,
+    });
   });
 });

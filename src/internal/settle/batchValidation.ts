@@ -69,6 +69,28 @@ export function validatePayeeManifest(
   }
 }
 
+/** Filter manifest rows for a single payee identity (multi-payee batch handoff). */
+export function filterManifestForPayee<T extends { agentB: string }>(
+  items: T[],
+  payeeAddressHex: string
+): { matched: T[]; skipped: number } {
+  const payee = payeeAddressHex.toLowerCase();
+  const matched = items.filter((item) => item.agentB.toLowerCase() === payee);
+  return { matched, skipped: items.length - matched.length };
+}
+
+export function manifestToClaims(
+  manifest: { index: number; dealId: string; fundTx: string; amount: string; agentB: string }[]
+) {
+  return manifest.map((m) => ({
+    index: m.index,
+    dealId: m.dealId,
+    fundTx: m.fundTx,
+    amount: m.amount,
+    agentB: m.agentB,
+  }));
+}
+
 export function validateDeliveryBatch(items: BatchDeliveryInput[]): void {
   for (let i = 0; i < items.length; i++) {
     const item = items[i]!;

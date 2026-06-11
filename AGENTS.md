@@ -167,21 +167,27 @@ See [docs/mcp/batch-sali.md](docs/mcp/batch-sali.md).
 
 ### 2. Official CLI (SDK wrapper)
 
+**Production (split):**
+
 ```bash
-# 3 workers, 1 TEST each, SALI FastPay
+# Payer only — fund N escrows, write manifest
+npm run batch:fund -- --payees 0xA,0xB,0xC --amount 1 --work-prefix "label-batch"
+npm run batch:fund -- --jobs-file ./jobs.json --out ./manifest.json
+
+# Payee only — claim rows matching AGENT_B_PRIVATE_KEY (multi-payee safe)
+npm run batch:claim -- --manifest ./manifest.json
+```
+
+**Demo (both keys — not production architecture):**
+
+```bash
 npm run pay:batch -- --payees 0xA,0xB,0xC --amount 1 --work-prefix "label-batch"
-
-# Same payee, 5 microtasks, 2 TEST each
 npm run pay:batch -- --payee 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC --count 5 --amount 2
-
-# Full work proof per job
-npm run pay:batch -- --payee 0x... --count 3 --amount 1 --mode hybridWork
-
-# Custom job list (JSON)
-npm run pay:batch -- --jobs-file ./jobs.json
 ```
 
 `jobs.json` example: `[{"agentB":"0x...","amount":"1000000000000000000","workDescription":"task-1"}]`
+
+> **Batch = coordination (manifest). MCP = single identity. Never mix keys in one env.**
 
 ### 3. Existing demos (fixed patterns)
 
@@ -195,7 +201,7 @@ npm run demo:batch:split                      # fundDealsBatch → claimDealsBat
 
 `executeBatchSettlement`, `fundDealsBatch`, `claimDealsBatch`, etc. — see [docs/sdk/batch-settlements.md](docs/sdk/batch-settlements.md) and `examples/pipeline/run-batch.ts`.
 
-**Requirements:** payer allowance ≥ sum of amounts; payees registered or `autoOnboardRecipients: true`; for `execute_batch_settlement` / `pay:batch`, payee key must sign deliver/claim unless all jobs use the same payee as `AGENT_B_PRIVATE_KEY`.
+**Requirements:** payer allowance ≥ sum of amounts; payees registered or `autoOnboardRecipients: true`. For `batch:fund`, only payer key required. For `batch:claim`, only payee key required (CLI filters manifest). For `pay:batch` / `execute_batch_settlement`, both keys required.
 
 ## Network
 

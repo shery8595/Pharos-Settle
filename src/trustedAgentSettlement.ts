@@ -489,12 +489,13 @@ export {
   submitDeliveriesBatch,
   attestReleasesBatch,
   claimDealsBatch,
-  registerRecipients,
-  registerRecipient,
+  filterManifestForPayee,
+  manifestToClaims,
   fundDeal,
   submitDeliveryWithHash,
   attestReleaseWithHash,
-};
+} from "./internal/settle/index.js";
+export { registerRecipients, registerRecipient } from "./internal/onboard/recipients.js";
 export type {
   BatchSettlementOutput,
   BatchFundOutput,

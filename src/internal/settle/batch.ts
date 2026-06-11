@@ -34,6 +34,7 @@ import {
   validateDeliveryBatch,
   validatePayerBatchJobs,
   validatePayeeManifest,
+  manifestToClaims,
 } from "./batchValidation.js";
 
 const pharosChain = {
@@ -831,16 +832,6 @@ export async function claimDealsBatch(
         : "Some claims failed.",
     results,
   };
-}
-
-function manifestToClaims(manifest: BatchDealManifest[]): BatchClaimInput[] {
-  return manifest.map((m) => ({
-    index: m.index,
-    dealId: m.dealId,
-    fundTx: m.fundTx,
-    amount: m.amount,
-    agentB: m.agentB,
-  }));
 }
 
 function manifestToDeliveries(manifest: BatchDealManifest[]): BatchDeliveryInput[] {

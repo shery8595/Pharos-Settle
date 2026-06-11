@@ -312,6 +312,10 @@ export {
   attestReleasesBatch,
   claimDealsBatch,
 } from "./batch.js";
+export {
+  filterManifestForPayee,
+  manifestToClaims,
+} from "./batchValidation.js";
 export type {
   BatchSettlementOutput,
   BatchDealResult,

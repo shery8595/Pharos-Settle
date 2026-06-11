@@ -253,10 +253,12 @@ Payee address in the request can differ from `.env` only if you use payer-only t
 
 **Never** create ad-hoc batch scripts. For N payments / SALI FastPay:
 
-| Mode | MCP | CLI |
-|------|-----|-----|
-| `saliFast` | `execute_batch_settlement` or `fund_deals_batch` → `complete_claims_batch` | `npm run pay:batch -- --payees 0xA,0xB --amount 1` |
-| `hybridWork` | above + deliver + attest batch tools | `npm run pay:batch -- ... --mode hybridWork` |
+| Mode | MCP (production) | CLI (production) | Demo |
+|------|------------------|------------------|------|
+| `saliFast` | `fund_deals_batch` → `complete_claims_batch` | `batch:fund` → `batch:claim` | `pay:batch` |
+| `hybridWork` | fund → deliver → attest → claim batch tools | same split + hybrid phases | `pay:batch --mode hybridWork` |
+
+Never add multi-payee keys to env (`AGENT_B_BATCH`). One MCP = one identity; multi-payee manifests are filtered per payee on claim.
 
 Demos: `npm run demo:batch`, `npm run demo:batch:split`. Docs: [batch-settlements.md](../../docs/sdk/batch-settlements.md), [batch-sali.md](../../docs/mcp/batch-sali.md).
 
