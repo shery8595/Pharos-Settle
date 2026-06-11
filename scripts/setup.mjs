@@ -9,16 +9,25 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
+const isWin = process.platform === "win32";
 
-function run(step, args, opts = {}) {
-  const result = spawnSync(npmCmd, args, {
-    cwd: root,
-    stdio: "inherit",
-    ...opts,
-  });
+/** Cross-platform npm invoke (Windows needs shell so npm.cmd can run). */
+function run(step, args) {
+  const result = isWin
+    ? spawnSync("cmd.exe", ["/d", "/s", "/c", "npm", ...args], {
+        cwd: root,
+        stdio: "inherit",
+        windowsHide: true,
+      })
+    : spawnSync("npm", args, { cwd: root, stdio: "inherit" });
+
+  if (result.error) {
+    console.error(`\n✗ ${step} failed to start: ${result.error.message}`);
+    process.exit(1);
+  }
   if (result.status !== 0) {
     console.error(`\n✗ ${step} failed (exit ${result.status ?? "unknown"})`);
+    if (result.signal) console.error(`  signal: ${result.signal}`);
     process.exit(result.status ?? 1);
   }
 }
