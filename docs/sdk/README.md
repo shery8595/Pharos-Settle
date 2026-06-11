@@ -58,6 +58,18 @@ From source (development):
 import { executeTrustedSettlement } from "./src/trustedAgentSettlement.js";
 ```
 
+## One-shot CLI
+
+```bash
+npm run pay:once -- --payee 0x... --amount 5 --work "task-id"
+npm run pay:batch -- --payees 0xA,0xB,0xC --amount 1 --work-prefix "payroll"
+npm run pay:batch -- --payee 0x... --count 10 --amount 2 --mode saliFast
+```
+
+Thin SDK wrappers — prefer MCP (`execute_trusted_settlement`, `execute_batch_settlement`, or split batch tools). Agents must **not** create ad-hoc `pay-custom.ts` / `pay-batch-custom.ts` scripts.
+
+Batch details: [batch-settlements.md](batch-settlements.md) · MCP: [batch-sali.md](../mcp/batch-sali.md)
+
 ## Documentation index
 
 | Doc | Content |

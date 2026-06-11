@@ -24,6 +24,8 @@
     "build": "tsc",
     "gates:atlantic": "tsx scripts/gates/validate-atlantic.ts",
     "check:balance": "tsx scripts/check-balance.ts",
+    "pay:once": "tsx scripts/pay-once.ts",
+    "pay:batch": "tsx scripts/pay-batch.ts",
     "agent:doctor": "tsx scripts/agent-doctor.ts",
     "agent:doctor:mock": "tsx scripts/agent-doctor.ts --mock",
     "test": "npm run build && hardhat test && vitest run",

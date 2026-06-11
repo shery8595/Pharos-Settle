@@ -70,8 +70,12 @@ Or use **`.pharos-settle/mcp.generated.json`** (absolute `cwd` + `npx tsx`).
 
 ## Non-interactive setup
 
+**Agents** running `npm run setup` in Cursor often have **no TTY** — CLI prompts are skipped (`mcpMode` and `runMode` stay `null`). The **agent must ask you** project/global and demo/live in chat (see `AGENTS.md`).
+
+Run yourself in a terminal for interactive prompts, or pass flags:
+
 ```bash
-npm run setup -- --mode=project --run=demo   # defaults
+npm run setup -- --mode=project --run=demo
 npm run setup -- --mode=global --run=live
 ```
 

@@ -42,7 +42,17 @@ Output includes `maxParallelInBlock` and `endToEndDealsPerSec` — proof of para
 
 One MCP with both keys: `execute_batch_settlement` with `batchMode` `saliFast` or `hybridWork`.
 
-## CLI demos
+## CLI
+
+**Custom payees / amounts (SDK wrapper — prefer MCP when connected):**
+
+```bash
+npm run pay:batch -- --payees 0xA,0xB,0xC --amount 1 --work-prefix "label-batch"
+npm run pay:batch -- --payee 0x... --count 10 --amount 2 --mode saliFast
+npm run pay:batch -- --jobs-file ./jobs.json --mode hybridWork
+```
+
+**Fixed demos:**
 
 ```bash
 npm run demo:batch              # SALI FastPay, BATCH_SIZE=5
@@ -51,6 +61,8 @@ BATCH_MODE=hybridWork npm run demo:batch
 npm run demo:batch:split        # two-MCP payer/payee handoff
 npm run demo:batch:split:simulate
 ```
+
+Agents must **not** create `pay-batch-custom.ts` — use `pay:batch` or MCP tools above.
 
 ## Metrics
 

@@ -88,7 +88,7 @@ async function promptChoice({ title, options, defaultIndex, parseAnswer }) {
 async function promptMcpMode() {
   const fromArg = parseMcpModeArg();
   if (fromArg) return fromArg;
-  if (!input.isTTY) return "project";
+  if (!input.isTTY) return null;
 
   return promptChoice({
     title: `
@@ -109,7 +109,7 @@ MCP mode — how will you use Pharos Settle in your IDE?
 async function promptRunMode() {
   const fromArg = parseRunModeArg();
   if (fromArg) return fromArg;
-  if (!input.isTTY) return "demo";
+  if (!input.isTTY) return null;
 
   return promptChoice({
     title: `
@@ -213,6 +213,16 @@ function installSkill(mcpMode) {
   return installed;
 }
 
+function printSkippedInteractiveNotice(mcpMode, runMode) {
+  if (mcpMode != null && runMode != null) return;
+  console.log(`
+⚠ Setup ran non-interactively (no TTY) — MCP mode and/or run mode were not chosen here.
+  • Run in your own terminal:  npm run setup
+  • Or tell your agent to ask:  project vs global MCP, then demo vs live
+  • Flags:  npm run setup -- --mode=global --run=demo
+`);
+}
+
 function verifyMcpConfig() {
   const mcpPath = join(root, ".cursor", "mcp.json");
   if (!existsSync(mcpPath)) {
@@ -260,29 +270,48 @@ function createEnvFromExample() {
 }
 
 function modeSteps(mcpMode, runMode, keysConfigured) {
-  const mcpSteps =
-    mcpMode === "global"
-      ? [
-          "Add pharos-settle from .pharos-settle/mcp-bin.generated.json to Cursor Settings → MCP → global servers",
-          "Reload MCP so pharos-settle is connected",
-          "Open any workspace — MCP runs from the Pharos-Settle clone at repoPath",
-        ]
-      : [
-          "Open Pharos-Settle as workspace / project root (not a parent folder)",
-          "Reload MCP — .cursor/mcp.json uses ${workspaceFolder}",
-        ];
+  const steps = [];
 
-  if (runMode === "live" && !keysConfigured) {
-    mcpSteps.push(
-      "User chose live at setup — confirm PRIVATE_KEY and AGENT_B_PRIVATE_KEY are set in .env at repoPath before live MCP tools"
+  if (mcpMode == null) {
+    steps.push(
+      "Ask user: project MCP (open Pharos-Settle as workspace root) vs global MCP (any workspace) — save mcpMode in checklist"
     );
-  } else if (runMode === "live") {
-    mcpSteps.push("User chose live at setup — keys configured; use MCP without mock: true or npm run agent:doctor");
+  } else if (mcpMode === "global") {
+    steps.push(
+      "Add pharos-settle from .pharos-settle/mcp-bin.generated.json to Cursor Settings → MCP → global servers",
+      "Reload MCP so pharos-settle is connected",
+      "Open any workspace — MCP runs from the Pharos-Settle clone at repoPath"
+    );
   } else {
-    mcpSteps.push("User chose demo at setup — use mock: true or npm run agent:doctor:mock");
+    steps.push(
+      "Open Pharos-Settle as workspace / project root (not a parent folder)",
+      "Reload MCP — .cursor/mcp.json uses ${workspaceFolder}"
+    );
   }
 
-  return mcpSteps;
+  if (runMode == null) {
+    steps.push("Ask user: demo (mock) vs live Atlantic — save runMode in checklist");
+  } else if (runMode === "live" && !keysConfigured) {
+    steps.push(
+      "User chose live — confirm PRIVATE_KEY and AGENT_B_PRIVATE_KEY are set in .env at repoPath before live MCP tools"
+    );
+  } else if (runMode === "live") {
+    steps.push("User chose live — keys configured; use MCP without mock: true or npm run agent:doctor");
+  } else {
+    steps.push("User chose demo — use mock: true or npm run agent:doctor:mock");
+  }
+
+  return steps;
+}
+
+function checklistMessage(mcpMode, runMode) {
+  if (mcpMode == null || runMode == null) {
+    return "Agent: ask project vs global MCP and demo vs live (setup ran non-interactively). See AGENTS.md";
+  }
+  if (mcpMode === "global") {
+    return "Agent: confirm global MCP connected; runMode chosen at setup. See AGENTS.md";
+  }
+  return "Agent: confirm workspace root + MCP reload; runMode chosen at setup. See AGENTS.md";
 }
 
 function writePortableArtifacts(envInfo, mcpMode, runMode, keysConfigured) {
@@ -299,12 +328,11 @@ function writePortableArtifacts(envInfo, mcpMode, runMode, keysConfigured) {
         mcpMode,
         mcpModeDocs: "docs/mcp/modes.md",
         runMode,
+        setupInteractive: mcpMode != null && runMode != null,
+        needsSetupChoices: mcpMode == null || runMode == null,
         keysConfigured: runMode === "live" ? keysConfigured : null,
         repoPath,
-        message:
-          mcpMode === "global"
-            ? "Agent: confirm global MCP connected; runMode already chosen at setup. See AGENTS.md"
-            : "Agent: confirm workspace root + MCP reload; runMode already chosen at setup. See AGENTS.md",
+        message: checklistMessage(mcpMode, runMode),
         env: {
           path: ".env",
           createdFromExample: envInfo.created,
@@ -358,6 +386,8 @@ function writePortableArtifacts(envInfo, mcpMode, runMode, keysConfigured) {
 }
 
 function printRunNextSteps(runMode, keysConfigured) {
+  if (runMode == null) return;
+
   if (runMode === "live") {
     if (keysConfigured) {
       console.log(`Run mode (live):
@@ -382,6 +412,8 @@ function printRunNextSteps(runMode, keysConfigured) {
 }
 
 function printModeNextSteps(mcpMode, { mcpGeneratedPath, mcpBinPath }) {
+  if (mcpMode == null) return;
+
   if (mcpMode === "global") {
     console.log(`
 Next (global MCP — use from any workspace):
@@ -418,8 +450,15 @@ console.log("✓ Dependencies installed");
 run("Build", ["run", "build"]);
 console.log("✓ Project built");
 
-console.log(`✓ MCP mode → ${mcpMode} (docs/mcp/modes.md)`);
-console.log(`✓ Run mode → ${runMode}`);
+printSkippedInteractiveNotice(mcpMode, runMode);
+console.log(
+  mcpMode != null
+    ? `✓ MCP mode → ${mcpMode} (docs/mcp/modes.md)`
+    : "○ MCP mode → not chosen (agent will ask: project vs global)"
+);
+console.log(
+  runMode != null ? `✓ Run mode → ${runMode}` : "○ Run mode → not chosen (agent will ask: demo vs live)"
+);
 
 const skillPaths = installSkill(mcpMode);
 for (const { label, path: skillPath } of skillPaths) {

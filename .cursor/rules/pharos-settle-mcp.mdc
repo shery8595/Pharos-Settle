@@ -11,9 +11,18 @@ Before calling **pharos-settle** MCP tools (`get_agent_readiness`, `simulate_tru
 
 Read **`.pharos-settle/setup-checklist.json`** when present (also see `AGENTS.md`). If `"awaitingConfirmation": true`, or the user just ran `npm run setup`, run the confirmation flow below **before** any MCP tool call.
 
-Read **`mcpMode`**: `"project"` (default) or `"global"`. Guide: [docs/mcp/modes.md](docs/mcp/modes.md).
+Guide: [docs/mcp/modes.md](docs/mcp/modes.md).
 
-## 2. Ask the user (use AskQuestion when available)
+## 2. Setup choices (non-interactive setup)
+
+If `needsSetupChoices` is true or `mcpMode` / `runMode` is null — **ask first** (AskQuestion):
+
+1. **Project MCP** vs **Global MCP** → save `mcpMode` in checklist  
+2. **Demo** vs **Live** → save `runMode` in checklist  
+
+Parent workspace (repo not root, e.g. `skill_test/Pharos-Settle`) → suggest **global** MCP.
+
+## 3. MCP confirmation (use AskQuestion when available)
 
 ### Project mode
 
@@ -31,7 +40,7 @@ Read **`mcpMode`**: `"project"` (default) or `"global"`. Guide: [docs/mcp/modes.
 
 Workspace root does **not** need to be Pharos-Settle in global mode.
 
-## 3. If anything is not ready
+## 4. If anything is not ready
 
 - **Project / wrong workspace:** `File → Open Folder → Pharos-Settle` (repo root with `.cursor/mcp.json`).
 - **Global / MCP not added:** Cursor → Settings → MCP → global server — paste from `.pharos-settle/mcp-bin.generated.json` — [docs/mcp/modes.md](docs/mcp/modes.md).
@@ -39,7 +48,7 @@ Workspace root does **not** need to be Pharos-Settle in global mode.
 - Do **not** call Pharos MCP tools or claim MCP is connected.
 - Offer terminal fallback: `npm run agent:doctor:mock` and `npm run demo:simulate`.
 
-## 4. If both confirmed
+## 5. If both confirmed
 
 Update `.pharos-settle/setup-checklist.json`:
 
@@ -60,6 +69,14 @@ Do not run live settlement without both keys configured.
 
 Then proceed with MCP tools or mock demos as appropriate.
 
-## 5. If MCP tools are missing from this chat
+## 6. If MCP tools are missing from this chat
 
 Say explicitly: **"Pharos Settle MCP is not connected in this session."** Do not simulate MCP by running npm scripts unless the user asks for CLI fallback.
+
+## Custom payments
+
+Do **not** create `scripts/pay-custom.ts` or other one-off payment scripts. Use MCP `simulate_trusted_settlement` / `execute_trusted_settlement`, or `npm run pay:once -- --payee 0x... --amount 5 --work "task"` (SDK wrapper). See `AGENTS.md` § Custom payments.
+
+## Batch settlements
+
+Do **not** create ad-hoc batch scripts. Use MCP `execute_batch_settlement` or split `fund_deals_batch` → `complete_claims_batch`, or `npm run pay:batch -- --payees 0xA,0xB --amount 1`. See `AGENTS.md` § Batch settlements and `docs/mcp/batch-sali.md`.

@@ -239,6 +239,27 @@ After `simulateTrustedSettlement` or `getSettlementStatus`, act on **one** hint:
 | `wait` | poll `getSettlementStatus` later (auto-release window or chain pending) |
 | `done` | stop — deal released or refunded; no further txs |
 
+## Custom amount / payee (agents)
+
+**Never** create `scripts/pay-custom.ts` or similar. For “pay N TEST to 0x…”:
+
+1. **MCP:** `simulate_trusted_settlement` → `execute_trusted_settlement` (`token` from `atlantic.json`, `amount` in wei, `autoOnboardRecipients: true` if needed).
+2. **CLI:** `npm run pay:once -- --payee 0x... --amount 5 --work "task-id"` (wraps the same SDK).
+3. **Code:** `examples/agent-consumer/openai-agent.ts` pattern.
+
+Payee address in the request can differ from `.env` only if you use payer-only tools (`fund_deal` + hand off `dealId`) or payee has `AGENT_B_PRIVATE_KEY` for deliver/claim.
+
+## Batch payroll (agents)
+
+**Never** create ad-hoc batch scripts. For N payments / SALI FastPay:
+
+| Mode | MCP | CLI |
+|------|-----|-----|
+| `saliFast` | `execute_batch_settlement` or `fund_deals_batch` → `complete_claims_batch` | `npm run pay:batch -- --payees 0xA,0xB --amount 1` |
+| `hybridWork` | above + deliver + attest batch tools | `npm run pay:batch -- ... --mode hybridWork` |
+
+Demos: `npm run demo:batch`, `npm run demo:batch:split`. Docs: [batch-settlements.md](../../docs/sdk/batch-settlements.md), [batch-sali.md](../../docs/mcp/batch-sali.md).
+
 ## Example prompts
 
 1. "Pay the scraping agent 1 TEST on Pharos if it delivers competitor pricing data"

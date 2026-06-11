@@ -27,7 +27,24 @@ Full guide: [docs/mcp/modes.md](docs/mcp/modes.md).
 
 After `npm run setup`, read **`.pharos-settle/setup-checklist.json`**. If `"awaitingConfirmation": true` (or the user just ran setup):
 
-Read **`mcpMode`** (`"project"` or `"global"`). Use **AskQuestion** when available.
+Use **AskQuestion** when available.
+
+### Setup choices (if not chosen in terminal)
+
+When an agent runs `npm run setup`, the terminal often has **no TTY** — prompts are skipped and `needsSetupChoices` is `true`. **You must ask the user** before MCP confirmation:
+
+| Order | If missing | Ask |
+|-------|------------|-----|
+| 1 | `mcpMode` is `null` / missing | **Project MCP** (open Pharos-Settle as workspace root) vs **Global MCP** (any workspace — paste `mcp-bin.generated.json`) |
+| 2 | `runMode` is `null` / missing | **Demo / mock** vs **Live Atlantic test** |
+
+After the user answers, **write** `mcpMode` and/or `runMode` into `.pharos-settle/setup-checklist.json`. If they chose **global**, mention copying `.pharos-settle/mcp-bin.generated.json` to Cursor global MCP.
+
+**Parent-folder clone** (e.g. workspace is `skill_test` but repo is `skill_test/Pharos-Settle`): recommend **global** MCP unless they will re-open Pharos-Settle as workspace root.
+
+### MCP confirmation (after `mcpMode` is known)
+
+Read **`mcpMode`** (`"project"` or `"global"`).
 
 ### Project mode (`mcpMode: "project"`)
 
@@ -89,6 +106,93 @@ Do **not** use raw `cast send` for agent payments. Use MCP tools or SDK:
 `get_agent_readiness` → `simulate_trusted_settlement` → `fund_deal` → `submit_delivery` → `attest_release` → `complete_claim_for_deal`
 
 Mock mode: pass `mock: true` when no wallet keys are configured.
+
+## Custom payments (e.g. “pay 5 TEST to 0x…”)
+
+**Do not create new scripts** (`scripts/pay-custom.ts`, etc.). Use one of these — in order:
+
+### 1. MCP (preferred when connected)
+
+`simulate_trusted_settlement` then `execute_trusted_settlement` with:
+
+| Field | Source |
+|-------|--------|
+| `agentA` | Payer from `PRIVATE_KEY` (or `deployments/atlantic.json` → `deployer`) |
+| `agentB` | User’s payee address |
+| `token` | `deployments/atlantic.json` → `mockToken` (TEST) |
+| `amount` | Wei string — `5` TEST = `"5000000000000000000"` |
+| `workDescription` | Stable task id |
+
+Set `autoOnboardRecipients: true` if payee is not registered.
+
+### 2. Official CLI (SDK wrapper)
+
+```bash
+npm run pay:once -- --payee 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC --amount 5 --work "my-task"
+npm run pay:once -- --payee 0x... --amount 5 --simulate   # preflight only
+```
+
+Uses `simulateTrustedSettlement` / `executeTrustedSettlement` from `src/trustedAgentSettlement.js` — same as MCP.
+
+### 3. SDK import (code / examples)
+
+Copy pattern from `examples/agent-consumer/openai-agent.ts` — import from `pharos-trusted-settlement` or `src/trustedAgentSettlement.js`. **Never** add a one-off file under `scripts/` for each payment.
+
+**Payee must hold `AGENT_B_PRIVATE_KEY`** (or use split MCP payer + payee tools) for deliver/claim steps in `execute_trusted_settlement` when payee ≠ env payee.
+
+## Batch settlements (SALI FastPay / payroll)
+
+**Do not create** `scripts/pay-batch-custom.ts` or similar. Use MCP, official CLI, or existing demos.
+
+### Modes
+
+| Mode | Flow | MCP tools |
+|------|------|-----------|
+| **`saliFast`** | fund N → claim N | `fund_deals_batch` → `complete_claims_batch` (split) or `execute_batch_settlement` (both keys) |
+| **`hybridWork`** | fund → deliver → attest → claim × N | + `submit_deliveries_batch`, `attest_releases_batch` |
+
+### 1. MCP (preferred)
+
+**Both keys (demo MCP):** `execute_batch_settlement` with `jobs[]`, `batchMode: "saliFast"` or `"hybridWork"`, `autoOnboardRecipients: true`.
+
+**Split payer / payee MCPs:**
+
+1. Payer: `fund_deals_batch` → share `manifest`
+2. Payee: `complete_claims_batch` (`saliFast`) — or deliver → attest → claim for `hybridWork`
+
+See [docs/mcp/batch-sali.md](docs/mcp/batch-sali.md).
+
+### 2. Official CLI (SDK wrapper)
+
+```bash
+# 3 workers, 1 TEST each, SALI FastPay
+npm run pay:batch -- --payees 0xA,0xB,0xC --amount 1 --work-prefix "label-batch"
+
+# Same payee, 5 microtasks, 2 TEST each
+npm run pay:batch -- --payee 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC --count 5 --amount 2
+
+# Full work proof per job
+npm run pay:batch -- --payee 0x... --count 3 --amount 1 --mode hybridWork
+
+# Custom job list (JSON)
+npm run pay:batch -- --jobs-file ./jobs.json
+```
+
+`jobs.json` example: `[{"agentB":"0x...","amount":"1000000000000000000","workDescription":"task-1"}]`
+
+### 3. Existing demos (fixed patterns)
+
+```bash
+BATCH_SIZE=10 npm run demo:batch              # executeBatchSettlement, saliFast
+BATCH_MODE=hybridWork npm run demo:batch
+npm run demo:batch:split                      # fundDealsBatch → claimDealsBatch handoff
+```
+
+### 4. SDK
+
+`executeBatchSettlement`, `fundDealsBatch`, `claimDealsBatch`, etc. — see [docs/sdk/batch-settlements.md](docs/sdk/batch-settlements.md) and `examples/pipeline/run-batch.ts`.
+
+**Requirements:** payer allowance ≥ sum of amounts; payees registered or `autoOnboardRecipients: true`; for `execute_batch_settlement` / `pay:batch`, payee key must sign deliver/claim unless all jobs use the same payee as `AGENT_B_PRIVATE_KEY`.
 
 ## Network
 
