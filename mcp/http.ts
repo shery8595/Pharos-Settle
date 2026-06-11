@@ -2,7 +2,7 @@
  * DEPRECATED — demo-only HTTP bridge. Canonical agent integration: npm run mcp (stdio).
  * This surface may expose fewer tools than stdio MCP and is not maintained for parity.
  */
-import "dotenv/config";
+import { hasValidPrivateKey, reloadProjectEnv } from "./reload-env.js";
 import { createServer } from "node:http";
 
 const PORT = Number(process.env.MCP_PORT ?? 3921);
@@ -29,6 +29,7 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "POST" && req.url === "/call") {
+    reloadProjectEnv();
     const chunks: Buffer[] = [];
     for await (const c of req) chunks.push(c as Buffer);
     const body = JSON.parse(Buffer.concat(chunks).toString()) as {
@@ -47,7 +48,7 @@ const server = createServer(async (req, res) => {
 
       const cfg = {
         ...(body.config ?? {}),
-        mock: body.config?.mock ?? !process.env.PRIVATE_KEY,
+        mock: body.config?.mock ?? !hasValidPrivateKey(process.env.PRIVATE_KEY),
         deploymentNetwork: "atlantic",
       };
 

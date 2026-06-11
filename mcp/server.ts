@@ -3,12 +3,14 @@
  * Protocol-compliant MCP server (stdio) for trusted-agent-settlement.
  * Run: npm run mcp
  */
-import "dotenv/config";
+import { reloadProjectEnv } from "./reload-env.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerSettlementTools } from "./tools.js";
 import { registerSettlementResources } from "./resources.js";
 import { registerSettlementPrompts } from "./prompts.js";
+
+reloadProjectEnv();
 
 const mcpServer = new McpServer({
   name: "trusted-agent-settlement",

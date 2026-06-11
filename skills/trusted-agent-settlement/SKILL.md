@@ -198,7 +198,7 @@ mkdir -p .cursor/skills && cp -r skills/trusted-agent-settlement .cursor/skills/
 
 Pair with MCP: [docs/mcp/setup.md](../../docs/mcp/setup.md) · roles: [docs/mcp/roles.md](../../docs/mcp/roles.md).
 
-**After `npm run setup`:** Read `.pharos-settle/setup-checklist.json` and [AGENTS.md](../../AGENTS.md). If `awaitingConfirmation` is true, use **AskQuestion** to confirm workspace root + MCP connected — before any MCP tool. IDE MCP config: [docs/mcp/other-ides.md](../../docs/mcp/other-ides.md).
+**After `npm run setup`:** Setup creates `.env` from `.env.example`. Read `.pharos-settle/setup-checklist.json` and [AGENTS.md](../../AGENTS.md). If `awaitingConfirmation` is true, use **AskQuestion** to confirm workspace root + MCP connected — before any MCP tool. Then ask **demo (mock)** vs **live test**; for live, user must set `PRIVATE_KEY` and `AGENT_B_PRIVATE_KEY` in `.env` first. IDE MCP config: [docs/mcp/other-ides.md](../../docs/mcp/other-ides.md).
 
 **Atlantic demo:** Both demo wallets are pre-registered on Atlantic — clone, add keys to `.env`, run `npm run demo:pharos`.
 

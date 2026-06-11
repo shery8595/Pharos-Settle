@@ -25,6 +25,17 @@ If **no** → give IDE-specific steps from [docs/mcp/other-ides.md](docs/mcp/oth
 
 If **yes** → set `"awaitingConfirmation": false` and `"confirmedAt"` in `.pharos-settle/setup-checklist.json`, then proceed.
 
+**Then ask how they want to run** (use AskQuestion when available):
+
+| Prompt | Options |
+|--------|---------|
+| **Demo (mock)** or **live Atlantic test**? | **Demo / mock — no keys** / **Live test on Atlantic** |
+
+- **Demo:** Use `mock: true` on MCP tools, or CLI: `npm run agent:doctor:mock`, `npm run demo:simulate`. No `.env` keys needed.
+- **Live test:** They must set **`PRIVATE_KEY`** (payer) and **`AGENT_B_PRIVATE_KEY`** (payee) in **`.env`** first (created from `.env.example` by `npm run setup`). Keys must be full 32-byte hex (not the `0x` placeholder). MCP re-reads `.env` on each tool call — no restart needed after saving keys. Remind them wallets need PHRS on Atlantic. Then `npm run agent:doctor` or MCP without `mock: true`.
+
+Do **not** call live settlement tools (`fund_deal`, etc. without `mock: true`) until both keys are configured.
+
 If MCP tools are **not available** in this session, say so explicitly. Offer CLI fallback: `npm run agent:doctor:mock`, `npm run demo:simulate`.
 
 ## What this project is

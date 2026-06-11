@@ -4,7 +4,7 @@
  * Run: npm run setup
  */
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -72,7 +72,24 @@ function verifyMcpConfig() {
 
 const portableDir = join(root, ".pharos-settle");
 
-function writePortableArtifacts() {
+function createEnvFromExample() {
+  const examplePath = join(root, ".env.example");
+  const envPath = join(root, ".env");
+
+  if (!existsSync(examplePath)) {
+    console.error(`\n✗ .env.example missing: ${examplePath}`);
+    process.exit(1);
+  }
+
+  if (existsSync(envPath)) {
+    return { envPath, created: false };
+  }
+
+  copyFileSync(examplePath, envPath);
+  return { envPath, created: true };
+}
+
+function writePortableArtifacts(envInfo) {
   mkdirSync(portableDir, { recursive: true });
   const repoPath = root.replace(/\\/g, "/");
 
@@ -85,11 +102,17 @@ function writePortableArtifacts() {
         setupCompletedAt: new Date().toISOString(),
         repoPath,
         message:
-          "Agent: confirm workspace root + MCP reload before pharos-settle tools. See AGENTS.md and docs/mcp/other-ides.md",
+          "Agent: confirm workspace root + MCP reload, then ask demo vs live. See AGENTS.md and docs/mcp/other-ides.md",
+        env: {
+          path: ".env",
+          createdFromExample: envInfo.created,
+          examplePath: ".env.example",
+        },
         steps: [
           "Open Pharos-Settle as workspace / project root (not a parent folder)",
           "Add MCP config from .pharos-settle/mcp.generated.json to your IDE",
           "Reload MCP so pharos-settle is connected",
+          "Ask user: mock/demo (no keys) or live Atlantic test — if live, set PRIVATE_KEY and AGENT_B_PRIVATE_KEY in .env first",
         ],
         ideDocs: "docs/mcp/other-ides.md",
       },
@@ -151,7 +174,14 @@ console.log("✓ Skill installed → .cursor/skills/trusted-agent-settlement/");
 const mcpPath = verifyMcpConfig();
 console.log(`✓ MCP configured → ${mcpPath.replace(/\\/g, "/")}`);
 
-const { checklistPath, mcpGeneratedPath, mcpBinPath } = writePortableArtifacts();
+const envInfo = createEnvFromExample();
+if (envInfo.created) {
+  console.log(`✓ Environment file created → ${envInfo.envPath.replace(/\\/g, "/")} (from .env.example)`);
+} else {
+  console.log(`✓ Environment file exists → ${envInfo.envPath.replace(/\\/g, "/")} (left unchanged)`);
+}
+
+const { checklistPath, mcpGeneratedPath, mcpBinPath } = writePortableArtifacts(envInfo);
 console.log(`✓ Setup checklist → ${checklistPath.replace(/\\/g, "/")}`);
 console.log(`✓ MCP config (copy to your IDE) → ${mcpGeneratedPath.replace(/\\/g, "/")}`);
 console.log(`✓ MCP bin alternate → ${mcpBinPath.replace(/\\/g, "/")}`);
@@ -165,7 +195,14 @@ Next (all IDEs):
 
 Cursor: .cursor/mcp.json is already committed — just reload MCP.
 
-Mock demo (no keys):
+Demo (no keys — recommended first):
   npm run agent:doctor:mock
   npm run demo:simulate
+  MCP tools with mock: true
+
+Live Atlantic test:
+  Edit .env — set PRIVATE_KEY (payer) and AGENT_B_PRIVATE_KEY (payee)
+  Fund wallets with PHRS (Atlantic faucet), then:
+  npm run agent:doctor
+  npm run demo:pharos
 `);

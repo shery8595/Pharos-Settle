@@ -5,17 +5,20 @@ Canonical integration: **stdio MCP** (`npm run mcp`). HTTP bridge is deprecated 
 ## First-run checklist
 
 ```bash
-npm run setup                # install + build + skill + verify MCP config
+npm run setup                # install + build + skill + .env + verify MCP config
 ```
+
+Setup copies **`.env.example` → `.env`** (skips if `.env` already exists). Keys are empty placeholders — safe for demo.
 
 1. **Open `Pharos-Settle` as workspace root** (not a parent folder)
 2. Restart Cursor / reload MCP (`pharos-settle` is in committed `.cursor/mcp.json`)
-3. `npm run agent:doctor:mock` — no keys, explore safely
-4. Optional: `npm run mcp` in another terminal for manual stdio test
-5. In chat, the agent should **ask you to confirm** workspace root + MCP reload (yes/no) — see [AGENTS.md](../../AGENTS.md) and `.pharos-settle/setup-checklist.json`
-6. **Other IDEs (Claude Desktop, etc.):** [other-ides.md](other-ides.md) — copy `.pharos-settle/mcp.generated.json`
-7. Call `get_agent_readiness` then `simulate_trusted_settlement` with `mock: true`
-8. For live: fund wallets, `npm run agent:doctor`, then `fund_deal` / split flow
+3. **Demo (recommended first):** `npm run agent:doctor:mock` — no keys, explore safely
+4. **Live test:** edit `.env` — set `PRIVATE_KEY` (payer) and `AGENT_B_PRIVATE_KEY` (payee), fund PHRS, then `npm run agent:doctor`
+5. Optional: `npm run mcp` in another terminal for manual stdio test
+6. In chat, the agent should **ask you to confirm** workspace root + MCP reload, then **demo vs live** — see [AGENTS.md](../../AGENTS.md) and `.pharos-settle/setup-checklist.json`
+7. **Other IDEs (Claude Desktop, etc.):** [other-ides.md](other-ides.md) — copy `.pharos-settle/mcp.generated.json`
+8. Call `get_agent_readiness` then `simulate_trusted_settlement` with `mock: true`
+9. For live: set keys in `.env`, fund wallets, `npm run agent:doctor`, then `fund_deal` / split flow
 
 Legacy: hand-written MCP config below (only if not using committed `.cursor/mcp.json`)
 
@@ -90,7 +93,9 @@ Same JSON structure in Claude's MCP config file (location varies by OS).
 
 See [Environment variables](../getting-started/environment.md).
 
-Without any private key, MCP defaults to **mock mode**.
+Without any valid private key (`PRIVATE_KEY` length ≥ 66), MCP defaults to **mock mode**.
+
+After you edit `.env`, the next MCP tool call **re-reads `.env` from disk** — you do not need to restart MCP for key changes (unlike one-shot CLI commands, which always start fresh).
 
 ## Verify
 
@@ -103,6 +108,7 @@ Without any private key, MCP defaults to **mock mode**.
 
 | Symptom | Fix |
 |---------|-----|
+| Still in mock after saving keys in `.env` | Call any tool again (env reloads per request). Ensure keys are full 32-byte hex, not `0x` placeholder |
 | `Missing payer private key` on payee MCP | Use `submit_delivery` / `complete_claim_for_deal`, not `fund_deal` |
 | `Missing payee private key` on payer MCP | Use `fund_deal` / `attest_release`, not `submit_delivery` |
 | Preflight `agent_b_registered` fails | `register_recipients` or `autoOnboardRecipients: true` |

@@ -28,6 +28,7 @@ import type {
   SettlementConfig,
   TrustedSettlementInput,
 } from "../src/shared/schemas.js";
+import { hasValidPrivateKey, reloadProjectEnv } from "./reload-env.js";
 
 const settlementFields = {
   agentA: z.string().describe("Payer agent address (0x...)"),
@@ -75,16 +76,21 @@ const hashOrWorkSchema = {
     .describe("keccak256('delivery:' + workDescription); use instead of workDescription when known"),
 };
 
+function defaultMock(mock?: boolean): boolean {
+  return mock ?? !hasValidPrivateKey(process.env.PRIVATE_KEY);
+}
+
 function buildConfig(mode?: "cooperative" | "safetyNet", mock?: boolean): SettlementConfig {
+  reloadProjectEnv();
   return {
     mode: mode ?? "cooperative",
-    mock: mock ?? !process.env.PRIVATE_KEY,
+    mock: defaultMock(mock),
     deploymentNetwork: "atlantic",
   };
 }
 
 function mcpConfig(mock?: boolean): SettlementConfig {
-  return { ...buildConfig(), mock: mock ?? !process.env.PRIVATE_KEY };
+  return { ...buildConfig(), mock: defaultMock(mock) };
 }
 
 function pickInput(args: z.infer<typeof settlementInputSchema>): TrustedSettlementInput {

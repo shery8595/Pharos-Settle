@@ -36,6 +36,17 @@ Update `.pharos-settle/setup-checklist.json`:
 { "awaitingConfirmation": false, "confirmedAt": "<ISO-8601 timestamp>" }
 ```
 
+**Ask demo vs live** (AskQuestion when available):
+
+| Prompt | Options |
+|--------|---------|
+| Run in **demo (mock)** or **live Atlantic test**? | **Demo / mock — no keys** / **Live test on Atlantic** |
+
+- **Demo:** `mock: true` on tools, or `npm run agent:doctor:mock` / `npm run demo:simulate`.
+- **Live:** User must set `PRIVATE_KEY` and `AGENT_B_PRIVATE_KEY` in `.env` (from `.env.example` via setup) and fund PHRS before live MCP or `fund_deal`.
+
+Do not run live settlement without both keys configured.
+
 Then proceed with MCP tools or mock demos as appropriate.
 
 ## 5. If MCP tools are missing from this chat
