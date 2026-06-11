@@ -107,8 +107,13 @@ async function main() {
   if (result.explorerLink) console.log("explorer:", result.explorerLink);
 
   if (result.dealId) {
-    const status = await getSettlementStatus({ dealId: result.dealId }, config);
-    console.log("status:", status.state, "canClaim:", status.canClaim);
+    try {
+      const status = await getSettlementStatus(result.dealId, config);
+      console.log("status:", status.state, "nextAction:", status.nextAction, "canClaim:", status.canClaim);
+    } catch (e) {
+      console.warn("status poll failed (settlement may still be complete):", (e as Error).message);
+      console.warn("  check: MCP get_settlement_status or npm run pay:once with dealId on explorer");
+    }
   }
 
   if (!result.success) process.exit(1);
