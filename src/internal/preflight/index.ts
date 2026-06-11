@@ -5,7 +5,9 @@ import type { SettlementConfig, TrustedSettlementInput, CheckResult } from "../.
 import { check, allPassed } from "../../shared/errors.js";
 import { agentRegistryAbi, erc20Abi, tokenAllowlistAbi } from "../../shared/abis.js";
 import { loadDeployments, resolveDeploymentNetwork } from "../../shared/chain.js";
-import { computePreflightHash } from "./hash.js";
+import { computePreflightHash, verifyPreflightHash } from "./hash.js";
+
+export { computePreflightHash, verifyPreflightHash, canonicalJsonStringify } from "./hash.js";
 import { mockIsRegistered } from "../onboard/mockRegistry.js";
 
 export type PreflightResult = {

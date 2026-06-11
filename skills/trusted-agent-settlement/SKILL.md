@@ -58,9 +58,11 @@ Optional timing: `ttlSeconds` (reclaim deadline), `disputeWindowSeconds` (auto-r
 | Who ghosts? | Outcome |
 |-------------|---------|
 | Payee never delivers | Payer **reclaims** (`reclaim_trusted_settlement` / `mode: safetyNet`) |
-| Payee submits junk delivery | Payer **rejects** (`reject_delivery` during dispute window) |
+| Payee submits junk delivery | Payer **rejects** (`reject_delivery` during dispute window) — **cooperative review only**; payer has unilateral refund power, no on-chain quality check |
 | Payer never attests after delivery | Payee **still gets paid** (auto-release after `disputeWindow`) |
 | Both cooperate | **Instant settlement** — fund → deliver → attest → claim |
+
+> **⚠️ Payer rejection trust assumption (Phase 1):** `reject_delivery` is not adversarial arbitration. A payer can reject valid work after consuming it and keep a full refund (0% fee). Phase 2 adds disputes. See [threat-model.md](../../docs/security/threat-model.md#payer-rejection-rug-vector-asymmetric-power).
 
 ## Agent scenarios
 
@@ -227,7 +229,7 @@ Token **decimals** (for `amount` in wei): TEST/WBTC/WETH/WPHRS = 18, USDC/USDT =
 ## When to use
 
 - One agent hires another for verifiable work (research, risk, summarization, labeling)
-- **Ghost protection** — neither side can rug the other mid-deal
+- **Ghost protection** — payee ghost → reclaim; payer ghost → auto-release; junk → cooperative `reject_delivery` (payer rejection is unilateral in Phase 1)
 - Simulate before gas; poll `nextAction` for multi-step flows
 - **SALI FastPay** — one payer, many worker agents, parallel fund+claim on Pharos (`batchMode: saliFast`)
 - **Batch agent commerce** — full deliver+attest+claim at scale (`batchMode: hybridWork`)

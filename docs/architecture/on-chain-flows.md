@@ -49,6 +49,8 @@ Blocked if `deliverySubmittedAt > 0`.
 
 ### Junk delivery (reject)
 
+> **⚠️ Trust assumption:** Phase 1 `rejectDelivery` is for **cooperative** junk review. The payer can reject any delivery during the window with no on-chain proof of invalidity — including valid work already accessed off-chain. See [threat-model.md](../security/threat-model.md#payer-rejection-rug-vector-asymmetric-power).
+
 1. Payee `submitDelivery(resultHash)` (any hash — no on-chain quality check)
 2. During dispute window: payer `rejectDelivery` — immediate full refund, no fee
 3. If payer does not reject and does not attest: ghost-payer auto-release after `disputeWindow`

@@ -264,35 +264,48 @@ Phase 2 is codenamed **Agent Arena**: evolving from bilateral payments to a **mu
 
 **⚠️ Planned — not implemented.**
 
-**Problem Phase 1 leaves open:** Payer and payee disagree on **subjective work quality** — Phase 1 handles junk/non-delivery via `reject_delivery`, but not quality arbitration.
+**Problems Phase 1 leaves open:**
+
+1. **Payer rejection rug** — `rejectDelivery` is unilateral: payer refunds 100% during the dispute window with no on-chain validity check. A payer can consume valid work (via `resultHash` / IPFS / off-chain handoff) and reject for free. Phase 1 assumes **cooperative review**, not adversarial dispute resolution. See [threat-model.md](security/threat-model.md#payer-rejection-rug-vector-asymmetric-power).
+
+2. **Subjective quality** — both parties active, work partially acceptable; no split or arbitration path.
+
+Phase 1 recap (what exists today):
 
 - Payer attests → immediate release
 - Payer ghosts → auto-release after `disputeWindow`
 - Payee ghosts → reclaim
-- Junk delivery → payer `reject_delivery` during dispute window
+- Junk delivery (cooperative payer) → payer `reject_delivery` during dispute window — **no fee, no evidence requirement**
 
-There is **no** on-chain path for **subjective quality** disputes (both parties active, work partially acceptable).
-
-**Phase 2 plan:**
+**Phase 2 plan — proper resolution:**
 
 | Capability | Description |
 |------------|-------------|
-| `dispute(dealId, reason)` | Either party flags a deal after delivery |
-| `resolveDispute(dealId, ruling)` | Owner/arbitrator splits or assigns outcome |
-| Dispute state | New deal states between Accepted and Released/Refunded |
+| `dispute(dealId, reason, evidenceHash)` | Either party flags a deal; evidence bound to `resultHash` / delivery CID |
+| `resolveDispute(dealId, ruling)` | Arbitrator (owner, elected panel, or external oracle) assigns outcome |
+| Partial settlement | Split escrow: e.g. 70% to payee, 30% refund — not binary Released/Refunded |
+| Dispute state machine | New states between `Accepted` and terminal; freeze `rejectDelivery` while dispute open |
+| Encrypted / commit-reveal delivery | Payee commits hash at submit; plaintext revealed only after attestation or ruling (mitigates rejection rug) |
+| Rejection bond / fee | Optional stake or protocol fee on `rejectDelivery` to raise cost of spam rejects |
 | SDK `dispute` / `resolveDispute` steps | Agent-callable dispute lifecycle |
-| MCP tools | `open_dispute`, `get_dispute_status` |
+| MCP tools | `open_dispute`, `get_dispute_status`, `submit_dispute_evidence` |
+
+**Reputation tie-in** (see §3): repeated lost disputes or high reject-without-attest rate lowers score; optional slashing on bad-faith rejection.
 
 ```mermaid
 flowchart TB
   Delivered[delivery_submitted] --> Agree{payer_attests?}
   Agree -->|yes| Released[claim]
   Agree -->|no_within_window| AutoRelease[auto_release_claim]
-  Agree -->|disagree| Dispute[dispute_opened]
-  Dispute --> Arbitrate[owner_resolveDispute]
+  Agree -->|reject_or_disagree| Dispute[dispute_opened]
+  Dispute --> Evidence[evidence_on_resultHash]
+  Evidence --> Arbitrate[arbitrator_resolveDispute]
   Arbitrate --> Released
+  Arbitrate --> Partial[partial_release]
   Arbitrate --> Refunded[partial_or_full_refund]
 ```
+
+**Design goal:** Move from payer-unilateral `rejectDelivery` to **evidence-backed disputes** with neutral resolution — while keeping Phase 1 bilateral flows as the settlement core.
 
 ### 2. Marketplace and task discovery
 

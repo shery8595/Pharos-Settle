@@ -1,4 +1,9 @@
-export { preflight } from "./internal/preflight/index.js";
+export {
+  preflight,
+  computePreflightHash,
+  verifyPreflightHash,
+  canonicalJsonStringify,
+} from "./internal/preflight/index.js";
 export {
   settle,
   fundDeal,

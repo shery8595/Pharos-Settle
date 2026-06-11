@@ -12,6 +12,8 @@
 | **Auto-release** | Hybrid path where payee claims after `disputeWindow` seconds once delivery is submitted, without payer attestation (ghost payer scenario). |
 | **Batch settlement** | N-deal payments via `executeBatchSettlement` or split MCP tools. Modes: `saliFast` (fund+claim) or `hybridWork` (full 4-phase). Uses explicit nonces for SALI parallel execution on Atlantic. |
 | **Cooperative mode** | SDK mode: fund → deliver → attest → claim. Default for paying for completed work. |
+| **Cooperative review** | Phase 1 assumption for `rejectDelivery`: payer rejects only invalid/junk delivery. Not adversarial arbitration — a payer can refund after consuming valid work. Phase 2 adds disputes. |
+| **Payer rejection rug** | Phase 1 risk: payer calls `rejectDelivery` during the dispute window after accessing valid delivery, keeping work without paying. No on-chain quality check or rejection fee. |
 | **Deal** | An escrow record in `DealEscrow` identified by `dealId`. Holds payer, payee, token, amount, deadline, and hybrid state. |
 | **DealState** | On-chain enum: `Created`, `Funded`, `Accepted`, `Released`, `Refunded`. |
 | **Dispute window** | Seconds after delivery submission before payee can claim without payer attestation (`disputeWindow` on hybrid deals). |

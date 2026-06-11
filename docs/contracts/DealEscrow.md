@@ -30,11 +30,19 @@ Holds ERC-20 funds and implements the deal state machine. Only callable by `rout
 | `accept(dealId)` | Funded → Accepted | `"bad state"` |
 | `submitDelivery(dealId, hash)` | sets delivery fields | `"not hybrid"`, `"already delivered"`, `"expired"` |
 | `attestRelease(dealId, hash)` | sets `payerAttested` | `"not hybrid"` |
-| `rejectDelivery(dealId)` | → Refunded | `"no delivery"`, `"already attested"`, `"dispute window elapsed"` |
+| `rejectDelivery(dealId)` | → Refunded | `"no delivery"`, `"already attested"`, `"dispute window elapsed"` — see [trust assumption](#rejectdelivery-trust-assumption) |
 | `claim(dealId, proofHash)` | Accepted → Released | `"expired"`, `"cannot claim"` |
 | `reclaim(dealId)` | → Refunded | `"not expired"`, `"delivery submitted"` |
 
 `preflightHash` is write-only on-chain in Phase 1 — stored at deal creation but not validated by the contract.
+
+## rejectDelivery trust assumption
+
+> **⚠️ Cooperative review only (Phase 1).** `rejectDelivery` refunds 100% to the payer when called inside the dispute window. The contract does **not** verify delivery quality, decrypt `resultHash`, or require evidence. A payer can reject valid work after consuming it off-chain.
+
+- **No protocol fee** on rejection (same as `reclaim`).
+- **Payee risk:** asymmetric power — payer controls refund during the window.
+- **Phase 2:** dispute module, partial settlement, encrypted delivery, reputation/slashing — see [threat-model.md](../security/threat-model.md#payer-rejection-rug-vector-asymmetric-power) and [PHASES.md § Dispute](../PHASES.md#1-dispute-and-arbitration).
 
 ## canClaim logic
 

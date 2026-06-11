@@ -30,7 +30,9 @@
 
 ### Preflight hash
 
-`computePreflightHash(input, checks)` — deterministic; changes when any check result changes.
+`computePreflightHash(input, checks)` — canonical JSON (sorted keys, checks sorted by `name`); changes when any check result changes.
+
+`verifyPreflightHash(onChainHash, input, checks)` — off-chain audit helper. Contracts store `preflightHash` at fund time but do **not** enforce it (Phase 1); integrators re-run `preflight` and compare.
 
 ## Onboarding helpers
 
