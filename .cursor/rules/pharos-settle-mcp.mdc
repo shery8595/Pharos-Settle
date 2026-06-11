@@ -9,7 +9,7 @@ Before calling **pharos-settle** MCP tools (`get_agent_readiness`, `simulate_tru
 
 ## 1. Check setup state
 
-Read `.cursor/setup-checklist.json` when present. If `"awaitingConfirmation": true`, or the user just ran `npm run setup`, run the confirmation flow below **before** any MCP tool call.
+Read **`.pharos-settle/setup-checklist.json`** when present (also see `AGENTS.md`). If `"awaitingConfirmation": true`, or the user just ran `npm run setup`, run the confirmation flow below **before** any MCP tool call.
 
 ## 2. Ask the user (use AskQuestion when available)
 
@@ -18,18 +18,19 @@ Ask **both** items in one form if possible:
 | Prompt | Options |
 |--------|---------|
 | Is **Pharos-Settle** opened as your **workspace root** (not a parent folder like `skill_test`)? | **Yes, repo is workspace root** / **No or not sure** |
-| Have you **reloaded MCP** so `pharos-settle` is connected (Settings → MCP)? | **Yes, reloaded** / **Not yet** |
+| Have you **added MCP config** (from `.pharos-settle/mcp.generated.json` if not Cursor) and **reloaded** `pharos-settle`? | **Yes, connected** / **Not yet** |
 
 ## 3. If anything is not ready
 
 - **Wrong workspace:** Tell user `File → Open Folder → Pharos-Settle` (the repo root that contains `.cursor/mcp.json`).
-- **MCP not reloaded:** Settings → MCP → restart **pharos-settle**.
+- **MCP not configured:** Copy block from `.pharos-settle/mcp.generated.json` — see `docs/mcp/other-ides.md`.
+- **MCP not reloaded:** Settings → MCP → restart **pharos-settle** (Cursor) or restart IDE (Claude Desktop).
 - Do **not** call Pharos MCP tools or claim MCP is connected.
 - Offer terminal fallback: `npm run agent:doctor:mock` and `npm run demo:simulate`.
 
 ## 4. If both confirmed
 
-Update `.cursor/setup-checklist.json`:
+Update `.pharos-settle/setup-checklist.json`:
 
 ```json
 { "awaitingConfirmation": false, "confirmedAt": "<ISO-8601 timestamp>" }

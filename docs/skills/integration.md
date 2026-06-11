@@ -26,6 +26,12 @@ Every integration uses the same inputs — swap values for your agents, tokens, 
 
 See [SKILL.md](../../skills/trusted-agent-settlement/SKILL.md) for a copy-paste `input` object.
 
+## Multi-IDE
+
+- Portable agent gate: [AGENTS.md](../../AGENTS.md)
+- MCP config per IDE: [other-ides.md](../mcp/other-ides.md)
+- After `npm run setup`: copy `.pharos-settle/mcp.generated.json` into Claude Desktop / other MCP clients
+
 ## Install
 
 Copy the **directory** (not just `SKILL.md`) into your agent's skills folder:

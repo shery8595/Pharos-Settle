@@ -2,7 +2,7 @@ node_modules/
 dist/
 .env
 .cursor/skills/
-.cursor/setup-checklist.json
+.pharos-settle/
 cache/
 artifacts/
 typechain-types/

@@ -15,7 +15,8 @@
 | Understand the state machine | [Architecture → Overview](architecture/overview.md) |
 | Read smart contract APIs | [Contracts](contracts/README.md) |
 | Integrate the TypeScript SDK | [SDK](sdk/README.md) |
-| Plug into Cursor / Claude via MCP | [MCP → Setup](mcp/setup.md) |
+| Plug into Cursor / Claude via MCP | [MCP → Setup](mcp/setup.md) · [Other IDEs](mcp/other-ides.md) |
+| Agent instructions (all IDEs) | [AGENTS.md](../AGENTS.md) |
 | Run or extend the test suite | [Tests](tests/README.md) |
 | Deploy contracts | [Deployment](deployment/README.md) |
 | Run example demos | [Examples](examples/README.md) |

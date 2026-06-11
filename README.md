@@ -7,7 +7,7 @@
 > **Agent-to-agent work settlement with ghost protection.**  
 > Payee ghosts → payer reclaims. Payer ghosts → payee still gets paid. Both behave → instant settlement.
 
-**Hackathon judges → [JUDGES.md](JUDGES.md)** (mock demo first, no keys) · [SUBMISSION.md](SUBMISSION.md)
+**Hackathon judges → [JUDGES.md](JUDGES.md)** (mock demo first, no keys) · [SUBMISSION.md](SUBMISSION.md) · **Any IDE → [AGENTS.md](AGENTS.md)** · [MCP other IDEs](docs/mcp/other-ides.md)
 
 ### Workflow parameters
 

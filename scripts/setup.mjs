@@ -70,28 +70,71 @@ function verifyMcpConfig() {
   return mcpPath;
 }
 
-function writeSetupChecklist() {
-  const checklistPath = join(root, ".cursor", "setup-checklist.json");
-  mkdirSync(join(root, ".cursor"), { recursive: true });
+const portableDir = join(root, ".pharos-settle");
+
+function writePortableArtifacts() {
+  mkdirSync(portableDir, { recursive: true });
+  const repoPath = root.replace(/\\/g, "/");
+
+  const checklistPath = join(portableDir, "setup-checklist.json");
   writeFileSync(
     checklistPath,
     JSON.stringify(
       {
         awaitingConfirmation: true,
         setupCompletedAt: new Date().toISOString(),
+        repoPath,
         message:
-          "Agent: ask user to confirm workspace root + MCP reload before calling pharos-settle tools. See .cursor/rules/pharos-settle-mcp.mdc",
+          "Agent: confirm workspace root + MCP reload before pharos-settle tools. See AGENTS.md and docs/mcp/other-ides.md",
         steps: [
-          "Open Pharos-Settle as workspace root (not a parent folder)",
-          "Reload MCP: Settings → MCP → restart pharos-settle",
+          "Open Pharos-Settle as workspace / project root (not a parent folder)",
+          "Add MCP config from .pharos-settle/mcp.generated.json to your IDE",
+          "Reload MCP so pharos-settle is connected",
         ],
+        ideDocs: "docs/mcp/other-ides.md",
       },
       null,
       2
     ) + "\n",
     "utf-8"
   );
-  return checklistPath;
+
+  const mcpGeneratedPath = join(portableDir, "mcp.generated.json");
+  const mcpBlock = {
+    "pharos-settle": {
+      command: "npx",
+      args: ["tsx", "mcp/server.ts"],
+      cwd: repoPath,
+      env: {
+        PHAROS_RPC_URL: "https://atlantic.dplabs-internal.com",
+      },
+    },
+  };
+  writeFileSync(
+    mcpGeneratedPath,
+    JSON.stringify({ mcpServers: mcpBlock }, null, 2) + "\n",
+    "utf-8"
+  );
+
+  const mcpBinPath = join(portableDir, "mcp-bin.generated.json");
+  writeFileSync(
+    mcpBinPath,
+    JSON.stringify(
+      {
+        mcpServers: {
+          "pharos-settle": {
+            command: "node",
+            args: [join(repoPath, "bin/pharos-settle-mcp.mjs").replace(/\\/g, "/")],
+          },
+        },
+      },
+      null,
+      2
+    ) + "\n",
+    "utf-8"
+  );
+
+  return { checklistPath, mcpGeneratedPath, mcpBinPath };
 }
 
 console.log("\nPharos Settle — setup\n");
@@ -108,15 +151,19 @@ console.log("✓ Skill installed → .cursor/skills/trusted-agent-settlement/");
 const mcpPath = verifyMcpConfig();
 console.log(`✓ MCP configured → ${mcpPath.replace(/\\/g, "/")}`);
 
-const checklistPath = writeSetupChecklist();
+const { checklistPath, mcpGeneratedPath, mcpBinPath } = writePortableArtifacts();
 console.log(`✓ Setup checklist → ${checklistPath.replace(/\\/g, "/")}`);
+console.log(`✓ MCP config (copy to your IDE) → ${mcpGeneratedPath.replace(/\\/g, "/")}`);
+console.log(`✓ MCP bin alternate → ${mcpBinPath.replace(/\\/g, "/")}`);
 
 console.log(`
-Next:
-  1. Open Pharos-Settle as workspace root (not a parent folder)
-  2. Reload MCP in Cursor (Settings → MCP → restart pharos-settle)
-  3. In chat, your agent should ask you to confirm both steps (yes/no)
-  4. Then ask: "What settlement tools do you have?"
+Next (all IDEs):
+  1. Open Pharos-Settle as workspace / project root
+  2. Copy MCP block from .pharos-settle/mcp.generated.json into your IDE (see docs/mcp/other-ides.md)
+  3. Reload MCP — agent should ask you to confirm (yes/no) — see AGENTS.md
+  4. Ask: "What settlement tools do you have?"
+
+Cursor: .cursor/mcp.json is already committed — just reload MCP.
 
 Mock demo (no keys):
   npm run agent:doctor:mock
