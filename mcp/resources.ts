@@ -10,21 +10,19 @@ export function readAtlanticDeployments(): string {
   return readFileSync(p, "utf-8");
 }
 
-export const QUICKSTART = `# trusted-agent-settlement quickstart
+export const QUICKSTART = `# Pharos Settle quickstart (cast-first, MCP-supported)
 
-## Environment
-PRIVATE_KEY=0x...          # Agent A (payer)
-AGENT_B_PRIVATE_KEY=0x...  # Agent B (payee)
-PHAROS_RPC_URL=https://atlantic.dplabs-internal.com
+## Default pre-checks
+1. export RPC=https://atlantic.dplabs-internal.com
+2. export PRIVATE_KEY=0x...
+3. Read assets/deployments.json
+4. cast balance $(cast wallet address --private-key $PRIVATE_KEY) --rpc-url $RPC --ether
 
-## Flow
-1. simulate_trusted_settlement (mode: cooperative)
-2. execute_trusted_settlement when preflight.ready
-3. get_settlement_status to poll nextAction
+## Cast path (preferred)
+See references/settlement.md — fundAndAcceptHybrid → submitDelivery → attestRelease → claim
 
-## Modes
-- cooperative: fund → deliver → attest → claim
-- safetyNet: reclaim when payee never delivered
+## MCP path (optional)
+simulate_trusted_settlement → fund_deal → submit_delivery → attest_release → complete_claim_for_deal
 
 Chain: Pharos Atlantic (688689)
 `;

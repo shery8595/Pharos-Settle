@@ -85,7 +85,7 @@ Merge into top-level `mcpServers` (use block from `.pharos-settle/mcp.generated.
 }
 ```
 
-Restart Claude Desktop. Paste **`skills/trusted-agent-settlement/SKILL.md`** into a Project's custom instructions (Claude has no `.cursor/rules`).
+Restart Claude Desktop. Paste **`SKILL.md`** (and reference `references/` as needed) into a Project's custom instructions (Claude has no `.cursor/rules`).
 
 **Agent gate:** Read `AGENTS.md` and `.pharos-settle/setup-checklist.json`; ask user to confirm repo path + MCP connected before settlement tools.
 
@@ -96,7 +96,7 @@ Restart Claude Desktop. Paste **`skills/trusted-agent-settlement/SKILL.md`** int
 1. Find **MCP servers** in settings  
 2. Add stdio server — paste `pharos-settle` from `.pharos-settle/mcp.generated.json`  
 3. Reload MCP  
-4. Add `AGENTS.md` or `skills/trusted-agent-settlement/SKILL.md` to project rules if supported  
+4. Add `AGENTS.md` or root `SKILL.md` to project rules if supported  
 
 ---
 

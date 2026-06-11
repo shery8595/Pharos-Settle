@@ -1,85 +1,46 @@
 ---
-description: After npm run setup, confirm MCP mode (project or global) and reload before settlement tools
+description: Cast-first Pharos Settle skill; MCP gate only when calling pharos-settle MCP tools
 alwaysApply: true
 ---
 
-# Pharos Settle — MCP readiness gate
+# Pharos Settle — agent gate
 
-Before calling **pharos-settle** MCP tools (`get_agent_readiness`, `simulate_trusted_settlement`, `fund_deal`, etc.):
+## Default (cast-first)
 
-## 1. Check setup state
+Read root **`SKILL.md`** first. Before any on-chain settlement:
 
-Read **`.pharos-settle/setup-checklist.json`** when present (also see `AGENTS.md`). If `"awaitingConfirmation": true`, or the user just ran `npm run setup`, run the confirmation flow below **before** any MCP tool call.
+1. RPC reachable (`cast chain-id --rpc-url $RPC`)
+2. `$PRIVATE_KEY` set
+3. Contracts in `assets/deployments.json`
+4. Balance sufficient
 
-Guide: [docs/mcp/modes.md](docs/mcp/modes.md).
+Execute via **`references/settlement.md` Method A (cast)**. Do **not** ask about MCP global/local or demo/live unless the user explicitly wants MCP tools.
 
-## 2. Setup choices (non-interactive setup)
+Addresses: `assets/networks.json`, `assets/tokens.json`, `assets/deployments.json`.
 
-If `needsSetupChoices` is true or `mcpMode` / `runMode` is null — **ask first** (AskQuestion):
+## MCP tools (optional — only when calling them)
 
-1. **Project MCP** vs **Global MCP** → save `mcpMode` in checklist; if **global**, run **`npm run mcp:install-global`**
-2. **Demo** vs **Live** → save `runMode` in checklist  
+Apply the gate below **only** before **pharos-settle** MCP tool calls (`fund_deal`, `simulate_trusted_settlement`, etc.) — not for cast/forge.
 
-Parent workspace (repo not root, e.g. `skill_test/Pharos-Settle`) → suggest **global** MCP.
+Read **`.pharos-settle/setup-checklist.json`** when present. Guide: [docs/mcp/modes.md](docs/mcp/modes.md).
 
-## 3. MCP confirmation (use AskQuestion when available)
+**Auto-skip:** If pharos-settle MCP tools are in this session, set `awaitingConfirmation: false` in the checklist and proceed.
 
-**Auto-skip:** If **`pharos-settle` MCP tools are in this session**, set `awaitingConfirmation: false` in the checklist and proceed — no prompts.
+If user wants MCP but tools are missing: say **"Pharos Settle MCP is not connected in this session."** Use cast path or `npm run demo:judge`.
 
-### Project mode
+### MCP setup (only if user chose MCP)
 
-| Prompt | Options |
-|--------|---------|
-| Is **Pharos-Settle** opened as your **workspace root** (not a parent folder)? | **Yes, repo is workspace root** / **No or not sure** |
-| Is **`pharos-settle` MCP** connected/reloaded? | **Yes, connected** / **Not yet** |
+If `needsSetupChoices` or `mcpMode` / `runMode` is null — ask (AskQuestion):
 
-### Global mode
+1. **Project MCP** vs **Global MCP** → save `mcpMode`; if global, run `npm run mcp:install-global`
+2. **Demo** vs **Live** → save `runMode`
 
-When **`globalMcpInstalled`** is `true`, skip the manual-paste question — setup already wrote `~/.cursor/mcp.json`.
-
-| Prompt | Options |
-|--------|---------|
-| Is **`pharos-settle` MCP** connected/reloaded? | **Yes, connected** / **Not yet** |
-
-Workspace root does **not** need to be Pharos-Settle in global mode.
-
-## 4. If anything is not ready
-
-- **Project / wrong workspace:** `File → Open Folder → Pharos-Settle` (repo root with `.cursor/mcp.json`).
-- **Global / MCP not added:** Run **`npm run mcp:install-global`**, then reload MCP — [docs/mcp/modes.md](docs/mcp/modes.md).
-- **MCP not reloaded:** Settings → MCP → restart **pharos-settle** (Cursor) or restart IDE (Claude Desktop).
-- Do **not** call Pharos MCP tools or claim MCP is connected.
-- Offer terminal fallback: `npm run agent:doctor:mock` and `npm run demo:simulate`.
-
-## 5. If both confirmed
-
-Update `.pharos-settle/setup-checklist.json`:
-
-```json
-{ "awaitingConfirmation": false, "confirmedAt": "<ISO-8601 timestamp>" }
-```
-
-**Run mode** — read `runMode` from checklist (`demo` | `live`, chosen at `npm run setup`). Re-ask only if missing.
-
-| `runMode` | Action |
-|-----------|--------|
-| `demo` | `mock: true` on tools, or `npm run agent:doctor:mock` / `npm run demo:simulate` |
-| `live` | No `mock: true`; require keys in `.env` at `repoPath` |
-
-**Live keys:** If `runMode` is `live` and `keysConfigured` is false, ask **Keys saved in .env?** and remind: `PRIVATE_KEY` + `AGENT_B_PRIVATE_KEY` (66+ char hex), PHRS funded. Do not run `fund_deal` until both keys validate.
-
-Do not run live settlement without both keys configured.
-
-Then proceed with MCP tools or mock demos as appropriate.
-
-## 6. If MCP tools are missing from this chat
-
-Say explicitly: **"Pharos Settle MCP is not connected in this session."** Do not simulate MCP by running npm scripts unless the user asks for CLI fallback.
+Confirm MCP connected per `mcpMode`. Live: `PRIVATE_KEY` + `AGENT_B_PRIVATE_KEY` in `.env`.
 
 ## Custom payments
 
-Do **not** create `scripts/pay-custom.ts` or other one-off payment scripts. Use MCP `simulate_trusted_settlement` / `execute_trusted_settlement`, or `npm run pay:once -- --payee 0x... --amount 5 --work "task"` (SDK wrapper). See `AGENTS.md` § Custom payments.
+Do **not** create `scripts/pay-custom.ts`. Use cast ([references/settlement.md](references/settlement.md)), MCP tools, or `npm run pay:once`. See `AGENTS.md`.
 
 ## Batch settlements
 
-Do **not** create ad-hoc batch scripts. Use MCP `execute_batch_settlement` or split `fund_deals_batch` → `complete_claims_batch`, or `npm run pay:batch -- --payees 0xA,0xB --amount 1`. See `AGENTS.md` § Batch settlements and `docs/mcp/batch-sali.md`.
+Do **not** create ad-hoc batch scripts. Use cast loop, MCP `execute_batch_settlement`, or `npm run batch:fund` / `batch:claim`. See `AGENTS.md`.

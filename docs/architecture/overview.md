@@ -93,7 +93,7 @@ See [Off-chain pipeline](off-chain-pipeline.md).
 
 ## MCP
 
-stdio server (`npm run mcp`): **17 tools** (per-step + batch), resources (`pharos://deployments/atlantic`), prompts. See [MCP architecture](../mcp/architecture.md) and [composable patterns](../../skills/trusted-agent-settlement/SKILL.md#composable-patterns).
+stdio server (`npm run mcp`): **17 tools** (per-step + batch), resources (`pharos://deployments/atlantic`), prompts. See [MCP architecture](../mcp/architecture.md) and [settlement flows](../../references/settlement.md).
 
 ## Deferred (Phase 2)
 

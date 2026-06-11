@@ -9,7 +9,7 @@ Pharos Settle supports two ways to connect MCP in Cursor (and similar IDEs). `np
 | **Best for** | Judges, first demo, working only in this repo | Your own agent app in another folder |
 | **Cursor MCP config** | Committed `.cursor/mcp.json` (`cwd`: `${workspaceFolder}`) | Setup writes **`~/.cursor/mcp.json`** — reload in Settings → MCP |
 | **Workspace** | Open **Pharos-Settle** as workspace root | Any project — MCP points at fixed Pharos clone path |
-| **Skill location** | `.cursor/skills/trusted-agent-settlement/` (setup copies here) | `~/.cursor/skills/trusted-agent-settlement/` (setup copies here too) |
+| **Skill location** | `.cursor/skills/trusted-agent-settlement/` (SKILL.md + assets/ + references/) | `~/.cursor/skills/trusted-agent-settlement/` (global setup) |
 | **Generated config** | `.cursor/mcp.json` already works after reload | Auto-merged from `.pharos-settle/mcp-bin.generated.json` (`npm run mcp:install-global`) |
 
 Both modes use the **same MCP server** and **same `.env`** in your Pharos-Settle clone. Keys are read from that clone on every tool call.

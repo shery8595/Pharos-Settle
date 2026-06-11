@@ -20,7 +20,7 @@
 | Run or extend the test suite | [Tests](tests/README.md) |
 | Deploy contracts | [Deployment](deployment/README.md) |
 | Run example demos | [Examples](examples/README.md) |
-| Install as an agent Skill | [Skills → Integration](skills/integration.md) (`skills/trusted-agent-settlement/`, 17 MCP tools) |
+| Install as an agent Skill | [Skills → Integration](skills/integration.md) (`SKILL.md` + `assets/` + `references/`, cast-first) |
 | Understand Phase 1 vs Phase 2 roadmap | [Phase 1 vs Phase 2](PHASES.md) |
 
 ## System map

@@ -192,13 +192,19 @@ function run(step, args) {
 }
 
 function copySkillTo(dest) {
-  const src = join(root, "skills", "trusted-agent-settlement");
-  if (!existsSync(src)) {
-    console.error(`\n✗ Skill source missing: ${src}`);
+  const skillMd = join(root, "SKILL.md");
+  if (!existsSync(skillMd)) {
+    console.error(`\n✗ Skill source missing: ${skillMd}`);
     process.exit(1);
   }
-  mkdirSync(dirname(dest), { recursive: true });
-  cpSync(src, dest, { recursive: true, force: true });
+  mkdirSync(dest, { recursive: true });
+  cpSync(skillMd, join(dest, "SKILL.md"), { force: true });
+  for (const dir of ["assets", "references"]) {
+    const srcDir = join(root, dir);
+    if (existsSync(srcDir)) {
+      cpSync(srcDir, join(dest, dir), { recursive: true, force: true });
+    }
+  }
   return dest;
 }
 

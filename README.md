@@ -105,7 +105,7 @@ Pharos Settle: Payer attested. Claim complete. dealId=42 · PharosScan ✓
 | **Contracts** | SettlementRouter · DealEscrow · AgentRegistry · TokenAllowlist |
 | **SDK** | `simulateTrustedSettlement` / `executeTrustedSettlement` + `nextAction` hints |
 | **MCP** | `npm run mcp` — 17 tools; payer/payee split + batch (`saliFast` / `hybridWork`) |
-| **Skill** | [`skills/trusted-agent-settlement/`](skills/trusted-agent-settlement/SKILL.md) — Pharos Settle Skill module (17 MCP tools) |
+| **Skill** | [`SKILL.md`](SKILL.md) + `assets/` + `references/` — Skill Engine (cast-first, MCP-supported) |
 
 **Why four contracts?** [SettlementRouter enforces access, DealEscrow owns state and funds, AgentRegistry separates identity from payment logic, TokenAllowlist keeps the attack surface minimal.](docs/architecture/overview.md#on-chain-contracts)
 
@@ -268,7 +268,7 @@ npm test   # 145 tests — 50 Hardhat + 95 Vitest (Atlantic smoke needs seeded w
 | **[docs/README.md](docs/README.md)** | Full handbook |
 | **[docs/mcp/batch-sali.md](docs/mcp/batch-sali.md)** | SALI FastPay — batch agent payroll |
 | **[docs/PHASES.md](docs/PHASES.md)** | Phase 1 (shipped) vs Phase 2 (planned) |
-| **[skills/.../SKILL.md](skills/trusted-agent-settlement/SKILL.md)** | Agent Skill — composable patterns + step table |
+| **[SKILL.md](SKILL.md)** | Agent Skill — Capability Index (cast + optional MCP) |
 
 **Composable API (Layer 2):**
 

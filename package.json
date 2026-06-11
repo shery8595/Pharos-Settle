@@ -11,7 +11,9 @@
     "mcp",
     "dist",
     "deployments",
-    "skills",
+    "SKILL.md",
+    "assets",
+    "references",
     "AGENTS.md"
   ],
   "main": "dist/trustedAgentSettlement.js",
@@ -50,6 +52,7 @@
     "demo:ghost-payee": "tsx examples/ghost-payee/run-ghost-payee.ts",
     "demo:ghost-payee:simulate": "tsx examples/ghost-payee/run-ghost-payee.ts --simulate",
     "skill:sync": "node scripts/skill-sync.mjs",
+    "skill:sync-assets": "node scripts/sync-skill-assets.mjs",
     "demo:agent": "tsx examples/agent-consumer/openai-agent.ts",
     "demo:pipeline": "tsx examples/pipeline/run-pipeline.ts",
     "demo:batch": "tsx examples/pipeline/run-batch.ts",

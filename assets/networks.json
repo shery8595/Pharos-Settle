@@ -1,0 +1,21 @@
+{
+  "atlantic": {
+    "name": "Pharos Atlantic Testnet",
+    "chainId": 688689,
+    "rpcUrl": "https://atlantic.dplabs-internal.com",
+    "explorerUrl": "https://atlantic.pharosscan.xyz",
+    "explorerApiUrl": "https://api.socialscan.io/pharos-atlantic-testnet/v1/explorer/command_api/contract",
+    "nativeSymbol": "PHRS",
+    "nativeDecimals": 18
+  },
+  "pacific": {
+    "name": "Pharos Pacific Mainnet",
+    "chainId": null,
+    "rpcUrl": null,
+    "explorerUrl": "https://pharosscan.xyz",
+    "explorerApiUrl": null,
+    "nativeSymbol": "PHRS",
+    "nativeDecimals": 18,
+    "notes": "Mainnet fields TBD — use atlantic for testnet settlement"
+  }
+}

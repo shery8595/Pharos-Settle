@@ -6,7 +6,7 @@
 
 1. `npm run demo:judge` — one-command mock flow (no keys)
 2. Watch demo video for live Atlantic txs _(link in [SUBMISSION.md](SUBMISSION.md))_
-3. Reusable surfaces: [SKILL.md](skills/trusted-agent-settlement/SKILL.md) · 17 MCP tools · TypeScript SDK · smart contracts · batch manifest handoff
+3. Reusable surfaces: [SKILL.md](SKILL.md) · 17 MCP tools · TypeScript SDK · smart contracts · batch manifest handoff
 4. Click PharosScan proofs: [SUBMISSION.md](SUBMISSION.md#live-proof-pharosscan)
 
 ## Why this wins Phase 1
@@ -15,7 +15,7 @@ Agents cannot safely hire each other with raw transfers. Pharos Settle gives the
 
 | Reusable surface | Where |
 |------------------|-------|
-| Agent Skill | `skills/trusted-agent-settlement/SKILL.md` |
+| Agent Skill | `SKILL.md` + `assets/` + `references/` |
 | MCP (17 tools) | `npm run mcp` |
 | TypeScript SDK | `src/trustedAgentSettlement.ts` + `steps.ts` |
 | Smart contracts | `deployments/atlantic.json` |
@@ -78,7 +78,7 @@ Pharos Settle ships that primitive today: contracts live on Atlantic, agents plu
 |---------------|----------------|
 | “Can I pay safely?” dry-run | **Preflight** / `simulateTrustedSettlement` |
 | Plug-in for Cursor / Claude | **MCP** (`npm run mcp`, 17 tools) |
-| Agent instruction file | **Skill** (`skills/trusted-agent-settlement/`) |
+| Agent instruction file | **Skill Engine** (`SKILL.md`, `assets/`, `references/`) |
 | Pay only after work proof | **Hybrid release** (deliver → attest → claim) |
 | Batch payroll to many agents | **SALI FastPay** (`batchMode: saliFast`) |
 | Receipt check after payment | **Prove tier** (receipt; SPV optional) |
@@ -257,7 +257,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 | **`resultHash` delivery** | Work proof without revealing full details |
 | **MCP / SDK parity** | Same workflow via tools or code |
 
-Full mapping + patterns: [skills/trusted-agent-settlement/SKILL.md](skills/trusted-agent-settlement/SKILL.md)
+Full mapping + patterns: [SKILL.md](SKILL.md)
 
 ---
 
@@ -277,5 +277,5 @@ Pharos Settle: Claim complete. dealId=42 · PharosScan ✓
 | Doc | Purpose |
 |-----|---------|
 | [SUBMISSION.md](SUBMISSION.md) | Full submission + DoraHacks copy-paste |
-| [skills/trusted-agent-settlement/SKILL.md](skills/trusted-agent-settlement/SKILL.md) | Agent Skill module |
+| [SKILL.md](SKILL.md) | Agent Skill module |
 | [docs/demo-script.md](docs/demo-script.md) | 3-minute video script |

@@ -3,7 +3,7 @@
 | Term | Definition |
 |------|------------|
 | **Agent** | An Ethereum address registered in `AgentRegistry` that can participate in settlements as payer or payee. |
-| **Pharos Settle Skill** | Standardized skill module at `skills/trusted-agent-settlement/`: Stripe Checkout for AI agents on Pharos — ghost protection, **17 MCP tools**, SALI FastPay. |
+| **Pharos Settle Skill** | Skill Engine at repo root (`SKILL.md`, `assets/`, `references/`): cast-first agent settlement on Pharos — ghost protection, MCP optional, SALI FastPay. |
 | **Dual-ghost protection** | Umbrella term: ghost payee (reclaim) + ghost payer (auto-release) + cooperative junk rejection (`reject_delivery` + `reasonHash`). See [WHATS-NOVEL.md](WHATS-NOVEL.md). |
 | **Arbiter mode** | Deal funded with non-zero `arbiter`; payer reject opens `Disputed` instead of instant refund; arbiter calls `resolve_dispute`. |
 | **Rejection reason hash** | Required `bytes32` on `rejectDelivery`; SDK helper `rejectionReasonHash(reason)` — auditable evidence for Phase 2 reputation. |

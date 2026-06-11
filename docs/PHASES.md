@@ -164,7 +164,7 @@ Details: [MCP documentation](mcp/README.md) · [Batch / SALI](mcp/batch-sali.md)
 
 ### 4. Agent Skill
 
-`skills/trusted-agent-settlement/` — standardized Pharos Settle Skill module (`SKILL.md` documents all **17 MCP tools**). Copy the directory into an agent’s skills folder so LLM agents know **when** and **how** to pay on Pharos without custom settlement code.
+**Skill Engine** at repo root (`SKILL.md`, `assets/`, `references/`) — cast-first settlement with optional **17 MCP tools**. `npm run skill:sync` copies the bundle into an agent’s skills folder.
 
 Triggers: “pay agent on pharos”, “agent commerce”, “safe agent payment”, etc.
 

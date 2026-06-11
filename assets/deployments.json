@@ -1,0 +1,10 @@
+{
+  "version": "1.2.0",
+  "network": "atlantic",
+  "settlementRouter": "0x16bb93a34af2a4d32dbfd03d4b82f5f2bba084ca",
+  "dealEscrow": "0x611012929c84e1de6cbe0ed998dd617a8bdeaa7a",
+  "agentRegistry": "0x59f98951f5755b8fbb78f65f949ae7541eeeac19",
+  "tokenAllowlist": "0xd3346371182356c5ffa1975cf13d04b0663497dc",
+  "mockToken": "0x625e10db28639bc663f2e32e781804984b2dc6b3",
+  "deployer": "0xb8664841528e9Bd60D91AbB1bCF2975e67Fa0e17"
+}

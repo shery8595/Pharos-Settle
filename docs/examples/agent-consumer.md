@@ -21,7 +21,7 @@ Requires API keys for the configured LLM provider (see file header).
 
 ## Skill dependency
 
-Agent loads [`skills/trusted-agent-settlement/SKILL.md`](../../skills/trusted-agent-settlement/SKILL.md) or connects MCP server.
+Agent loads [`SKILL.md`](../../SKILL.md) (cast-first) or connects MCP server (optional).
 
 ## Related docs
 

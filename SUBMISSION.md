@@ -65,7 +65,7 @@ Tutorials show “10 TEST on Atlantic” as one instance — the Skill is parame
 |---------------|-----------|
 | Dry-run before paying | Preflight / `simulateTrustedSettlement` |
 | Cursor / Claude plug-in | MCP (`npm run mcp`) |
-| Agent how-to file | Skill (`skills/trusted-agent-settlement/`) |
+| Agent how-to file | Skill (`SKILL.md (Skill Engine: assets/ + references/)/`) |
 | Pay after work proof | Hybrid release |
 | Pay many workers at once | SALI FastPay (`saliFast` batch) |
 
@@ -78,7 +78,7 @@ Tutorials show “10 TEST on Atlantic” as one instance — the Skill is parame
 | On-chain | Router + escrow + registry + allowlist — [live addresses](deployments/atlantic.json) |
 | SDK | `simulateTrustedSettlement` → `executeTrustedSettlement` + `nextAction` |
 | MCP | 17 tools — payer/payee split + batch |
-| Skill | `skills/trusted-agent-settlement/` — composable agent economy primitive |
+| Skill | `SKILL.md (Skill Engine: assets/ + references/)/` — composable agent economy primitive |
 
 ### Composability design
 
@@ -101,7 +101,7 @@ Tutorials show “10 TEST on Atlantic” as one instance — the Skill is parame
 
 > **v1.2.0:** Auditable `reasonHash` on reject; optional **arbiter** → `Disputed` → `resolve_dispute`. Cooperative mode: payer-rug risk documented in [threat-model](docs/security/threat-model.md). Phase 2: reputation + marketplace.
 
-→ [SKILL.md](skills/trusted-agent-settlement/SKILL.md) · [JUDGES.md](JUDGES.md)
+→ [SKILL.md](SKILL.md (Skill Engine: assets/ + references/)/SKILL.md) · [JUDGES.md](JUDGES.md)
 
 ### Agent scenarios
 
@@ -202,4 +202,4 @@ Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) · Contract
 | [docs/PHASES.md](docs/PHASES.md) | Phase 1 vs Phase 2 |
 | [docs/README.md](docs/README.md) | Full handbook |
 | [docs/mcp/batch-sali.md](docs/mcp/batch-sali.md) | SALI FastPay |
-| [skills/trusted-agent-settlement/SKILL.md](skills/trusted-agent-settlement/SKILL.md) | Agent Skill |
+| [SKILL.md (Skill Engine: assets/ + references/)/SKILL.md](SKILL.md (Skill Engine: assets/ + references/)/SKILL.md) | Agent Skill |

@@ -51,4 +51,4 @@ Pharos Settle is **not** generic escrow with a README. The novelty is an **agent
 
 - [SUBMISSION.md](../SUBMISSION.md) — hackathon entry + DoraHacks copy-paste
 - [JUDGES.md](../JUDGES.md) — mock demo first (no keys)
-- [skills/trusted-agent-settlement/SKILL.md](../skills/trusted-agent-settlement/SKILL.md) — agent-facing Skill
+- [SKILL.md](../SKILL.md) + [references/settlement.md](../references/settlement.md) — agent-facing Skill Engine

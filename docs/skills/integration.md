@@ -1,12 +1,14 @@
 # Agent Skill integration
 
-The **Pharos Settle Skill** is a standardized skill module at `skills/trusted-agent-settlement/` — *Stripe Checkout for AI agents on Pharos*, with **ghost protection** when agents hire each other.
+The **Pharos Settle Skill** follows the [Pharos Skill Engine](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine) layout at the **repo root** — *Stripe Checkout for AI agents on Pharos*, cast-first with MCP support.
 
 | Field | Value |
 |-------|-------|
 | Skill name | `trusted-agent-settlement` |
-| Repo path | `skills/trusted-agent-settlement/SKILL.md` |
-| MCP tools | **16** (documented in SKILL.md; same list as [MCP README](../mcp/README.md)) |
+| Entry | [`SKILL.md`](../../SKILL.md) |
+| Assets | `assets/` (networks, tokens, deployments) |
+| References | `references/` (cast preferred, MCP optional) |
+| MCP tools | **17** — [MCP README](../mcp/README.md), [`references/mcp.md`](../../references/mcp.md) |
 | npm package | `pharos-trusted-settlement` |
 
 ## Workflow parameters
@@ -24,7 +26,7 @@ Every integration uses the same inputs — swap values for your agents, tokens, 
 | Mode | `mode` | `cooperative` or `safetyNet` |
 | Batch | `batchMode` | `saliFast` or `hybridWork` |
 
-See [SKILL.md](../../skills/trusted-agent-settlement/SKILL.md) for a copy-paste `input` object.
+See [`references/settlement.md`](../../references/settlement.md) for cast and MCP fund flows.
 
 ## Multi-IDE
 
@@ -34,13 +36,14 @@ See [SKILL.md](../../skills/trusted-agent-settlement/SKILL.md) for a copy-paste 
 
 ## Install
 
-Copy the **directory** (not just `SKILL.md`) into your agent's skills folder:
+Copy the **Skill Engine bundle** into your agent's skills folder:
 
 ```bash
-cp -r skills/trusted-agent-settlement ~/.cursor/skills/trusted-agent-settlement
+npm run skill:sync
 
-# Project-scoped (committed with repo)
-mkdir -p .cursor/skills && cp -r skills/trusted-agent-settlement .cursor/skills/
+# Or manually:
+mkdir -p ~/.cursor/skills/trusted-agent-settlement
+cp SKILL.md assets references -r ~/.cursor/skills/trusted-agent-settlement/
 ```
 
 ## When to use
@@ -69,7 +72,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 | SDK ergonomic | `trustedAgentSettlement.ts` |
 | Primitives | `steps.ts` — `preflight`, `submitDelivery`, `claimDeal`, … |
 
-Canonical mapping, patterns, and guarantees: [SKILL.md](../../skills/trusted-agent-settlement/SKILL.md).
+Canonical mapping: [SKILL.md](../../SKILL.md) Capability Index and [`references/settlement.md`](../../references/settlement.md).
 
 ### Composable guarantees
 

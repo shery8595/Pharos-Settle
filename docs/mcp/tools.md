@@ -1,6 +1,6 @@
 # MCP tools
 
-**17 tools** — canonical list: [README.md](README.md#tools-17). Same list in [SKILL.md](../../skills/trusted-agent-settlement/SKILL.md).
+**17 tools** — canonical list: [README.md](README.md#tools-17). MCP optional path: [`references/mcp.md`](../../references/mcp.md).
 
 All tools return JSON in `content[0].text`. Errors set `isError: true`. See [roles.md](roles.md) for payer vs payee vs arbiter.
 
