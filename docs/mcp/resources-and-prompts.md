@@ -42,7 +42,17 @@ Generates instructions to:
 
 1. `get_settlement_status`
 2. Poll until `autoReleaseAt`
-3. Complete claim when `canClaim`
+3. `complete_claim_for_deal` when `canClaim`
+
+### recover-from-ghost-payee
+
+**Args:** `dealId`
+
+Generates instructions to:
+
+1. `get_settlement_status`
+2. Poll until `nextAction` is `reclaim` (past deal deadline)
+3. `reclaim_trusted_settlement`
 
 ## Usage in Cursor
 

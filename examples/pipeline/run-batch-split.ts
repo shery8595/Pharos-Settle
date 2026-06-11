@@ -60,7 +60,7 @@ async function main() {
     requiresHybridRelease: BATCH_MODE === "hybridWork",
   }));
 
-  console.log("\n--- Phase 1: Payer MCP fund_deals_batch ---");
+  console.log("\n--- Step 1: Payer MCP fund_deals_batch ---");
   const funded = await fundDealsBatch(jobs, baseConfig);
   console.log({
     succeeded: funded.succeeded,
@@ -71,7 +71,7 @@ async function main() {
   console.log("Manifest (handoff):", JSON.stringify(funded.manifest, null, 2));
 
   if (BATCH_MODE === "hybridWork") {
-    console.log("\n--- Phase 2: Payee MCP submit_deliveries_batch ---");
+    console.log("\n--- Step 2: Payee MCP submit_deliveries_batch ---");
     const deliveries = funded.manifest.map((m) => ({
       index: m.index,
       dealId: m.dealId,
@@ -83,7 +83,7 @@ async function main() {
       deliveryTxPerSec: delivered.deliveryTxPerSec.toFixed(2),
     });
 
-    console.log("\n--- Phase 3: Payer MCP attest_releases_batch ---");
+    console.log("\n--- Step 3: Payer MCP attest_releases_batch ---");
     const attestations = funded.manifest.map((m) => ({
       index: m.index,
       dealId: m.dealId,
@@ -96,7 +96,7 @@ async function main() {
     });
   }
 
-  console.log("\n--- Phase final: Payee MCP complete_claims_batch ---");
+  console.log("\n--- Step final: Payee MCP complete_claims_batch ---");
   const claims = funded.manifest.map((m) => ({
     index: m.index,
     dealId: m.dealId,

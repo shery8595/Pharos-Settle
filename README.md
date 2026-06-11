@@ -7,6 +7,16 @@
 > **Agent-to-agent work settlement with ghost protection.**  
 > Payee ghosts → payer reclaims. Payer ghosts → payee still gets paid. Both behave → instant settlement.
 
+### What's novel
+
+- **Dual-ghost protection** — both safety nets with mock demos in &lt;60s
+- **`nextAction` loops** — agents poll one hint, not hardcoded flows
+- **`preflightHash` binding** — funded deal matches simulate checks
+- **Manifest handoff** — split payer/payee MCP identities
+- **SALI FastPay** — parallel batch agent payroll on Atlantic
+
+→ [docs/WHATS-NOVEL.md](docs/WHATS-NOVEL.md)
+
 **Hackathon judges → [JUDGES.md](JUDGES.md)** (mock demo first, no keys) · [SUBMISSION.md](SUBMISSION.md) · **Any IDE → [AGENTS.md](AGENTS.md)** · [MCP other IDEs](docs/mcp/other-ides.md)
 
 ### Workflow parameters
@@ -132,9 +142,14 @@ Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) · RPC: `ht
 | `npm run demo:batch` | SALI batch (`saliFast`, BATCH_SIZE=5) |
 | `npm run demo:batch:simulate` | Batch flow in mock mode |
 | `npm run demo:batch:split` | Two-agent batch handoff (saliFast or hybridWork) |
+| `npm run demo:ghost-payee` | Payer reclaims when payee ghosts |
+| `npm run demo:ghost-payee:simulate` | Ghost payee mock (no keys) |
 | `npm run demo:ghost-payer` | Payee paid after payer ghosts |
+| `npm run demo:ghost-payer:simulate` | Ghost payer mock (no keys) |
 | `npm run demo:agent` | Generic agent uses Skill (no settlement code) |
 | `npm run demo:pipeline` | Composable Layer 2 pipeline |
+
+Full list: [docs/examples/demos.md](docs/examples/demos.md) · `demo:reclaim` → `demo:ghost-payee`.
 
 ## MCP (plug-and-play agents)
 

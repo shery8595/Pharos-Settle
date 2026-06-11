@@ -18,6 +18,16 @@ One AI agent pays another for work. Money sits in escrow until the job is proven
 | Payer disappears after delivery | Worker still gets paid |
 | Both do their part | Instant settlement |
 
+### What's novel
+
+- **Dual-ghost protection** — both ghost paths demonstrated (`demo:ghost-payee`, `demo:ghost-payer`)
+- **`nextAction` loops** — single hint per poll (`fund`, `claim`, `reclaim`, …)
+- **`preflightHash` binding** — simulate checks bound to funded deal
+- **Manifest handoff** — payer MCP funds batch; payee MCP claims its rows
+- **SALI FastPay** — parallel batch payroll (`maxParallelInBlock`)
+
+→ [docs/WHATS-NOVEL.md](docs/WHATS-NOVEL.md)
+
 ### Workflow parameters (reuse any scenario)
 
 Same flow for 1 TEST, 10 USDC, another worker, or your own deployment — swap the inputs:
@@ -120,13 +130,25 @@ Demo wallets are pre-registered after `seed:pharos`. First-time deploy from scra
 npm run deploy:pharos && npm run seed:pharos && npm run demo:pharos
 ```
 
+Mock ghost demos (no keys, <60s):
+
+```bash
+npm run demo:ghost-payee:simulate   # payee ghosts → payer reclaims
+npm run demo:ghost-payer:simulate   # payer ghosts → payee still paid
+```
+
 More live demos:
 
 ```bash
 npm run demo:batch          # batch payroll (SALI FastPay)
+npm run demo:ghost-payee    # payee ghosts → payer reclaims
 npm run demo:ghost-payer    # payer ghosts → payee still paid
 npm test                    # 103 tests
 ```
+
+Key demos table: [docs/examples/demos.md](docs/examples/demos.md).
+
+**Multi-payee batch:** One MCP = one wallet identity. Payer funds N payees via `fund_deals_batch`; each payee claims their manifest rows with their own key/MCP.
 
 ---
 

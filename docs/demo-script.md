@@ -1,18 +1,76 @@
-# Demo video script (<3 min)
+# Demo video script (~90s)
 
-**Hook (say out loud):** *"Pharos Settle is Stripe Checkout for AI agents on Pharos — ghost protection when agents hire each other."*
+**Hook (say out loud):** *"Pharos Settle is Stripe Checkout for AI agents on Pharos — **dual-ghost protection** when agents hire each other: payee ghosts → reclaim; payer ghosts → payee still paid."*
 
-1. **Agent transcript (20s):** Show this on screen while MCP runs:
-   ```
-   User:     Pay 1 TEST to the research agent if it delivers the market report.
-   Pharos Settle: Preflight passed. nextAction: fund.
-   Research: Delivery submitted.
-   Pharos Settle: Claim complete. dealId=42 · PharosScan ✓
-   ```
-2. **MCP plug-in (25s):** Cursor `mcp.json` → **15 tools** → `simulate_trusted_settlement` → `fund_deal`
-3. **Ghost protection (20s):** Table on screen — payee ghosts → reclaim; payer ghosts → payee paid; both → instant
-4. **SALI FastPay (25s):** `npm run demo:batch` — "batch agent payroll", `maxParallelInBlock`
-5. **Ghost payer demo (15s):** `npm run demo:ghost-payer:simulate`
-6. **Close (15s):** Agent economy primitive on Atlantic — 103 tests, live deploy, Skill module
+Full novelty story: [WHATS-NOVEL.md](WHATS-NOVEL.md)
 
-Record locally; link in root [SUBMISSION.md](../SUBMISSION.md).
+---
+
+## Segment 1 — Hook (10s)
+
+Show the dual-ghost table on screen:
+
+| Who ghosts? | Outcome |
+|-------------|---------|
+| Payee never delivers | Payer **reclaims** |
+| Payer never attests | Payee **still paid** |
+| Both cooperate | Instant settlement |
+
+---
+
+## Segment 2 — Ghost payee (20s)
+
+```bash
+npm run demo:ghost-payee:simulate
+```
+
+Narrate: *"Worker never delivered — payer reclaims after TTL."* Highlight `nextAction: reclaim` and `reclaim_trusted_settlement`.
+
+Live (optional): `npm run demo:ghost-payee` → PharosScan refund tx.
+
+---
+
+## Segment 3 — Ghost payer (20s)
+
+```bash
+npm run demo:ghost-payer:simulate
+```
+
+Narrate: *"Payer ghosted after delivery — payee still gets paid via auto-release."*
+
+---
+
+## Segment 4 — Cooperative MCP (20s)
+
+Show agent transcript on screen while MCP runs:
+
+```
+User:     Pay 1 TEST to the research agent if it delivers the market report.
+Pharos Settle: Preflight passed. nextAction: fund.
+Research: Delivery submitted.
+Pharos Settle: Claim complete. dealId=42 · PharosScan ✓
+```
+
+Cursor MCP → **15 tools** → `simulate_trusted_settlement` → `fund_deal` → claim.
+
+---
+
+## Segment 5 — SALI FastPay (15s)
+
+```bash
+npm run demo:batch:simulate
+# or live: npm run demo:batch
+```
+
+Narrate: *"Batch agent payroll — N workers, `maxParallelInBlock` on Pharos."*
+
+---
+
+## Close (15s)
+
+- Live on **Pharos Atlantic** — [deployments/atlantic.json](../deployments/atlantic.json)
+- **103 tests** green
+- **Skill** + **15 MCP tools**
+- Link: [SUBMISSION.md](../SUBMISSION.md)
+
+Record locally; paste URL in root [SUBMISSION.md](../SUBMISSION.md) DoraHacks section.

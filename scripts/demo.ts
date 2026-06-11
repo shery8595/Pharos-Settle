@@ -120,15 +120,16 @@ async function runExecute(mock: boolean) {
   }
 }
 
-async function runReclaim(mock: boolean) {
-  if (mock) {
-    console.log("\n[trusted-agent-settlement]");
-    console.log("→ deal funded, payee never delivered...");
-    console.log("→ deadline passed, reclaiming...");
-    console.log("✓ funds returned to payer (Refunded) [mock]");
-    return;
-  }
-  console.log("Reclaim flow requires a funded deal past deadline — use hardhat test or manual dealId");
+async function runReclaim() {
+  console.log("demo:reclaim is now an alias for demo:ghost-payee — run: npm run demo:ghost-payee");
+  const { spawnSync } = await import("node:child_process");
+  const args = process.argv.includes("--simulate") ? ["--simulate"] : [];
+  const r = spawnSync("npx", ["tsx", "examples/ghost-payee/run-ghost-payee.ts", ...args], {
+    stdio: "inherit",
+    shell: true,
+    cwd: process.cwd(),
+  });
+  process.exit(r.status ?? 1);
 }
 
 async function main() {
@@ -136,7 +137,7 @@ async function main() {
   const reclaim = process.argv.includes("--reclaim");
   const mock = !cliNetwork() || !loadDeployments();
 
-  if (reclaim) await runReclaim(mock);
+  if (reclaim) await runReclaim();
   else if (simulateOnly) await runSimulate(mock);
   else {
     await runSimulate(mock);

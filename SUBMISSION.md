@@ -6,6 +6,16 @@
 
 **Package:** `pharos-trusted-settlement` · **Network:** Pharos Atlantic (`688689`) · **Tests:** 103 green
 
+### What's novel
+
+- **Dual-ghost protection** — payee ghosts → reclaim; payer ghosts → auto-release claim
+- **`nextAction` loops** — agents poll one hint instead of hardcoding flows
+- **`preflightHash` binding** — funded deal tied to simulate checks
+- **Manifest handoff** — split payer/payee MCPs without mixing keys
+- **SALI FastPay** — parallel batch agent payroll on Atlantic
+
+→ Full comparison: [docs/WHATS-NOVEL.md](docs/WHATS-NOVEL.md)
+
 ---
 
 ## Shipped vs planned
@@ -131,9 +141,15 @@ See [JUDGES.md](JUDGES.md) for what to look for in the output.
 
 | Command | Shows |
 |---------|--------|
+| `npm run demo:ghost-payee:simulate` | Ghost payee — payer reclaims (mock, no keys) |
+| `npm run demo:ghost-payer:simulate` | Ghost payer — payee paid when payer ghosts (mock) |
 | `npm run demo:batch` | SALI FastPay — parallel batch payroll |
-| `npm run demo:ghost-payer` | Ghost protection — payee paid when payer ghosts |
+| `npm run demo:pharos` | Live cooperative settlement |
 | `npm test` | 103 tests |
+
+Full list: [docs/examples/demos.md](docs/examples/demos.md) · `demo:reclaim` aliases `demo:ghost-payee`.
+
+**Multi-payee batch:** One MCP = one wallet identity. Payer funds N payees via `fund_deals_batch`; each payee claims their manifest rows with their own key/MCP.
 
 ---
 
@@ -155,9 +171,20 @@ Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) · Proof: [
 
 **Title:** Pharos Settle — Stripe Checkout for AI agents on Pharos  
 **Tags:** AgentSkill, MCP, Payments, Onchain, Pharos  
-**One-liner:** Agent-to-agent work settlement with ghost protection — payee ghosts → reclaim; payer ghosts → payee paid; SALI FastPay for batch agent payroll. Live on Atlantic, 103 tests, 15 MCP tools.
+**One-liner:** Dual-ghost protection + agent-native API (Skill + 15 MCP tools) for agent-to-agent work settlement on Pharos — simulate-first, `nextAction` loops, SALI FastPay batch payroll. Live Atlantic, 103 tests.
 
 **Demo video:** _(paste URL — script: [docs/demo-script.md](docs/demo-script.md))_
+
+### Live proof (PharosScan)
+
+| Flow | Tx hash | Notes |
+|------|---------|-------|
+| Cooperative settlement | _(paste)_ | `npm run demo:pharos` |
+| SALI batch fund | _(paste)_ | `npm run demo:batch` |
+| Ghost payee reclaim | _(paste)_ | `npm run demo:ghost-payee` |
+| Ghost payer claim | _(paste)_ | `npm run demo:ghost-payer` |
+
+Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz)
 
 ---
 

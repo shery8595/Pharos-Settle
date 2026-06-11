@@ -492,6 +492,7 @@ export {
   filterManifestForPayee,
   manifestToClaims,
   fundDeal,
+  reclaimDeal,
   submitDeliveryWithHash,
   attestReleaseWithHash,
 } from "./internal/settle/index.js";

@@ -48,7 +48,32 @@ Steps:
 
 1. Call get_settlement_status for deal ${dealId}
 2. If nextAction is wait, poll until autoReleaseAt passes
-3. When canClaim is true, complete the payment flow`,
+3. When canClaim is true, call complete_claim_for_deal`,
+          },
+        },
+      ],
+    })
+  );
+
+  mcpServer.registerPrompt(
+    "recover-from-ghost-payee",
+    {
+      description: "Safety net: payee never delivered — poll until reclaim window opens",
+      argsSchema: {
+        dealId: z.string().describe("Deal ID"),
+      },
+    },
+    async ({ dealId }) => ({
+      messages: [
+        {
+          role: "user" as const,
+          content: {
+            type: "text" as const,
+            text: `Deal ${dealId} on Pharos: payee may have ghosted (never delivered work).
+
+1. Call get_settlement_status for deal ${dealId}
+2. If nextAction is wait, poll until nextAction becomes reclaim (past deal deadline / ttlSeconds)
+3. Call reclaim_trusted_settlement for deal ${dealId}`,
           },
         },
       ],

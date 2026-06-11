@@ -14,6 +14,16 @@ description: >
 > **Agent-to-agent work settlement with ghost protection.**  
 > Payee ghosts → payer reclaims. Payer ghosts → payee still gets paid. Both behave → instant settlement.
 
+## What's novel
+
+- **Dual-ghost protection** — ghost payee (`reclaim_trusted_settlement`) + ghost payer (auto-release claim)
+- **`nextAction` loops** — poll one hint per step
+- **`preflightHash` binding** — funded deal matches simulate checks
+- **Manifest handoff** — `fund_deals_batch` → payee `complete_claims_batch`
+- **SALI FastPay** — parallel batch payroll on Atlantic
+
+→ Full comparison: [docs/WHATS-NOVEL.md](../../docs/WHATS-NOVEL.md)
+
 ## Workflow parameters (swap these)
 
 Every settlement uses the **same state machine** — only the inputs change. Tutorials often show “Agent A pays Agent B 10 TEST on Atlantic”; treat those as examples, not fixed values.
@@ -142,11 +152,15 @@ simulate_trusted_settlement → fund_deal → submit_delivery → attest_release
 get_settlement_status → wait (poll until nextAction: claim) → complete_claim_for_deal
 ```
 
+Demos: `npm run demo:ghost-payer` · `npm run demo:ghost-payer:simulate`
+
 **3. Ghost payee recovery** (worker never delivers)
 
 ```
-get_settlement_status → reclaim_trusted_settlement
+fund_deal (or fund only) → get_settlement_status → wait until nextAction: reclaim → reclaim_trusted_settlement
 ```
+
+Demos: `npm run demo:ghost-payee` · `npm run demo:ghost-payee:simulate` · (`demo:reclaim` alias)
 
 **4. Batch worker payroll** (SALI FastPay — one payer, many workers)
 
@@ -268,7 +282,7 @@ Demos: `npm run demo:batch`, `npm run demo:batch:split`. Docs: [batch-settlement
 2. "Trading agent: pay risk-analysis agent for VaR report before executing the trade"
 3. "DAO assistant: pay summarizer agent for proposal #12 brief — simulate first"
 4. "Batch payroll: SALI FastPay 100 labeling microtasks to worker agents"
-5. "Reclaim deal 42 — labeling agent never delivered"
+5. "Reclaim deal 42 — worker never delivered" (ghost payee → `reclaim_trusted_settlement`)
 
 ## API (Layer 1)
 

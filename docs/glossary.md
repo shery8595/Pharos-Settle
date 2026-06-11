@@ -4,8 +4,10 @@
 |------|------------|
 | **Agent** | An Ethereum address registered in `AgentRegistry` that can participate in settlements as payer or payee. |
 | **Pharos Settle Skill** | Standardized skill module at `skills/trusted-agent-settlement/`: Stripe Checkout for AI agents on Pharos — ghost protection, **15 MCP tools**, SALI FastPay. |
-| **Ghost protection** | Pharos Settle's core promise: payee ghosts → payer reclaims; payer ghosts → payee still gets paid; both cooperate → instant settlement. |
-| **SALI FastPay** | Batch agent payroll mode (`batchMode: saliFast`): one payer, many worker agents, parallel fund+claim on Pharos Atlantic. |
+| **Dual-ghost protection** | Umbrella term for both safety nets: ghost payee (payer reclaims) + ghost payer (payee auto-release claim). See [WHATS-NOVEL.md](WHATS-NOVEL.md). |
+| **Ghost protection** | Same as dual-ghost protection — Pharos Settle's core promise for agent-to-agent hiring. |
+| **preflightHash** | Deterministic hash of simulate/preflight checks, stored on-chain when the deal is funded — binds funded terms to dry-run. |
+| **SALI FastPay** | Batch agent payroll mode (`batchMode: saliFast`): one payer, many worker agents, parallel fund+claim on Pharos Atlantic (`maxParallelInBlock`). |
 | **Atlantic** | Pharos Atlantic testnet (chain ID `688689`). Primary deployment target. |
 | **Auto-release** | Hybrid path where payee claims after `disputeWindow` seconds once delivery is submitted, without payer attestation (ghost payer scenario). |
 | **Batch settlement** | N-deal payments via `executeBatchSettlement` or split MCP tools. Modes: `saliFast` (fund+claim) or `hybridWork` (full 4-phase). Uses explicit nonces for SALI parallel execution on Atlantic. |

@@ -13,7 +13,9 @@ Runnable demos and integration patterns.
 | `demo:batch:split` | `examples/pipeline/run-batch-split.ts` | Two-MCP batch handoff |
 | `demo:batch:simulate` | `examples/pipeline/run-batch.ts` | Mock batch |
 | `demo:batch:split:simulate` | `examples/pipeline/run-batch-split.ts` | Mock split batch |
-| `demo:ghost-payer` | `examples/ghost-payer/run-ghost-payer.ts` | Auto-release |
+| `demo:ghost-payee` | `examples/ghost-payee/run-ghost-payee.ts` | Payee ghosts → reclaim |
+| `demo:ghost-payer` | `examples/ghost-payer/run-ghost-payer.ts` | Payer ghosts → auto-release |
+| `demo:reclaim` | `examples/ghost-payee/run-ghost-payee.ts` | Alias for `demo:ghost-payee` |
 | `demo:agent` | `examples/agent-consumer/openai-agent.ts` | NL agent |
 | `demo:pipeline` | `examples/pipeline/run-pipeline.ts` | Composable steps |
 
@@ -21,6 +23,7 @@ Runnable demos and integration patterns.
 
 - [Demos](demos.md) — full command table
 - [Batch pipeline](batch-pipeline.md)
+- [Ghost payee](ghost-payee.md)
 - [Ghost payer](ghost-payer.md)
 - [Agent consumer](agent-consumer.md)
 

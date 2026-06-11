@@ -199,7 +199,8 @@ See `deployments/atlantic.json` → `allowedTokens`.
 | `demo:ghost-payer` | Auto-release when payer ghosts |
 | `demo:agent` | NL agent pays via Skill (no settlement code) |
 | `demo:pipeline` | Composable `steps.ts` |
-| `demo:reclaim` | Safety-net reclaim |
+| `demo:ghost-payee` | Ghost payee — payer reclaims (`demo:reclaim` alias) |
+| `demo:ghost-payer` | Ghost payer — payee paid after auto-release |
 
 Details: [Examples](examples/README.md)
 

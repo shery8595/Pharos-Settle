@@ -26,12 +26,16 @@ function sleep(ms: number) {
 
 async function main() {
   const d = loadDeployments();
-  const mock = !d || process.argv.includes("--simulate");
-  const agentA = d?.deployer ?? "0x1111111111111111111111111111111111111111";
-  const agentB =
-    process.env.DEMO_AGENT_B ??
-    (process.env.AGENT_B_PRIVATE_KEY ? new Wallet(process.env.AGENT_B_PRIVATE_KEY).address : undefined) ??
-    "0x2222222222222222222222222222222222222222";
+  const simulate = process.argv.includes("--simulate");
+  const mock = simulate || !d;
+  const agentA = simulate
+    ? "0x1111111111111111111111111111111111111111"
+    : (d?.deployer ?? "0x1111111111111111111111111111111111111111");
+  const agentB = simulate
+    ? "0x2222222222222222222222222222222222222222"
+    : (process.env.DEMO_AGENT_B ??
+        (process.env.AGENT_B_PRIVATE_KEY ? new Wallet(process.env.AGENT_B_PRIVATE_KEY).address : undefined) ??
+        "0x2222222222222222222222222222222222222222");
 
   const input = {
     agentA,

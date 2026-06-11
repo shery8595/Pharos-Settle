@@ -14,6 +14,8 @@ That file includes live Atlantic contract addresses (from `deployments/atlantic.
 - [x] Contracts + tests green — **103 tests** (`npm test`: 37 Hardhat + 66 Vitest)
 - [x] Hybrid SALI batch — `saliFast` + `hybridWork` MCP tools + split demo
 - [x] Live Atlantic deployment — [`deployments/atlantic.json`](../deployments/atlantic.json)
+- [x] Ghost payee reclaim demo (`demo:ghost-payee`, `demo:reclaim` alias)
+- [x] Dual-ghost protection documented ([WHATS-NOVEL.md](WHATS-NOVEL.md))
 
 ## Demo video
 
