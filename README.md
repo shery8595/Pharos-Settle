@@ -90,7 +90,8 @@ if (sim.stages.preflight.ready) {
 **Both demo wallets are pre-registered on Atlantic — clone, add keys to `.env`, run `npm run demo:pharos`.**
 
 ```bash
-npm install
+npm run setup          # install, build, skill + MCP config
+# Open this repo as workspace root → Reload MCP in Cursor
 cp .env.example .env   # PRIVATE_KEY + AGENT_B_PRIVATE_KEY
 npm run demo:pharos    # first time only: deploy:pharos && seed:pharos once before this
 ```

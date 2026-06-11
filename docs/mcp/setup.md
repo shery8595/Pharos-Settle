@@ -5,16 +5,17 @@ Canonical integration: **stdio MCP** (`npm run mcp`). HTTP bridge is deprecated 
 ## First-run checklist
 
 ```bash
-npm install
-npm run build
-npm run agent:doctor:mock    # no keys — explore safely
-npm run mcp                  # in another terminal for manual test
+npm run setup                # install + build + skill + verify MCP config
 ```
 
-1. Add MCP config below
-2. Restart Cursor / reload MCP
-3. Call `get_agent_readiness` then `simulate_trusted_settlement` with `mock: true`
-4. For live: fund wallets, `npm run agent:doctor`, then `fund_deal` / split flow
+1. **Open `Pharos-Settle` as workspace root** (not a parent folder)
+2. Restart Cursor / reload MCP (`pharos-settle` is in committed `.cursor/mcp.json`)
+3. `npm run agent:doctor:mock` — no keys, explore safely
+4. Optional: `npm run mcp` in another terminal for manual stdio test
+5. Call `get_agent_readiness` then `simulate_trusted_settlement` with `mock: true`
+6. For live: fund wallets, `npm run agent:doctor`, then `fund_deal` / split flow
+
+Legacy: hand-written MCP config below (only if not using committed `.cursor/mcp.json`)
 
 ## Payer MCP (one key)
 

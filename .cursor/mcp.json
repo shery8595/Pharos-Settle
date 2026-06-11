@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "pharos-settle": {
+      "command": "npx",
+      "args": ["tsx", "mcp/server.ts"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PHAROS_RPC_URL": "https://atlantic.dplabs-internal.com"
+      }
+    }
+  }
+}

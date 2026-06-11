@@ -10,9 +10,11 @@
 
 ```bash
 git clone https://github.com/shery8595/Pharos-Settle.git
-cd pharos
-npm install
+cd Pharos-Settle
+npm run setup
 ```
+
+`npm run setup` installs dependencies, builds the SDK, copies the skill to `.cursor/skills/`, and verifies `.cursor/mcp.json`. **Open this folder as the IDE workspace root**, then reload MCP.
 
 **Atlantic demo:** Both demo wallets are pre-registered on Atlantic — clone, add keys to `.env`, run `npm run demo:pharos`. See [Atlantic quickstart](quickstart-atlantic.md).
 

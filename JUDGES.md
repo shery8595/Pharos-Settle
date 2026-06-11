@@ -88,7 +88,12 @@ Chain ID **688689** · RPC `https://atlantic.dplabs-internal.com` · Gas: **PHRS
 
 ```bash
 git clone https://github.com/shery8595/Pharos-Settle.git && cd Pharos-Settle
-npm install
+npm run setup
+```
+
+Then **open `Pharos-Settle` as the workspace root** (not a parent folder) and **reload MCP** (Settings → MCP → restart `pharos-settle`).
+
+```bash
 npm run agent:doctor:mock
 npm run demo:simulate
 ```

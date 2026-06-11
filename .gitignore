@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .env
+.cursor/skills/
 cache/
 artifacts/
 typechain-types/

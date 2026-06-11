@@ -9,6 +9,7 @@
     "./steps": "./dist/steps.js"
   },
   "scripts": {
+    "setup": "node scripts/setup.mjs",
     "build": "tsc",
     "gates:atlantic": "tsx scripts/gates/validate-atlantic.ts",
     "check:balance": "tsx scripts/check-balance.ts",
