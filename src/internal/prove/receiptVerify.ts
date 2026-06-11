@@ -20,7 +20,8 @@ export async function verifySettlementReceipt(params: {
   token: Address;
   payee: Address;
   escrowAddress: Address;
-  amount: bigint;
+  /** Net amount transferred to payee on claim (gross minus protocol fee). */
+  payeeAmount: bigint;
   claimTxHash: Hash;
 }): Promise<ProveStage> {
   const rpcUrl = params.config?.rpcUrl ?? params.rpcUrl ?? ATLANTIC.rpcUrl;
@@ -32,7 +33,13 @@ export async function verifySettlementReceipt(params: {
   const receipt = await client.waitForTransactionReceipt({ hash: params.claimTxHash });
   const finalityMs = Date.now() - start;
 
-  const transfer = findTransferToPayee(receipt, params.token, params.payee, params.escrowAddress, params.amount);
+  const transfer = findTransferToPayee(
+    receipt,
+    params.token,
+    params.payee,
+    params.escrowAddress,
+    params.payeeAmount
+  );
   if (!transfer) {
     return {
       verified: false,
@@ -42,7 +49,7 @@ export async function verifySettlementReceipt(params: {
   }
 
   const proofHash = keccak256(
-    toBytes(`${params.claimTxHash}:${params.amount.toString()}:${params.payee.toLowerCase()}`)
+    toBytes(`${params.claimTxHash}:${params.payeeAmount.toString()}:${params.payee.toLowerCase()}`)
   );
 
   return {

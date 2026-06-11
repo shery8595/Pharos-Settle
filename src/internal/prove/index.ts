@@ -1,6 +1,7 @@
 import { keccak256, toBytes, type Address, type Hash } from "viem";
 import type { SettlementConfig } from "../../shared/schemas.js";
 import type { ProveStage } from "../../shared/schemas.js";
+import { getFeeQuote } from "../commerce/feeQuote.js";
 import { verifySettlementReceipt } from "./receiptVerify.js";
 import { verifySpvPostSettlement } from "./spvPharos.js";
 import { loadDeployments, resolveDeploymentNetwork } from "../../shared/chain.js";
@@ -50,13 +51,14 @@ export async function prove(
   }
 
   const deployments = loadDeployments(resolveDeploymentNetwork(config));
+  const feeQuote = await getFeeQuote(input.amount, config);
   const postSettlement = await verifySettlementReceipt({
     rpcUrl: config.rpcUrl,
     config,
     token: input.token as Address,
     payee: input.payee as Address,
     escrowAddress: deployments.dealEscrow as Address,
-    amount: BigInt(input.amount),
+    payeeAmount: BigInt(feeQuote.payeeAmount),
     claimTxHash: input.claimTxHash,
   });
 

@@ -10,7 +10,7 @@ Post-settlement verification runs after a successful `claimTx`.
 |-------|-------------|
 | `token` | ERC-20 address |
 | `payee` | Payee address |
-| `amount` | Deal amount (wei string) |
+| `amount` | Gross deal amount (wei string) — used for fee quote |
 | `claimTxHash` | Claim transaction hash |
 | `claimBlockNumber` | Optional block for SPV |
 
@@ -19,8 +19,9 @@ Post-settlement verification runs after a successful `claimTx`.
 `config.proveTier` omitted or `"receipt"`.
 
 1. `waitForTransactionReceipt(claimTxHash)`
-2. Find ERC-20 `Transfer` log: `from=escrow`, `to=payee`, `value=amount`
-3. Compute `proofHash = keccak256(claimTxHash:amount:payee)`
+2. `getFeeQuote(amount)` → `payeeAmount` (gross minus on-chain `feeBps`)
+3. Find ERC-20 `Transfer` log: `from=escrow`, `to=payee`, `value=payeeAmount`
+4. Compute `proofHash = keccak256(claimTxHash:payeeAmount:payee)`
 
 **Module:** `src/internal/prove/receiptVerify.ts`
 

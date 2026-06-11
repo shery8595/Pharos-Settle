@@ -18,7 +18,7 @@ describe("verifySettlementReceipt", () => {
   const token = "0x1111111111111111111111111111111111111111" as Address;
   const payee = "0x2222222222222222222222222222222222222222" as Address;
   const escrow = "0x3333333333333333333333333333333333333333" as Address;
-  const amount = 1000000000000000000n;
+  const payeeAmount = 1000000000000000000n;
   const claimTx = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as Hash;
 
   beforeEach(() => {
@@ -41,7 +41,7 @@ describe("verifySettlementReceipt", () => {
       eventName: "Transfer",
       args: { from: escrow, to: payee },
     });
-    const data = encodeAbiParameters(parseAbiParameters("uint256"), [amount]);
+    const data = encodeAbiParameters(parseAbiParameters("uint256"), [payeeAmount]);
 
     const receipt = {
       blockNumber: 42n,
@@ -54,7 +54,7 @@ describe("verifySettlementReceipt", () => {
       token,
       payee,
       escrowAddress: escrow,
-      amount,
+      payeeAmount,
       claimTxHash: claimTx,
     });
 
@@ -70,11 +70,55 @@ describe("verifySettlementReceipt", () => {
       token,
       payee,
       escrowAddress: escrow,
-      amount,
+      payeeAmount,
       claimTxHash: claimTx,
     });
 
     expect(result.verified).toBe(false);
     expect(result.reason).toContain("Transfer event");
+  });
+
+  it("verifies net payee transfer when gross amount differs (fee deducted on claim)", async () => {
+    const grossAmount = 5000000000000000000n;
+    const netPayeeAmount = 4950000000000000000n;
+    const topics = encodeEventTopics({
+      abi: [
+        {
+          type: "event",
+          name: "Transfer",
+          inputs: [
+            { name: "from", type: "address", indexed: true },
+            { name: "to", type: "address", indexed: true },
+            { name: "value", type: "uint256", indexed: false },
+          ],
+        },
+      ],
+      eventName: "Transfer",
+      args: { from: escrow, to: payee },
+    });
+    const data = encodeAbiParameters(parseAbiParameters("uint256"), [netPayeeAmount]);
+
+    waitForTransactionReceipt.mockResolvedValue({
+      blockNumber: 7n,
+      logs: [{ address: token, topics, data }],
+    });
+
+    const withGross = await verifySettlementReceipt({
+      token,
+      payee,
+      escrowAddress: escrow,
+      payeeAmount: grossAmount,
+      claimTxHash: claimTx,
+    });
+    expect(withGross.verified).toBe(false);
+
+    const withNet = await verifySettlementReceipt({
+      token,
+      payee,
+      escrowAddress: escrow,
+      payeeAmount: netPayeeAmount,
+      claimTxHash: claimTx,
+    });
+    expect(withNet.verified).toBe(true);
   });
 });
