@@ -3,9 +3,13 @@ dist/
 .env
 .cursor/skills/
 .pharos-settle/
+.tmp-appdata/
 cache/
 artifacts/
 typechain-types/
 coverage/
 tmp/
 *.log
+
+# Local Hardhat network manifest (integration tests use deployments/localhost.json)
+deployments/hardhat.json
