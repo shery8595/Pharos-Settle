@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env
 .cursor/skills/
+.cursor/setup-checklist.json
 cache/
 artifacts/
 typechain-types/

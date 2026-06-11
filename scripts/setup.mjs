@@ -4,7 +4,7 @@
  * Run: npm run setup
  */
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -70,6 +70,30 @@ function verifyMcpConfig() {
   return mcpPath;
 }
 
+function writeSetupChecklist() {
+  const checklistPath = join(root, ".cursor", "setup-checklist.json");
+  mkdirSync(join(root, ".cursor"), { recursive: true });
+  writeFileSync(
+    checklistPath,
+    JSON.stringify(
+      {
+        awaitingConfirmation: true,
+        setupCompletedAt: new Date().toISOString(),
+        message:
+          "Agent: ask user to confirm workspace root + MCP reload before calling pharos-settle tools. See .cursor/rules/pharos-settle-mcp.mdc",
+        steps: [
+          "Open Pharos-Settle as workspace root (not a parent folder)",
+          "Reload MCP: Settings → MCP → restart pharos-settle",
+        ],
+      },
+      null,
+      2
+    ) + "\n",
+    "utf-8"
+  );
+  return checklistPath;
+}
+
 console.log("\nPharos Settle — setup\n");
 
 run("Dependencies", ["install"]);
@@ -84,12 +108,15 @@ console.log("✓ Skill installed → .cursor/skills/trusted-agent-settlement/");
 const mcpPath = verifyMcpConfig();
 console.log(`✓ MCP configured → ${mcpPath.replace(/\\/g, "/")}`);
 
+const checklistPath = writeSetupChecklist();
+console.log(`✓ Setup checklist → ${checklistPath.replace(/\\/g, "/")}`);
+
 console.log(`
 Next:
   1. Open Pharos-Settle as workspace root (not a parent folder)
   2. Reload MCP in Cursor (Settings → MCP → restart pharos-settle)
-  3. Ask your agent:
-     "What settlement tools do you have?"
+  3. In chat, your agent should ask you to confirm both steps (yes/no)
+  4. Then ask: "What settlement tools do you have?"
 
 Mock demo (no keys):
   npm run agent:doctor:mock

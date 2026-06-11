@@ -198,6 +198,8 @@ mkdir -p .cursor/skills && cp -r skills/trusted-agent-settlement .cursor/skills/
 
 Pair with MCP: [docs/mcp/setup.md](../../docs/mcp/setup.md) · roles: [docs/mcp/roles.md](../../docs/mcp/roles.md).
 
+**After `npm run setup`:** Read `.cursor/setup-checklist.json`. If `awaitingConfirmation` is true, use **AskQuestion** to confirm (1) Pharos-Settle is workspace root and (2) MCP `pharos-settle` was reloaded — before calling any MCP tool. See `.cursor/rules/pharos-settle-mcp.mdc`.
+
 **Atlantic demo:** Both demo wallets are pre-registered on Atlantic — clone, add keys to `.env`, run `npm run demo:pharos`.
 
 ## Supported tokens (Atlantic testnet)

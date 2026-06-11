@@ -12,8 +12,9 @@ npm run setup                # install + build + skill + verify MCP config
 2. Restart Cursor / reload MCP (`pharos-settle` is in committed `.cursor/mcp.json`)
 3. `npm run agent:doctor:mock` — no keys, explore safely
 4. Optional: `npm run mcp` in another terminal for manual stdio test
-5. Call `get_agent_readiness` then `simulate_trusted_settlement` with `mock: true`
-6. For live: fund wallets, `npm run agent:doctor`, then `fund_deal` / split flow
+5. In chat, the agent should **ask you to confirm** workspace root + MCP reload (yes/no) — see `.cursor/rules/pharos-settle-mcp.mdc` and `.cursor/setup-checklist.json` written by setup
+6. Call `get_agent_readiness` then `simulate_trusted_settlement` with `mock: true`
+7. For live: fund wallets, `npm run agent:doctor`, then `fund_deal` / split flow
 
 Legacy: hand-written MCP config below (only if not using committed `.cursor/mcp.json`)
 

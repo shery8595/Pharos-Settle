@@ -91,7 +91,7 @@ git clone https://github.com/shery8595/Pharos-Settle.git && cd Pharos-Settle
 npm run setup
 ```
 
-Then **open `Pharos-Settle` as the workspace root** (not a parent folder) and **reload MCP** (Settings → MCP → restart `pharos-settle`).
+Then **open `Pharos-Settle` as the workspace root** (not a parent folder) and **reload MCP** (Settings → MCP → restart `pharos-settle`). The agent should prompt you to confirm both (yes/no) before using settlement tools.
 
 ```bash
 npm run agent:doctor:mock
