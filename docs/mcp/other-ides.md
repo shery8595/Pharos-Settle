@@ -8,7 +8,11 @@ After clone:
 npm run setup
 ```
 
-Setup writes **`.pharos-settle/mcp.generated.json`** with your machine's absolute repo path — copy the `pharos-settle` block into your IDE.
+Setup asks **project** or **global** MCP mode and writes **`.pharos-settle/setup-checklist.json`**. See [modes.md](modes.md).
+
+- **Project (Cursor):** open Pharos-Settle as workspace root — `.cursor/mcp.json` uses `${workspaceFolder}`
+- **Global (Cursor):** paste **`.pharos-settle/mcp-bin.generated.json`** into Settings → MCP → global servers
+- **Other IDEs:** always use absolute path from **`.pharos-settle/mcp.generated.json`**
 
 ---
 
@@ -40,18 +44,18 @@ No keys in `env` → **mock mode** (safe for judges).
 
 ## Cursor
 
-| Item | Location |
-|------|----------|
-| MCP config | `.cursor/mcp.json` (committed; uses `${workspaceFolder}`) |
-| Skill | `.cursor/skills/trusted-agent-settlement/` (created by `npm run setup`) |
-| Agent gate | `.cursor/rules/pharos-settle-mcp.mdc` |
+| Item | Project mode | Global mode |
+|------|--------------|-------------|
+| MCP config | `.cursor/mcp.json` (`${workspaceFolder}`) | Settings → MCP → global — `mcp-bin.generated.json` |
+| Skill | `.cursor/skills/trusted-agent-settlement/` | Same + `~/.cursor/skills/trusted-agent-settlement/` |
+| Agent gate | `.cursor/rules/pharos-settle-mcp.mdc` | Same |
 
-1. Open **Pharos-Settle** as workspace root  
-2. `npm run setup`  
-3. Settings → MCP → reload **pharos-settle**  
-4. Agent confirms workspace + MCP (see `AGENTS.md`)
+1. `npm run setup` — choose mode when prompted  
+2. **Project:** open **Pharos-Settle** as workspace root → reload MCP  
+3. **Global:** add global MCP server → reload — any workspace works  
+4. Agent confirms per `mcpMode` in checklist (see `AGENTS.md`)
 
-Full guide: [setup.md](setup.md)
+Guides: [modes.md](modes.md) · [setup.md](setup.md)
 
 ---
 
@@ -112,7 +116,7 @@ SDK: `pharos-trusted-settlement` — see [sdk/README.md](../sdk/README.md).
 
 | Symptom | Fix |
 |---------|-----|
-| MCP not listed | Wrong workspace root — open `Pharos-Settle` folder, not parent |
+| MCP not listed | **Project:** open `Pharos-Settle` as root. **Global:** add server from `mcp-bin.generated.json` |
 | Tools missing in chat | Reload MCP; restart IDE |
 | `cwd` wrong | Re-run `npm run setup` — copies fresh `.pharos-settle/mcp.generated.json` |
 | Windows spawn errors | Use generated config; run `npm run setup` (not nested manual `npm.cmd` spawn) |
@@ -122,5 +126,6 @@ SDK: `pharos-trusted-settlement` — see [sdk/README.md](../sdk/README.md).
 ## Related
 
 - [AGENTS.md](../../AGENTS.md) — portable agent instructions  
+- [modes.md](modes.md) — project vs global MCP  
 - [setup.md](setup.md) — Cursor-first checklist  
 - [roles.md](roles.md) — payer / payee / demo tool matrix

@@ -10,29 +10,62 @@ cd Pharos-Settle
 npm run setup
 ```
 
-Then configure MCP for your IDE — see [docs/mcp/other-ides.md](docs/mcp/other-ides.md).
+Then configure MCP for your IDE — see [docs/mcp/modes.md](docs/mcp/modes.md) (project vs global) and [docs/mcp/other-ides.md](docs/mcp/other-ides.md).
+
+## MCP modes
+
+`npm run setup` asks **project** or **global** and saves `mcpMode` in `.pharos-settle/setup-checklist.json`.
+
+| Mode | When | MCP config |
+|------|------|------------|
+| **project** (default) | Judges, repo-only work | Committed `.cursor/mcp.json` — open Pharos-Settle as workspace root |
+| **global** | Use settlement from any workspace | Cursor **Settings → MCP → global** — paste `.pharos-settle/mcp-bin.generated.json` |
+
+Full guide: [docs/mcp/modes.md](docs/mcp/modes.md).
 
 ## MCP readiness gate (ask user before settlement tools)
 
 After `npm run setup`, read **`.pharos-settle/setup-checklist.json`**. If `"awaitingConfirmation": true` (or the user just ran setup):
 
-**Ask the user to confirm both** (use AskQuestion / multiple-choice if available):
+Read **`mcpMode`** (`"project"` or `"global"`). Use **AskQuestion** when available.
+
+### Project mode (`mcpMode: "project"`)
+
+Confirm **both**:
 
 1. Is **Pharos-Settle** opened as the **workspace / project root** (not a parent folder)?
-2. Is the **`pharos-settle` MCP server** connected/reloaded in this IDE?
+2. Is **`pharos-settle` MCP** connected/reloaded?
 
-If **no** → give IDE-specific steps from [docs/mcp/other-ides.md](docs/mcp/other-ides.md). Do **not** call settlement MCP tools.
+If **no** → [docs/mcp/modes.md](docs/mcp/modes.md#project-mode-default). Do **not** call settlement MCP tools.
 
-If **yes** → set `"awaitingConfirmation": false` and `"confirmedAt"` in `.pharos-settle/setup-checklist.json`, then proceed.
+### Global mode (`mcpMode: "global"`)
 
-**Then ask how they want to run** (use AskQuestion when available):
+Confirm **both**:
 
-| Prompt | Options |
-|--------|---------|
-| **Demo (mock)** or **live Atlantic test**? | **Demo / mock — no keys** / **Live test on Atlantic** |
+1. Did you add **`pharos-settle`** as a **global MCP server** (from `.pharos-settle/mcp-bin.generated.json`)?
+2. Is **`pharos-settle` MCP** connected/reloaded?
 
-- **Demo:** Use `mock: true` on MCP tools, or CLI: `npm run agent:doctor:mock`, `npm run demo:simulate`. No `.env` keys needed.
-- **Live test:** They must set **`PRIVATE_KEY`** (payer) and **`AGENT_B_PRIVATE_KEY`** (payee) in **`.env`** first (created from `.env.example` by `npm run setup`). Keys must be full 32-byte hex (not the `0x` placeholder). MCP re-reads `.env` on each tool call — no restart needed after saving keys. Remind them wallets need PHRS on Atlantic. Then `npm run agent:doctor` or MCP without `mock: true`.
+Workspace root does **not** need to be Pharos-Settle. Keys still live in the clone at `repoPath` in the checklist.
+
+If **no** → [docs/mcp/modes.md](docs/mcp/modes.md#global-mode). Do **not** call settlement MCP tools.
+
+### After MCP is confirmed
+
+Set `"awaitingConfirmation": false` and `"confirmedAt"` in `.pharos-settle/setup-checklist.json`, then proceed.
+
+### Run mode (demo vs live)
+
+`npm run setup` also asks **demo** or **live** and saves **`runMode`** in the checklist.
+
+- If **`runMode`** is already set → use it; do **not** re-ask unless the user wants to change.
+- If **`runMode`** is missing (old checklist) → ask with AskQuestion: **Demo / mock** vs **Live test on Atlantic**.
+
+| `runMode` | Behavior |
+|-----------|----------|
+| **`demo`** | `mock: true` on MCP tools, or `npm run agent:doctor:mock` / `npm run demo:simulate`. No keys needed. |
+| **`live`** | MCP without `mock: true` or `npm run agent:doctor` / `npm run demo:pharos` — only after keys are set. |
+
+**Live keys:** If `runMode` is `live` and `keysConfigured` is `false` (or keys missing in `.env` at `repoPath`), tell the user to set **`PRIVATE_KEY`** and **`AGENT_B_PRIVATE_KEY`** (full 32-byte hex, not `0x` placeholder), fund PHRS, save `.env`, then call any MCP tool (env reloads per request). Use AskQuestion: **Keys saved in .env?** before live settlement tools.
 
 Do **not** call live settlement tools (`fund_deal`, etc. without `mock: true`) until both keys are configured.
 

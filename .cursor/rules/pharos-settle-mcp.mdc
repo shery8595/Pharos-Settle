@@ -1,5 +1,5 @@
 ---
-description: After npm run setup, confirm workspace root and MCP reload before settlement tools
+description: After npm run setup, confirm MCP mode (project or global) and reload before settlement tools
 alwaysApply: true
 ---
 
@@ -11,19 +11,30 @@ Before calling **pharos-settle** MCP tools (`get_agent_readiness`, `simulate_tru
 
 Read **`.pharos-settle/setup-checklist.json`** when present (also see `AGENTS.md`). If `"awaitingConfirmation": true`, or the user just ran `npm run setup`, run the confirmation flow below **before** any MCP tool call.
 
+Read **`mcpMode`**: `"project"` (default) or `"global"`. Guide: [docs/mcp/modes.md](docs/mcp/modes.md).
+
 ## 2. Ask the user (use AskQuestion when available)
 
-Ask **both** items in one form if possible:
+### Project mode
 
 | Prompt | Options |
 |--------|---------|
-| Is **Pharos-Settle** opened as your **workspace root** (not a parent folder like `skill_test`)? | **Yes, repo is workspace root** / **No or not sure** |
-| Have you **added MCP config** (from `.pharos-settle/mcp.generated.json` if not Cursor) and **reloaded** `pharos-settle`? | **Yes, connected** / **Not yet** |
+| Is **Pharos-Settle** opened as your **workspace root** (not a parent folder)? | **Yes, repo is workspace root** / **No or not sure** |
+| Is **`pharos-settle` MCP** connected/reloaded? | **Yes, connected** / **Not yet** |
+
+### Global mode
+
+| Prompt | Options |
+|--------|---------|
+| Did you add **`pharos-settle`** as a **global MCP server** (from `.pharos-settle/mcp-bin.generated.json`)? | **Yes, added global MCP** / **Not yet** |
+| Is **`pharos-settle` MCP** connected/reloaded? | **Yes, connected** / **Not yet** |
+
+Workspace root does **not** need to be Pharos-Settle in global mode.
 
 ## 3. If anything is not ready
 
-- **Wrong workspace:** Tell user `File → Open Folder → Pharos-Settle` (the repo root that contains `.cursor/mcp.json`).
-- **MCP not configured:** Copy block from `.pharos-settle/mcp.generated.json` — see `docs/mcp/other-ides.md`.
+- **Project / wrong workspace:** `File → Open Folder → Pharos-Settle` (repo root with `.cursor/mcp.json`).
+- **Global / MCP not added:** Cursor → Settings → MCP → global server — paste from `.pharos-settle/mcp-bin.generated.json` — [docs/mcp/modes.md](docs/mcp/modes.md).
 - **MCP not reloaded:** Settings → MCP → restart **pharos-settle** (Cursor) or restart IDE (Claude Desktop).
 - Do **not** call Pharos MCP tools or claim MCP is connected.
 - Offer terminal fallback: `npm run agent:doctor:mock` and `npm run demo:simulate`.
@@ -36,14 +47,14 @@ Update `.pharos-settle/setup-checklist.json`:
 { "awaitingConfirmation": false, "confirmedAt": "<ISO-8601 timestamp>" }
 ```
 
-**Ask demo vs live** (AskQuestion when available):
+**Run mode** — read `runMode` from checklist (`demo` | `live`, chosen at `npm run setup`). Re-ask only if missing.
 
-| Prompt | Options |
-|--------|---------|
-| Run in **demo (mock)** or **live Atlantic test**? | **Demo / mock — no keys** / **Live test on Atlantic** |
+| `runMode` | Action |
+|-----------|--------|
+| `demo` | `mock: true` on tools, or `npm run agent:doctor:mock` / `npm run demo:simulate` |
+| `live` | No `mock: true`; require keys in `.env` at `repoPath` |
 
-- **Demo:** `mock: true` on tools, or `npm run agent:doctor:mock` / `npm run demo:simulate`.
-- **Live:** User must set `PRIVATE_KEY` and `AGENT_B_PRIVATE_KEY` in `.env` (from `.env.example` via setup) and fund PHRS before live MCP or `fund_deal`.
+**Live keys:** If `runMode` is `live` and `keysConfigured` is false, ask **Keys saved in .env?** and remind: `PRIVATE_KEY` + `AGENT_B_PRIVATE_KEY` (66+ char hex), PHRS funded. Do not run `fund_deal` until both keys validate.
 
 Do not run live settlement without both keys configured.
 

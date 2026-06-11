@@ -5,17 +5,31 @@ Canonical integration: **stdio MCP** (`npm run mcp`). HTTP bridge is deprecated 
 ## First-run checklist
 
 ```bash
-npm run setup                # install + build + skill + .env + verify MCP config
+npm run setup                # install + build + skill + .env + MCP mode prompt
 ```
+
+Setup asks **project** or **global** MCP mode, then **demo** or **live** — see [modes.md](modes.md).
+
+Non-interactive: `npm run setup -- --mode=global --run=live`
 
 Setup copies **`.env.example` → `.env`** (skips if `.env` already exists). Keys are empty placeholders — safe for demo.
 
+### Project mode (default)
+
 1. **Open `Pharos-Settle` as workspace root** (not a parent folder)
 2. Restart Cursor / reload MCP (`pharos-settle` is in committed `.cursor/mcp.json`)
+
+### Global mode
+
+1. **Settings → MCP → Add global server** — paste from `.pharos-settle/mcp-bin.generated.json`
+2. Reload **pharos-settle** — works from **any** workspace
+
+### Then (both modes)
+
 3. **Demo (recommended first):** `npm run agent:doctor:mock` — no keys, explore safely
 4. **Live test:** edit `.env` — set `PRIVATE_KEY` (payer) and `AGENT_B_PRIVATE_KEY` (payee), fund PHRS, then `npm run agent:doctor`
 5. Optional: `npm run mcp` in another terminal for manual stdio test
-6. In chat, the agent should **ask you to confirm** workspace root + MCP reload, then **demo vs live** — see [AGENTS.md](../../AGENTS.md) and `.pharos-settle/setup-checklist.json`
+6. In chat, the agent should **confirm your MCP mode** (project or global), then **demo vs live** — see [AGENTS.md](../../AGENTS.md), [modes.md](modes.md), and `.pharos-settle/setup-checklist.json`
 7. **Other IDEs (Claude Desktop, etc.):** [other-ides.md](other-ides.md) — copy `.pharos-settle/mcp.generated.json`
 8. Call `get_agent_readiness` then `simulate_trusted_settlement` with `mock: true`
 9. For live: set keys in `.env`, fund wallets, `npm run agent:doctor`, then `fund_deal` / split flow
