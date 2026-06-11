@@ -6,7 +6,7 @@ The **Pharos Settle Skill** is a standardized skill module at `skills/trusted-ag
 |-------|-------|
 | Skill name | `trusted-agent-settlement` |
 | Repo path | `skills/trusted-agent-settlement/SKILL.md` |
-| MCP tools | **15** (documented in SKILL.md; same list as [MCP README](../mcp/README.md)) |
+| MCP tools | **16** (documented in SKILL.md; same list as [MCP README](../mcp/README.md)) |
 | npm package | `pharos-trusted-settlement` |
 
 ## Workflow parameters
@@ -65,7 +65,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 
 | Layer | Surface |
 |-------|---------|
-| Skill / MCP | 15 tools — see [roles](../mcp/roles.md) |
+| Skill / MCP | 16 tools — see [roles](../mcp/roles.md) |
 | SDK ergonomic | `trustedAgentSettlement.ts` |
 | Primitives | `steps.ts` — `preflight`, `submitDelivery`, `claimDeal`, … |
 
@@ -77,7 +77,8 @@ Canonical mapping, patterns, and guarantees: [SKILL.md](../../skills/trusted-age
 |-----------|----------------|
 | **`nextAction` driven** | Agents loop without hardcoded flow logic |
 | **`dealId` handoff** | Payer and payee in separate processes |
-| **`preflightHash` binding** | Funded deal tied to simulated checks |
+| **`preflightHash` audit log** | Simulate checks hashed and stored on-chain (off-chain verifiable) |
+| **`reject_delivery`** | Payer can refund junk delivery during dispute window |
 | **`resultHash` delivery** | Work proof without revealing full details |
 | **MCP / SDK parity** | Same workflow via tools or code |
 
@@ -91,7 +92,7 @@ See [SALI FastPay](../mcp/batch-sali.md) and the Skill's batch section.
 
 ### Option A: MCP (recommended for Cursor)
 
-Plug in MCP server — **15 tools**; payer/payee split or demo shortcuts.
+Plug in MCP server — **16 tools**; payer/payee split or demo shortcuts.
 
 See [MCP setup](../mcp/setup.md) and [roles](../mcp/roles.md).
 

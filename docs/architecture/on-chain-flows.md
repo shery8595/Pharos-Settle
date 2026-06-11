@@ -47,6 +47,14 @@ stateDiagram-v2
 
 Blocked if `deliverySubmittedAt > 0`.
 
+### Junk delivery (reject)
+
+1. Payee `submitDelivery(resultHash)` (any hash — no on-chain quality check)
+2. During dispute window: payer `rejectDelivery` — immediate full refund, no fee
+3. If payer does not reject and does not attest: ghost-payer auto-release after `disputeWindow`
+
+Blocked after dispute window elapses (payee can claim via auto-release).
+
 ## Fee rules
 
 | Action | Fee |
@@ -63,6 +71,7 @@ Blocked if `deliverySubmittedAt > 0`.
 |----------|--------|
 | `submitDelivery` | Payee only (enforced at router) |
 | `attestRelease` | Payer only (enforced at router) |
+| `rejectDelivery` | Payer only (enforced at router) |
 | `claim` | Anyone (router delegates to escrow) |
 | `reclaim` | Anyone (router delegates to escrow) |
 | `fund`, `accept`, `createDeal` | Router only (escrow) |

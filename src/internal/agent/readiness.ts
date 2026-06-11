@@ -15,6 +15,7 @@ const PAYER_TOOLS = [
   "attest_release",
   "attest_releases_batch",
   "reclaim_trusted_settlement",
+  "reject_delivery",
   "get_settlement_status",
 ];
 

@@ -19,6 +19,7 @@ constructor(address registry_, address allowlist_, address escrow_)
 | `fundAndAcceptHybrid(...)` | anyone | Create + fund + accept (optional hybrid) |
 | `submitDelivery(dealId, resultHash)` | payee only | Submit work delivery |
 | `attestRelease(dealId, resultHash)` | payer only | Payer fast-path attestation |
+| `rejectDelivery(dealId)` | payer only | Reject junk delivery during dispute window — immediate refund |
 | `claim(dealId, proofHash)` | anyone | Release to payee (minus fee) |
 | `reclaim(dealId)` | anyone | Refund payer after deadline |
 | `canClaim(dealId)` | view | Hybrid claim eligibility |
@@ -30,7 +31,7 @@ constructor(address registry_, address allowlist_, address escrow_)
 - `"agent not registered"` — registry check on fund paths
 - `"token not allowed"` — allowlist check
 - `"only payee"` — `submitDelivery` caller ≠ deal.payee
-- `"only payer"` — `attestRelease` caller ≠ deal.payee
+- `"only payer"` — `attestRelease` or `rejectDelivery` caller ≠ deal.payer
 
 ## Events
 
@@ -44,7 +45,7 @@ Maps `dealId` → `keccak256(block.number, dealId, proofHash)` after claim.
 
 ## Related tests
 
-`test/contracts/SettlementRouter.test.cjs` — 14 tests (legacy, hybrid, reclaim, reverts)
+`test/contracts/SettlementRouter.test.cjs` — hybrid, reclaim, reject, reverts
 
 ## Related source
 

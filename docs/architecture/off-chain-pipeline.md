@@ -27,7 +27,7 @@ Read-only checks before gas:
 | Payer balance | `payer_balance` |
 | Payer allowance to escrow | `payer_allowance` |
 
-Produces `preflightHash` (deterministic from input + checks) stored on-chain.
+Produces `preflightHash` (deterministic from input + checks) stored on-chain at fund time. Phase 1 contracts store but do not validate this hash — integrators verify off-chain.
 
 ## 2. Onboard (optional)
 

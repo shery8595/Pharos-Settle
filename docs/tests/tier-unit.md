@@ -2,7 +2,7 @@
 
 **Runner:** Vitest  
 **Path:** `test/unit/**/*.vitest.ts`  
-**Count:** 42 tests
+**Count:** 56 tests
 
 ## File → module mapping
 
@@ -17,7 +17,10 @@
 | `feeQuote.vitest.ts` | `src/internal/commerce/feeQuote.ts` |
 | `receiptVerify.vitest.ts` | `src/internal/prove/receiptVerify.ts` |
 | `batch-split.vitest.ts` | `src/internal/settle/batch.ts`, `batchValidation.ts` |
+| `batch-cli.vitest.ts` | batch CLI argument parsing |
 | `trustedAgentSettlement.mock.vitest.ts` | Layer 1 API (mock mode) |
+
+Also: `test/cursor-global-mcp.vitest.ts` (4 tests) — global MCP install smoke; counted in Tier 2.
 
 ## Mock patterns
 

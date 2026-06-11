@@ -207,6 +207,131 @@ describe("SettlementRouter + DealEscrow", function () {
     await expect(fx.router.reclaim(1n)).to.be.revertedWith("delivery submitted");
   });
 
+  it("junk delivery: payer rejects during dispute window → full refund", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("2");
+    const disputeWindow = 3600n;
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+    const payerBefore = await fx.token.balanceOf(fx.payer.address);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      disputeWindow
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.ZeroHash);
+    expect(await fx.router.canClaim(1n)).to.equal(false);
+
+    await fx.router.connect(fx.payer).rejectDelivery(1n);
+
+    expect(await fx.token.balanceOf(fx.payer.address)).to.equal(payerBefore);
+    expect(await fx.token.balanceOf(fx.payee.address)).to.equal(0n);
+    expect((await fx.escrow.getDeal(1n)).state).to.equal(4);
+    expect(await fx.router.canClaim(1n)).to.equal(false);
+  });
+
+  it("rejectDelivery reverts if caller is not payer", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("1");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("junk"));
+    await expect(fx.router.connect(fx.payee).rejectDelivery(1n)).to.be.revertedWith("only payer");
+  });
+
+  it("rejectDelivery reverts after dispute window elapsed", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("1");
+    const disputeWindow = 60n;
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      disputeWindow
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("junk"));
+    await time.increase(61);
+    await expect(fx.router.connect(fx.payer).rejectDelivery(1n)).to.be.revertedWith(
+      "dispute window elapsed"
+    );
+  });
+
+  it("rejectDelivery reverts after payer attested", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("1");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("result"));
+    await fx.router.connect(fx.payer).attestRelease(1n, ethers.id("result"));
+    await expect(fx.router.connect(fx.payer).rejectDelivery(1n)).to.be.revertedWith(
+      "already attested"
+    );
+  });
+
+  it("rejectDelivery has no fee", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("5");
+    await fx.escrow.setFeeConfig(100, fx.feeRecipient.address);
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.ZeroHash);
+    await fx.router.connect(fx.payer).rejectDelivery(1n);
+
+    expect(await fx.token.balanceOf(fx.payer.address)).to.equal(amount);
+    expect(await fx.token.balanceOf(fx.feeRecipient.address)).to.equal(0n);
+  });
+
   it("reverts if payer unregistered", async function () {
     const fx = await deployFullStack();
     const [, , , stranger] = await ethers.getSigners();

@@ -38,7 +38,7 @@ Full cooperative settlement with receipt prove.
 | `npm run demo:pipeline` | Composable Layer 2 pipeline (`steps.ts`) |
 | `npm run demo:spv` | SPV prove tier on Atlantic |
 | `npm run demo:reclaim` | **Alias** for `demo:ghost-payee` (backward compat) |
-| `npm run agent:doctor:mock` | MCP readiness — 15 tools, no keys |
+| `npm run agent:doctor:mock` | MCP readiness — 16 tools, no keys |
 
 ## Batch / SALI
 

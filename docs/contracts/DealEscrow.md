@@ -30,8 +30,11 @@ Holds ERC-20 funds and implements the deal state machine. Only callable by `rout
 | `accept(dealId)` | Funded → Accepted | `"bad state"` |
 | `submitDelivery(dealId, hash)` | sets delivery fields | `"not hybrid"`, `"already delivered"`, `"expired"` |
 | `attestRelease(dealId, hash)` | sets `payerAttested` | `"not hybrid"` |
+| `rejectDelivery(dealId)` | → Refunded | `"no delivery"`, `"already attested"`, `"dispute window elapsed"` |
 | `claim(dealId, proofHash)` | Accepted → Released | `"expired"`, `"cannot claim"` |
 | `reclaim(dealId)` | → Refunded | `"not expired"`, `"delivery submitted"` |
+
+`preflightHash` is write-only on-chain in Phase 1 — stored at deal creation but not validated by the contract.
 
 ## canClaim logic
 

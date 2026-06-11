@@ -93,7 +93,7 @@ If MCP tools are **not available** in this session, say so explicitly. Offer CLI
 
 ## What this project is
 
-**Pharos Settle** — agent-to-agent escrow on Pharos Atlantic with ghost protection. Use the **MCP server** (15 tools) or the **Skill** at `skills/trusted-agent-settlement/SKILL.md`.
+**Pharos Settle** — agent-to-agent escrow on Pharos Atlantic with ghost protection. Use the **MCP server** (16 tools) or the **Skill** at `skills/trusted-agent-settlement/SKILL.md`.
 
 | Layer | Path |
 |-------|------|

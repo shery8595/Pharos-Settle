@@ -84,6 +84,7 @@ export const settlementRouterAbi = [
     outputs: [],
   },
   { name: "reclaim", type: "function", stateMutability: "nonpayable", inputs: [{ name: "dealId", type: "uint256" }], outputs: [] },
+  { name: "rejectDelivery", type: "function", stateMutability: "nonpayable", inputs: [{ name: "dealId", type: "uint256" }], outputs: [] },
   { name: "canClaim", type: "function", stateMutability: "view", inputs: [{ name: "dealId", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
   {
     name: "getDeal",

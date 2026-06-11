@@ -1,24 +1,28 @@
 # Tier 4: MCP tests
 
 **Runner:** Vitest  
-**Path:** `test/mcp/tools.vitest.ts`  
-**Count:** 19 tests (`tools.vitest.ts` + `two-agent-flow.vitest.ts`)
+**Path:** `test/mcp/*.vitest.ts`  
+**Count:** 25 tests
 
 ## Coverage
 
-### `test/mcp/tools.vitest.ts` (14 tests)
+### `test/mcp/tools.vitest.ts` (15 tests)
 
 Smoke MCP tool handlers with mock config — single payment, batch (`saliFast` / `hybridWork`), readiness, and error paths.
 
 | Area | Tools |
 |------|-------|
-| Single payment | `simulate_trusted_settlement`, `execute_trusted_settlement`, `fund_deal`, `submit_delivery`, `attest_release`, `complete_claim_for_deal` |
+| Single payment | `simulate_trusted_settlement`, `execute_trusted_settlement`, `fund_deal`, `submit_delivery`, `attest_release`, `reject_delivery`, `complete_claim_for_deal` |
 | Batch | `fund_deals_batch`, `submit_deliveries_batch`, `attest_releases_batch`, `complete_claims_batch`, `execute_batch_settlement` |
 | Other | `get_settlement_status`, `register_recipients`, `reclaim_trusted_settlement`, `get_agent_readiness` |
 
 ### `test/mcp/two-agent-flow.vitest.ts` (5 tests)
 
 Payer/payee role split: fund → deliver → attest → claim without demo shortcuts.
+
+### `test/mcp/reload-env.vitest.ts` (5 tests)
+
+`.env` reload on each tool call — key edits apply without MCP restart.
 
 ## Approach
 

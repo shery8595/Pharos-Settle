@@ -1,6 +1,6 @@
 # MCP tools
 
-**15 tools** — canonical list: [README.md](README.md#tools-15). Same list in [SKILL.md](../../skills/trusted-agent-settlement/SKILL.md).
+**16 tools** — canonical list: [README.md](README.md#tools-16). Same list in [SKILL.md](../../skills/trusted-agent-settlement/SKILL.md).
 
 All tools return JSON in `content[0].text`. Errors set `isError: true`. See [roles.md](roles.md) for payer vs payee.
 
@@ -30,7 +30,7 @@ Args: `dealId`, optional `amount`/`agentB` (defaults from on-chain `terms`), `mo
 
 ## get_settlement_status
 
-Returns `SettlementStatus` + `terms` (`payer`, `payee`, `token`, `amount`, `workHash`, `onChainResultHash`).
+Returns `SettlementStatus` + `terms` (`payer`, `payee`, `token`, `amount`, `workHash`, `onChainResultHash`, `rejectEligible`).
 
 ## register_recipients (payer)
 
@@ -38,7 +38,11 @@ Args: `recipients[]`, `mock`.
 
 ## reclaim_trusted_settlement (payer)
 
-Args: `dealId`, `mock`.
+Args: `dealId`, `mock`. Use when payee never delivered and TTL expired.
+
+## reject_delivery (payer)
+
+Args: `dealId`, `mock`. Reject invalid/junk delivery during dispute window — immediate full refund to payer.
 
 ## execute_trusted_settlement (demo shortcut)
 

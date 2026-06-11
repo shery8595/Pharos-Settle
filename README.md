@@ -2,16 +2,16 @@
 
 **Stripe Checkout for AI agents on Pharos** — a trust layer for agents that hire each other.
 
-[![Tests](https://img.shields.io/badge/tests-103-brightgreen)](#tests) [![Chain](https://img.shields.io/badge/chain-Pharos%20Atlantic%20(688689)-blue)](deployments/atlantic.json) [![Phase](https://img.shields.io/badge/phase-1%20shipped-success)](docs/PHASES.md)
+[![Tests](https://img.shields.io/badge/tests-130-brightgreen)](#tests) [![Chain](https://img.shields.io/badge/chain-Pharos%20Atlantic%20(688689)-blue)](deployments/atlantic.json) [![Phase](https://img.shields.io/badge/phase-1%20shipped-success)](docs/PHASES.md)
 
 > **Agent-to-agent work settlement with ghost protection.**  
-> Payee ghosts → payer reclaims. Payer ghosts → payee still gets paid. Both behave → instant settlement.
+> Payee ghosts → payer reclaims. Junk delivery → payer rejects. Payer ghosts → payee still gets paid. Both behave → instant settlement.
 
 ### What's novel
 
-- **Dual-ghost protection** — both safety nets with mock demos in &lt;60s
+- **Dual-ghost protection** — both safety nets + junk-delivery reject with mock demos in &lt;60s
 - **`nextAction` loops** — agents poll one hint, not hardcoded flows
-- **`preflightHash` binding** — funded deal matches simulate checks
+- **`preflightHash` audit log** — simulate checks hashed and stored on-chain (off-chain verifiable)
 - **Manifest handoff** — split payer/payee MCP identities
 - **SALI FastPay** — parallel batch agent payroll on Atlantic
 
@@ -58,7 +58,7 @@ flowchart LR
   RC --> DONE
 ```
 
-Reusable on Pharos Atlantic: four contracts, one state machine, Skill + 15 MCP tools.
+Reusable on Pharos Atlantic: four contracts, one state machine, Skill + 16 MCP tools.
 
 ### Example agent transcript
 
@@ -77,8 +77,8 @@ Pharos Settle: Payer attested. Claim complete. dealId=42 · PharosScan ✓
 |-------|-------------|
 | **Contracts** | SettlementRouter · DealEscrow · AgentRegistry · TokenAllowlist |
 | **SDK** | `simulateTrustedSettlement` / `executeTrustedSettlement` + `nextAction` hints |
-| **MCP** | `npm run mcp` — 15 tools; payer/payee split + batch (`saliFast` / `hybridWork`) |
-| **Skill** | [`skills/trusted-agent-settlement/`](skills/trusted-agent-settlement/SKILL.md) — Pharos Settle Skill module (15 MCP tools) |
+| **MCP** | `npm run mcp` — 16 tools; payer/payee split + batch (`saliFast` / `hybridWork`) |
+| **Skill** | [`skills/trusted-agent-settlement/`](skills/trusted-agent-settlement/SKILL.md) — Pharos Settle Skill module (16 MCP tools) |
 
 **Why four contracts?** [SettlementRouter enforces access, DealEscrow owns state and funds, AgentRegistry separates identity from payment logic, TokenAllowlist keeps the attack surface minimal.](docs/architecture/overview.md#on-chain-contracts)
 
@@ -123,11 +123,11 @@ Addresses in [`deployments/atlantic.json`](deployments/atlantic.json) (on-chain 
 
 | Contract | Address |
 |----------|---------|
-| SettlementRouter | `0x4c6e7be366dc9c4c358f85faa98a471fdaa4ad94` |
-| DealEscrow | `0xd019258710faf17d0952c91d66e0e11e5631c814` |
-| AgentRegistry | `0x8871d3538153eae0711fa6d01a0ed311a6b13e17` |
-| TokenAllowlist | `0x37e128f57732e951f8f2aecf8bce6129ebc08b21` |
-| TEST token | `0xde18fab2b974db730aeda8c6187ba37b1d6a3be9` |
+| SettlementRouter | `0xb5291b7342a6588ba675b08be7cebc7c6e547bdb` |
+| DealEscrow | `0xff528f1ee4cb5a22d68d1c9f29bf70ca4c4197d1` |
+| AgentRegistry | `0x42aff253e3e07d8b1a7a54aafd72cf9dbafeaa5d` |
+| TokenAllowlist | `0x9d8e069ce233e2c14b5a6194784043b73d51299a` |
+| TEST token | `0xf32692cc87145bb9b9892ca449fee889363ebe26` |
 
 Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) · RPC: `https://atlantic.dplabs-internal.com`
 
@@ -161,7 +161,7 @@ Cursor setup: [docs/mcp/setup.md](docs/mcp/setup.md)
 
 **Plug in as payer or payee** — one key per MCP. See [docs/mcp/setup.md](docs/mcp/setup.md) and [docs/mcp/roles.md](docs/mcp/roles.md).
 
-**Tools (15):** single-payment + batch — see [docs/mcp/batch-sali.md](docs/mcp/batch-sali.md) for `saliFast` vs `hybridWork`
+**Tools (16):** single-payment + batch — see [docs/mcp/batch-sali.md](docs/mcp/batch-sali.md) for `saliFast` vs `hybridWork`
 
 ```bash
 npm run agent:doctor        # readiness check
@@ -215,7 +215,7 @@ await claimDealsBatch(manifestToClaims(matched), { payeeSigner: AGENT_B_KEY });
 ## Tests
 
 ```bash
-npm test   # 103 tests — 37 Hardhat + 66 Vitest (Atlantic smoke needs seeded wallets)
+npm test   # 130 tests — 44 Hardhat + 86 Vitest (Atlantic smoke needs seeded wallets)
 ```
 
 | Tier | Path |

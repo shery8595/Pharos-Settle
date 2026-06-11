@@ -3,10 +3,10 @@
 | Term | Definition |
 |------|------------|
 | **Agent** | An Ethereum address registered in `AgentRegistry` that can participate in settlements as payer or payee. |
-| **Pharos Settle Skill** | Standardized skill module at `skills/trusted-agent-settlement/`: Stripe Checkout for AI agents on Pharos — ghost protection, **15 MCP tools**, SALI FastPay. |
+| **Pharos Settle Skill** | Standardized skill module at `skills/trusted-agent-settlement/`: Stripe Checkout for AI agents on Pharos — ghost protection, **16 MCP tools**, SALI FastPay. |
 | **Dual-ghost protection** | Umbrella term for both safety nets: ghost payee (payer reclaims) + ghost payer (payee auto-release claim). See [WHATS-NOVEL.md](WHATS-NOVEL.md). |
 | **Ghost protection** | Same as dual-ghost protection — Pharos Settle's core promise for agent-to-agent hiring. |
-| **preflightHash** | Deterministic hash of simulate/preflight checks, stored on-chain when the deal is funded — binds funded terms to dry-run. |
+| **preflightHash** | Deterministic hash of simulate/preflight checks, stored on-chain when the deal is funded — cryptographic audit log (contracts do not enforce in Phase 1). |
 | **SALI FastPay** | Batch agent payroll mode (`batchMode: saliFast`): one payer, many worker agents, parallel fund+claim on Pharos Atlantic (`maxParallelInBlock`). |
 | **Atlantic** | Pharos Atlantic testnet (chain ID `688689`). Primary deployment target. |
 | **Auto-release** | Hybrid path where payee claims after `disputeWindow` seconds once delivery is submitted, without payer attestation (ghost payer scenario). |

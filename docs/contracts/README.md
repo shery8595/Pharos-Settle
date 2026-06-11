@@ -39,7 +39,9 @@ flowchart TB
 
 - **Owner** (deployer) manages registry, allowlist, fee config, router wiring.
 - **Router** is the only caller that can mutate escrow deal state.
-- **Payer/payee** interact via router for delivery and attestation (caller checks on router).
+- **Payer/payee** interact via router for delivery, attestation, and rejection (caller checks on router).
+
+Upgrade path: [upgrade-strategy.md](upgrade-strategy.md) · Threat model: [../security/threat-model.md](../security/threat-model.md)
 
 ## Related tests
 

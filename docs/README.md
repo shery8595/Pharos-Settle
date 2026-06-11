@@ -2,7 +2,7 @@
 
 **Stripe Checkout for AI agents on Pharos** — a trust layer for agents that hire each other.
 
-**Pharos Settle** (*package: `trusted-agent-settlement`*) is an **agent economy primitive**: agent-to-agent work settlement with **ghost protection**, simulate-first flows, SALI FastPay batch payroll, and 15 MCP tools.
+**Pharos Settle** (*package: `trusted-agent-settlement`*) is an **agent economy primitive**: agent-to-agent work settlement with **ghost protection**, simulate-first flows, SALI FastPay batch payroll, and 16 MCP tools.
 
 > Payee ghosts → payer reclaims. Payer ghosts → payee still gets paid. Both behave → instant settlement.
 
@@ -20,7 +20,7 @@
 | Run or extend the test suite | [Tests](tests/README.md) |
 | Deploy contracts | [Deployment](deployment/README.md) |
 | Run example demos | [Examples](examples/README.md) |
-| Install as an agent Skill | [Skills → Integration](skills/integration.md) (`skills/trusted-agent-settlement/`, 15 MCP tools) |
+| Install as an agent Skill | [Skills → Integration](skills/integration.md) (`skills/trusted-agent-settlement/`, 16 MCP tools) |
 | Understand Phase 1 vs Phase 2 roadmap | [Phase 1 vs Phase 2](PHASES.md) |
 
 ## System map

@@ -8,6 +8,7 @@ import type {
   SimulationOutput,
   SettlementStatus,
   ReclaimOutput,
+  RejectOutput,
   RegisterRecipientsOutput,
   SettlementMode,
   FundDealOutput,
@@ -26,6 +27,7 @@ import {
   settle,
   fundDeal,
   reclaimDeal,
+  rejectDeal,
   claimDeal,
   readCanClaim,
   executeBatchSettlement,
@@ -42,7 +44,7 @@ import { getAgentReadiness } from "./internal/agent/readiness.js";
 import { prove } from "./internal/prove/index.js";
 import { settlementRouterAbi, DEAL_STATE, type NextAction } from "./shared/abis.js";
 import { getFeeQuote } from "./internal/commerce/feeQuote.js";
-import { computeNextAction, computeReclaimable, type DealSnapshot } from "./internal/commerce/nextAction.js";
+import { computeNextAction, computeReclaimable, computeRejectEligible, type DealSnapshot } from "./internal/commerce/nextAction.js";
 import { computeProofHash } from "./internal/prove/index.js";
 import { onlyPayeeNeedsOnboarding } from "./internal/preflight/onboarding.js";
 import { ensureRecipientsOnboarded } from "./internal/onboard/ensure.js";
@@ -303,6 +305,7 @@ export async function getSettlementStatus(
   const now = await chainNowSec(config);
   const state = DEAL_STATE[snapshot.state] ?? "Created";
   const reclaimable = computeReclaimable(snapshot, now);
+  const rejectEligible = computeRejectEligible(snapshot, now);
   const nextAction = computeNextAction(snapshot, now);
   const autoReleaseAt =
     snapshot.deliverySubmittedAt > 0n
@@ -332,6 +335,7 @@ export async function getSettlementStatus(
     amount: deal.amount.toString(),
     deadline: deal.deadline.toString(),
     reclaimable,
+    rejectEligible,
     requiresHybridRelease: deal.requiresHybridRelease,
     deliverySubmitted: snapshot.deliverySubmittedAt > 0n,
     payerAttested: deal.payerAttested,
@@ -428,12 +432,40 @@ export async function reclaimTrustedSettlement(
         status.state === "Released"
           ? "already released"
           : status.deliverySubmitted
-            ? "delivery submitted — reclaim blocked"
+            ? status.rejectEligible
+              ? "delivery submitted — use reject_delivery during dispute window"
+              : "delivery submitted — reclaim blocked"
             : "not yet expired",
       nextAction: status.nextAction,
     };
   }
   const refundTx = await reclaimDeal(dealId, config);
+  return { success: true, dealId, refundTx, nextAction: "done" };
+}
+
+export async function rejectDeliveryForDeal(
+  dealId: string,
+  config: SettlementConfig = {}
+): Promise<RejectOutput> {
+  const status = await getSettlementStatus(dealId, config);
+  if (!status.rejectEligible) {
+    return {
+      success: false,
+      dealId,
+      reason:
+        status.state === "Refunded"
+          ? "already refunded"
+          : status.state === "Released"
+            ? "already released"
+            : !status.deliverySubmitted
+              ? "no delivery submitted"
+              : status.payerAttested
+                ? "already attested"
+                : "dispute window elapsed or deal expired",
+      nextAction: status.nextAction,
+    };
+  }
+  const refundTx = await rejectDeal(dealId, config);
   return { success: true, dealId, refundTx, nextAction: "done" };
 }
 

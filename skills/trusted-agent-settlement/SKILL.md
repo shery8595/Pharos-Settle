@@ -2,7 +2,7 @@
 name: trusted-agent-settlement
 description: >
   Stripe Checkout for AI agents on Pharos — agent-to-agent work settlement with ghost protection.
-  A trust layer for agents that hire each other: simulate-first, nextAction hints, 15 MCP tools,
+  A trust layer for agents that hire each other: simulate-first, nextAction hints, 16 MCP tools,
   SALI FastPay batch payroll. Triggers on "pharos settle", "pay agent on pharos", "agent commerce",
   "safe agent payment", "agent escrow", "ghost protection", "batch agent payroll".
 ---
@@ -16,9 +16,9 @@ description: >
 
 ## What's novel
 
-- **Dual-ghost protection** — ghost payee (`reclaim_trusted_settlement`) + ghost payer (auto-release claim)
+- **Dual-ghost protection** — ghost payee (`reclaim_trusted_settlement`) + ghost payer (auto-release claim) + junk delivery (`reject_delivery`)
 - **`nextAction` loops** — poll one hint per step
-- **`preflightHash` binding** — funded deal matches simulate checks
+- **`preflightHash` audit log** — simulate checks hashed and stored on-chain (off-chain verifiable; contracts do not enforce)
 - **Manifest handoff** — `fund_deals_batch` → payee `complete_claims_batch`
 - **SALI FastPay** — parallel batch payroll on Atlantic
 
@@ -44,7 +44,7 @@ Every settlement uses the **same state machine** — only the inputs change. Tut
 const input = {
   agentA: "0x...",                                    // payer
   agentB: "0x...",                                    // payee
-  token: "0xde18fab2b974db730aeda8c6187ba37b1d6a3be9", // TEST — or USDC/USDT from atlantic.json
+  token: "0xf32692cc87145bb9b9892ca449fee889363ebe26", // TEST — or USDC/USDT from atlantic.json
   amount: "10000000000000000000",                      // 10 TEST (18 decimals)
   workDescription: "competitor-pricing-crawl-2026-06",
 };
@@ -58,6 +58,7 @@ Optional timing: `ttlSeconds` (reclaim deadline), `disputeWindowSeconds` (auto-r
 | Who ghosts? | Outcome |
 |-------------|---------|
 | Payee never delivers | Payer **reclaims** (`reclaim_trusted_settlement` / `mode: safetyNet`) |
+| Payee submits junk delivery | Payer **rejects** (`reject_delivery` during dispute window) |
 | Payer never attests after delivery | Payee **still gets paid** (auto-release after `disputeWindow`) |
 | Both cooperate | **Instant settlement** — fund → deliver → attest → claim |
 
@@ -81,6 +82,7 @@ flowchart LR
   AT -->|Attest| CL[Claim]
   AT -->|Payer_ghosts| AR[Auto_release]
   AT -->|Payee_ghosts| RC[Reclaim]
+  AT -->|Junk_delivery| RJ[Reject]
 ```
 
 ## Example agent transcript
@@ -100,7 +102,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 
 | Layer | Surface | Best for |
 |-------|---------|----------|
-| **Skill / MCP** | 15 stdio tools + this Skill file | Cursor agents, payer/payee in separate processes |
+| **Skill / MCP** | 16 stdio tools + this Skill file | Cursor agents, payer/payee in separate processes |
 | **SDK ergonomic** | `pharos-trusted-settlement` | Apps with typed outputs and `nextAction` |
 | **Developer primitives** | `pharos-trusted-settlement/steps` | Custom orchestrators, tests, pipelines |
 
@@ -184,7 +186,7 @@ Marketplace discovery and reputation are roadmap only — [docs/PHASES.md](../..
 |-----------|----------------|
 | **`nextAction` driven** | Agents can loop without hardcoded flow logic |
 | **`dealId` handoff** | Payer and payee can operate in separate processes |
-| **`preflightHash` binding** | Funded deal is tied to simulated checks |
+| **`preflightHash` audit log** | Simulate checks hashed and stored on-chain at fund time (off-chain verifiable) |
 | **`resultHash` delivery** | Work proof can be passed without revealing full details |
 | **MCP / SDK parity** | Same workflow works through agent tools or code |
 
@@ -197,8 +199,8 @@ Marketplace discovery and reputation are roadmap only — [docs/PHASES.md](../..
 | **npm package** | `pharos-trusted-settlement` |
 | **Repo path** | `skills/trusted-agent-settlement/` |
 | **Network** | Pharos Atlantic (`chainId` 688689) |
-| **MCP server** | `npm run mcp` (stdio) — **15 tools** |
-| **Tests** | `npm test` — 103 green |
+| **MCP server** | `npm run mcp` (stdio) — **16 tools** |
+| **Tests** | `npm test` — 130 green |
 
 ### Install
 
@@ -352,20 +354,20 @@ No on-chain maximum for either field (uint64); use `ttlSeconds` large enough to 
 
 ## MCP (plug and play)
 
-Run: `npm run mcp` — **15 tools** (canonical list matches [docs/mcp/README.md](../../docs/mcp/README.md)).
+Run: `npm run mcp` — **16 tools** (canonical list matches [docs/mcp/README.md](../../docs/mcp/README.md)).
 
 **Readiness:** `get_agent_readiness` or `npm run agent:doctor` — role is `payer` | `payee` | `demo` | `mock`.
 
 Pass `mock: true` when no keys are configured.
 
-### All MCP tools (15)
+### All MCP tools (16)
 
-`get_agent_readiness` · `simulate_trusted_settlement` · `fund_deal` · `fund_deals_batch` · `submit_delivery` · `submit_deliveries_batch` · `attest_release` · `attest_releases_batch` · `complete_claim_for_deal` · `complete_claims_batch` · `get_settlement_status` · `register_recipients` · `reclaim_trusted_settlement` · `execute_trusted_settlement` · `execute_batch_settlement`
+`get_agent_readiness` · `simulate_trusted_settlement` · `fund_deal` · `fund_deals_batch` · `submit_delivery` · `submit_deliveries_batch` · `attest_release` · `attest_releases_batch` · `complete_claim_for_deal` · `complete_claims_batch` · `get_settlement_status` · `register_recipients` · `reclaim_trusted_settlement` · `reject_delivery` · `execute_trusted_settlement` · `execute_batch_settlement`
 
 | Category | Tools | Role |
 |----------|-------|------|
 | Shared | `get_agent_readiness`, `simulate_trusted_settlement`, `get_settlement_status` | payer, payee, demo |
-| Payer | `register_recipients`, `fund_deal`, `attest_release`, `reclaim_trusted_settlement`, `fund_deals_batch`, `attest_releases_batch` | payer |
+| Payer | `register_recipients`, `fund_deal`, `attest_release`, `reclaim_trusted_settlement`, `reject_delivery`, `fund_deals_batch`, `attest_releases_batch` | payer |
 | Payee | `submit_delivery`, `complete_claim_for_deal`, `submit_deliveries_batch`, `complete_claims_batch` | payee |
 | Demo shortcuts | `execute_trusted_settlement`, `execute_batch_settlement` | demo (both keys) |
 

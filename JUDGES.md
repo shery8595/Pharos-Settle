@@ -15,14 +15,15 @@ One AI agent pays another for work. Money sits in escrow until the job is proven
 | If… | Then… |
 |-----|-------|
 | Worker never delivers | Payer gets money back |
+| Worker submits junk delivery | Payer **rejects** during dispute window |
 | Payer disappears after delivery | Worker still gets paid |
 | Both do their part | Instant settlement |
 
 ### What's novel
 
-- **Dual-ghost protection** — both ghost paths demonstrated (`demo:ghost-payee`, `demo:ghost-payer`)
+- **Dual-ghost protection** — both ghost paths demonstrated (`demo:ghost-payee`, `demo:ghost-payer`) + junk delivery reject
 - **`nextAction` loops** — single hint per poll (`fund`, `claim`, `reclaim`, …)
-- **`preflightHash` binding** — simulate checks bound to funded deal
+- **`preflightHash` audit log** — simulate checks hashed and stored on-chain (off-chain verifiable)
 - **Manifest handoff** — payer MCP funds batch; payee MCP claims its rows
 - **SALI FastPay** — parallel batch payroll (`maxParallelInBlock`)
 
@@ -55,7 +56,7 @@ Pharos Settle ships that primitive today: contracts live on Atlantic, agents plu
 | Plain English | Technical name |
 |---------------|----------------|
 | “Can I pay safely?” dry-run | **Preflight** / `simulateTrustedSettlement` |
-| Plug-in for Cursor / Claude | **MCP** (`npm run mcp`, 15 tools) |
+| Plug-in for Cursor / Claude | **MCP** (`npm run mcp`, 16 tools) |
 | Agent instruction file | **Skill** (`skills/trusted-agent-settlement/`) |
 | Pay only after work proof | **Hybrid release** (deliver → attest → claim) |
 | Batch payroll to many agents | **SALI FastPay** (`batchMode: saliFast`) |
@@ -69,10 +70,11 @@ Pharos Settle ships that primitive today: contracts live on Atlantic, agents plu
 |----------------------|-----------------------------------|
 | Smart contracts | Agent marketplace |
 | TypeScript SDK | Reputation scores |
-| MCP server (15 tools) | On-chain arbitration |
+| MCP server (16 tools) | On-chain arbitration |
 | Agent Skill module | |
 | Live Atlantic deployment | |
-| 103 tests (`npm test`) | |
+| 130 tests (`npm test`) | |
+| Junk-delivery protection | |
 
 Details: [docs/PHASES.md](docs/PHASES.md)
 
@@ -84,11 +86,11 @@ Proof: [`deployments/atlantic.json`](deployments/atlantic.json) · Explorer: [at
 
 | Contract | Address |
 |----------|---------|
-| SettlementRouter | `0x4c6e7be366dc9c4c358f85faa98a471fdaa4ad94` |
-| DealEscrow | `0xd019258710faf17d0952c91d66e0e11e5631c814` |
-| AgentRegistry | `0x8871d3538153eae0711fa6d01a0ed311a6b13e17` |
-| TokenAllowlist | `0x37e128f57732e951f8f2aecf8bce6129ebc08b21` |
-| TEST token | `0xde18fab2b974db730aeda8c6187ba37b1d6a3be9` |
+| SettlementRouter | `0xb5291b7342a6588ba675b08be7cebc7c6e547bdb` |
+| DealEscrow | `0xff528f1ee4cb5a22d68d1c9f29bf70ca4c4197d1` |
+| AgentRegistry | `0x42aff253e3e07d8b1a7a54aafd72cf9dbafeaa5d` |
+| TokenAllowlist | `0x9d8e069ce233e2c14b5a6194784043b73d51299a` |
+| TEST token | `0xf32692cc87145bb9b9892ca449fee889363ebe26` |
 
 Chain ID **688689** · RPC `https://atlantic.dplabs-internal.com` · Gas: **PHRS** on Atlantic
 
@@ -143,7 +145,7 @@ More live demos:
 npm run demo:batch          # batch payroll (SALI FastPay)
 npm run demo:ghost-payee    # payee ghosts → payer reclaims
 npm run demo:ghost-payer    # payer ghosts → payee still paid
-npm test                    # 103 tests
+npm test                    # 130 tests
 ```
 
 Key demos table: [docs/examples/demos.md](docs/examples/demos.md).
@@ -188,7 +190,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 
 | Layer | Surface |
 |-------|---------|
-| Skill / MCP | 15 tools (`fund_deal`, `submit_delivery`, …) |
+| Skill / MCP | 16 tools (`fund_deal`, `submit_delivery`, `reject_delivery`, …) |
 | SDK ergonomic | `simulateTrustedSettlement`, `fundDealSettlement`, … |
 | Primitives | `preflight`, `submitDelivery`, `claimDeal`, … via `steps.ts` |
 
@@ -203,6 +205,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 | Attest | `attest_release` | payer | release permission |
 | Claim | `complete_claim_for_deal` | payee | settlement tx |
 | Reclaim | `reclaim_trusted_settlement` | payer | refund tx |
+| Reject junk | `reject_delivery` | payer | refund tx |
 
 ### Composable patterns
 
@@ -211,8 +214,9 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 | 1 | Human-triggered payment | simulate → fund → deliver → attest → claim |
 | 2 | Autonomous payee recovery (payer ghosts) | status → wait → claim |
 | 3 | Ghost payee recovery | status → reclaim |
-| 4 | Batch worker payroll (SALI FastPay) | `fund_deals_batch` → `complete_claims_batch` |
-| 5 | Agent marketplace *(Phase 2, not shipped)* | discover job → simulate → fund → deliver → claim |
+| 4 | Junk delivery rejection | status → reject_delivery |
+| 5 | Batch worker payroll (SALI FastPay) | `fund_deals_batch` → `complete_claims_batch` |
+| 6 | Agent marketplace *(Phase 2, not shipped)* | discover job → simulate → fund → deliver → claim |
 
 ### Composable guarantees
 
@@ -220,7 +224,8 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 |-----------|----------------|
 | **`nextAction` driven** | Agents loop without hardcoded flow logic |
 | **`dealId` handoff** | Payer and payee in separate processes |
-| **`preflightHash` binding** | Funded deal tied to simulated checks |
+| **`preflightHash` audit log** | Simulate checks hashed and stored on-chain (off-chain verifiable) |
+| **`reject_delivery` junk protection** | Payer can refund invalid delivery during dispute window |
 | **`resultHash` delivery** | Work proof without revealing full details |
 | **MCP / SDK parity** | Same workflow via tools or code |
 

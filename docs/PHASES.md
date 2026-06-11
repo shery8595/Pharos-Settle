@@ -17,7 +17,7 @@ This document describes what the project **does today** (Phase 1, shipped) and w
 | **Trust model** | Registry + allowlist + time-locked escrow | + reputation scores + on-chain dispute resolution |
 | **Agent integration** | SDK, MCP, Cursor Skill | Same surfaces + marketplace discovery |
 | **Network** | Pharos Atlantic testnet (live deploy) | Production Pharos + richer protocol features |
-| **Status** | **✅ Shipped** — implemented, tested (103 tests), documented | **⚠️ Planned — not implemented** |
+| **Status** | **✅ Shipped** — implemented, tested (130 tests), documented | **⚠️ Planned — not implemented** |
 
 ---
 
@@ -37,7 +37,7 @@ Phase 1 solves **bilateral** agent commerce. Phase 2 extends to **many-to-many**
 
 ## Phase 1 — What the project does now
 
-**✅ Shipped in Phase 1 — implemented, tested (103 tests), deployed on Atlantic.**
+**✅ Shipped in Phase 1 — implemented, tested (130 tests), deployed on Atlantic.**
 
 Phase 1 delivers a complete **minimum viable agent payments stack**: smart contracts, TypeScript SDK, MCP server, agent Skill, demos, tests, and a live Atlantic deployment.
 
@@ -70,6 +70,10 @@ flowchart LR
   subgraph ghostPayee [Safety_net]
     F3[fund] --> R[reclaim_after_TTL]
   end
+  subgraph junkDelivery [Junk_delivery]
+    F4[fund] --> D4[deliver]
+    D4 --> RJ[reject_during_window]
+  end
 ```
 
 | Path | On-chain behavior | Agent mode |
@@ -77,13 +81,14 @@ flowchart LR
 | **Cooperative fast path** | fund → deliver → payer attest → claim | `cooperative` |
 | **Ghost payer** | fund → deliver → wait `disputeWindow` → claim | `cooperative` + `skipAttest` |
 | **Ghost payee** | fund → no delivery → reclaim after deadline | `safetyNet` |
+| **Junk delivery** | fund → deliver → payer reject during dispute window | payer `reject_delivery` |
 | **Legacy instant** | fund → claim (no hybrid) | `requiresHybridRelease: false` |
 | **Atomic settle** | create + fund + accept + claim in one tx | Router `settle()` |
 
 #### Economic model (Phase 1)
 
 - **Protocol fee** on successful `claim` only (`feeBps`, max 10%)
-- **No fee** on reclaim or refund
+- **No fee** on reclaim, reject, or refund
 - Fee recipient configured at deploy/seed time (default 1% in demos)
 
 #### Access control (Phase 1)
@@ -91,9 +96,9 @@ flowchart LR
 - Only **registered** agents can be payer or payee
 - Registered **payers** can onboard new payees (`registerRecipient` / `registerRecipients`)
 - Only **allowlisted** tokens
-- Only **payee** submits delivery; only **payer** attests (enforced at router)
+- Only **payee** submits delivery; only **payer** attests or rejects (enforced at router)
 
-Details: [Contracts documentation](contracts/README.md)
+Details: [Contracts documentation](contracts/README.md) · [Threat model](security/threat-model.md)
 
 ---
 
@@ -114,6 +119,7 @@ Two layers for integrators:
 | Execute | `executeTrustedSettlement` | Full pipeline with optional auto-onboard |
 | Status polling | `getSettlementStatus` | Deal state, `canClaim`, `reclaimable`, `autoReleaseAt` |
 | Reclaim | `reclaimTrustedSettlement` | Payer refund when payee ghosts |
+| Reject junk | `rejectDeliveryForDeal` | Payer refund when delivery invalid |
 | Complete claim | `completeClaimForDeal` | Claim after auto-release window |
 | Batch payments (orchestrator) | `executeBatchSettlement` | Full batch in one process — `saliFast` or `hybridWork` |
 | Batch payments (split phases) | `fundDealsBatch`, `submitDeliveriesBatch`, `attestReleasesBatch`, `claimDealsBatch` | Two-MCP handoff via `manifest` (`saliFast`: fund → claim; `hybridWork`: fund → deliver → attest → claim) |
@@ -138,9 +144,9 @@ Details: [SDK documentation](sdk/README.md)
 
 ### 3. MCP server (plug-and-play agents)
 
-Protocol-compliant **stdio** MCP server for Cursor, Claude Desktop, and other MCP clients — **15 tools**.
+Protocol-compliant **stdio** MCP server for Cursor, Claude Desktop, and other MCP clients — **16 tools**.
 
-**Single payment (payer / payee split):** `fund_deal`, `submit_delivery`, `attest_release`, `complete_claim_for_deal`, `get_settlement_status`, `register_recipients`, `reclaim_trusted_settlement`, `simulate_trusted_settlement`, `get_agent_readiness`.
+**Single payment (payer / payee split):** `fund_deal`, `submit_delivery`, `attest_release`, `complete_claim_for_deal`, `get_settlement_status`, `register_recipients`, `reclaim_trusted_settlement`, `reject_delivery`, `simulate_trusted_settlement`, `get_agent_readiness`.
 
 **Batch (`saliFast` / `hybridWork`):** `fund_deals_batch`, `submit_deliveries_batch`, `attest_releases_batch`, `complete_claims_batch` — hand off `manifest` between payer and payee MCPs.
 
@@ -156,7 +162,7 @@ Details: [MCP documentation](mcp/README.md) · [Batch / SALI](mcp/batch-sali.md)
 
 ### 4. Agent Skill
 
-`skills/trusted-agent-settlement/` — standardized Pharos Settle Skill module (`SKILL.md` documents all **15 MCP tools**). Copy the directory into an agent’s skills folder so LLM agents know **when** and **how** to pay on Pharos without custom settlement code.
+`skills/trusted-agent-settlement/` — standardized Pharos Settle Skill module (`SKILL.md` documents all **16 MCP tools**). Copy the directory into an agent’s skills folder so LLM agents know **when** and **how** to pay on Pharos without custom settlement code.
 
 Triggers: “pay agent on pharos”, “agent commerce”, “safe agent payment”, etc.
 
@@ -208,14 +214,14 @@ Details: [Examples](examples/README.md)
 
 ### 8. Test suite (Phase 1 quality bar)
 
-**103 tests** across five tiers (37 Hardhat + 66 Vitest):
+**130 tests** across five tiers (44 Hardhat + 86 Vitest):
 
 | Tier | Scope | Count |
 |------|-------|-------|
-| 1 Contracts | Hardhat on-chain | 27 |
-| 2 Unit | Vitest pure logic | 42 |
+| 1 Contracts | Hardhat on-chain | 34 |
+| 2 Unit | Vitest pure logic | 56 |
 | 3 Integration | SDK + in-process Hardhat | 10 |
-| 4 MCP | Tool smoke + two-agent flow | 19 |
+| 4 MCP | Tool smoke + two-agent flow + reload-env | 25 |
 | 5 Atlantic | Live RPC smoke | 5 |
 
 ```bash
@@ -258,13 +264,14 @@ Phase 2 is codenamed **Agent Arena**: evolving from bilateral payments to a **mu
 
 **⚠️ Planned — not implemented.**
 
-**Problem Phase 1 leaves open:** Payer and payee disagree—payee claims work is done, payer claims it is not. Phase 1 only supports:
+**Problem Phase 1 leaves open:** Payer and payee disagree on **subjective work quality** — Phase 1 handles junk/non-delivery via `reject_delivery`, but not quality arbitration.
 
 - Payer attests → immediate release
 - Payer ghosts → auto-release after `disputeWindow`
 - Payee ghosts → reclaim
+- Junk delivery → payer `reject_delivery` during dispute window
 
-There is **no** “both parties active but disagree” path.
+There is **no** on-chain path for **subjective quality** disputes (both parties active, work partially acceptable).
 
 **Phase 2 plan:**
 
@@ -390,7 +397,7 @@ flowchart TB
   subgraph phase1 [Phase_1_Shipped]
     P1_SDK[SDK_MCP_Skill]
     P1_Contracts[Router_Escrow_Registry_Allowlist]
-    P1_Tests[103_tests]
+    P1_Tests[130_tests]
     P1_SDK --> P1_Contracts
   end
   subgraph phase2 [Phase_2_Planned]
@@ -427,4 +434,4 @@ Phase 2 **builds on** Phase 1 contracts and SDK—it does not replace them. The 
 - **Deployments:** `deployments/atlantic.json`
 - **Deploy:** `npm run deploy:pharos && npm run seed:pharos`
 
-**⚠️ Planned — not implemented:** Phase 2 will require contract upgrades or new contracts (e.g. `DisputeModule`, `AgentMarketplace`) and corresponding SDK/MCP versions—TBD when scoped.
+**⚠️ Planned — not implemented:** Phase 2 will require contract upgrades or new contracts (e.g. `DisputeModule`, `AgentMarketplace`) and corresponding SDK/MCP versions — see [upgrade-strategy.md](contracts/upgrade-strategy.md).

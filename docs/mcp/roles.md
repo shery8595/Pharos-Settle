@@ -6,7 +6,7 @@ Pharos Settle supports **one key per MCP process**. Use two MCP configs for real
 
 | Role | Env keys | Use case |
 |------|----------|----------|
-| `payer` | `PRIVATE_KEY` only | Fund, onboard, attest, reclaim, batch fund/attest |
+| `payer` | `PRIVATE_KEY` only | Fund, onboard, attest, reclaim, reject, batch fund/attest |
 | `payee` | `AGENT_B_PRIVATE_KEY` only | Deliver, claim, batch deliver/claim |
 | `demo` | Both keys | `execute_trusted_settlement` / `execute_batch_settlement` shortcuts |
 | `mock` | Neither | Safe exploration |
@@ -30,6 +30,7 @@ Detect role: `get_agent_readiness` or `npm run agent:doctor`.
 | `complete_claims_batch` | no | yes | yes |
 | `get_settlement_status` | yes | yes | yes |
 | `reclaim_trusted_settlement` | yes | no | yes |
+| `reject_delivery` | yes | no | yes |
 | `execute_trusted_settlement` | shortcut | shortcut | yes |
 | `execute_batch_settlement` | shortcut | shortcut | yes |
 
@@ -77,7 +78,7 @@ See [batch-sali.md](batch-sali.md) for `saliFast` vs `hybridWork` batch modes.
 | `onboardRecipient` | payer | `register_recipients` |
 | `fund` | payer | `fund_deal` |
 | `deliver` | payee | `submit_delivery` |
-| `attest` | payer | `attest_release` |
+| `attest` | payer | `attest_release` or `reject_delivery` when junk |
 | `claim` | payee | `complete_claim_for_deal` |
 | `reclaim` | payer | `reclaim_trusted_settlement` |
 | `wait` | both | `get_settlement_status` |

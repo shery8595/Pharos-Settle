@@ -1,6 +1,6 @@
 # Test suite
 
-**103 tests** across 5 tiers (37 Hardhat + 66 Vitest). Verified: `npm test` (exit 0).
+**130 tests** across 5 tiers (44 Hardhat + 86 Vitest). Verified: `npm test` (exit 0).
 
 ```bash
 npm test                  # build + hardhat test + vitest run
@@ -14,10 +14,10 @@ npm run test:atlantic     # Atlantic RPC smoke only
 
 ```mermaid
 flowchart TB
-  T1[Tier1_Contracts_Hardhat_27]
-  T2[Tier2_Unit_Vitest_42]
+  T1[Tier1_Contracts_Hardhat_34]
+  T2[Tier2_Unit_Vitest_56]
   T3[Tier3_Integration_Hardhat_10]
-  T4[Tier4_MCP_Vitest_19]
+  T4[Tier4_MCP_Vitest_25]
   T5[Tier5_Atlantic_Vitest_5]
   T1 --> T3
   T2 --> T3
@@ -27,10 +27,10 @@ flowchart TB
 
 | Tier | Runner | Files | Tests |
 |------|--------|-------|-------|
-| 1 Contracts | Hardhat | `test/contracts/*.test.cjs` | 27 |
-| 2 Unit | Vitest | `test/unit/*.vitest.ts` | 42 |
+| 1 Contracts | Hardhat | `test/contracts/*.test.cjs` | 34 |
+| 2 Unit | Vitest | `test/unit/*.vitest.ts`, `test/cursor-global-mcp.vitest.ts` | 56 |
 | 3 Integration | Hardhat | `test/integration/*.test.cjs` | 10 |
-| 4 MCP | Vitest | `test/mcp/*.vitest.ts` | 19 |
+| 4 MCP | Vitest | `test/mcp/*.vitest.ts` | 25 |
 | 5 Atlantic | Vitest | `test/atlantic/*.vitest.ts` | 5 |
 
 ## Layout

@@ -170,6 +170,7 @@ export type SettlementStatus = {
   amount: string;
   deadline: string;
   reclaimable: boolean;
+  rejectEligible: boolean;
   requiresHybridRelease: boolean;
   deliverySubmitted: boolean;
   payerAttested: boolean;
@@ -219,6 +220,14 @@ export type RegisterRecipientsOutput = {
 };
 
 export type ReclaimOutput = {
+  success: boolean;
+  dealId: string;
+  refundTx?: string;
+  reason?: string;
+  nextAction?: NextAction;
+};
+
+export type RejectOutput = {
   success: boolean;
   dealId: string;
   refundTx?: string;

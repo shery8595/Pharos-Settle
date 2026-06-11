@@ -1,6 +1,6 @@
 {
   "name": "pharos-trusted-settlement",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Pharos Settle — agent commerce state machine on Pharos Atlantic",
   "type": "module",
   "bin": {

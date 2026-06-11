@@ -18,6 +18,7 @@ export const EXPECTED_MCP_TOOLS = [
   "get_agent_readiness",
   "get_settlement_status",
   "reclaim_trusted_settlement",
+  "reject_delivery",
   "register_recipients",
   "simulate_trusted_settlement",
   "submit_delivery",
@@ -144,6 +145,12 @@ describe("MCP settlement tools", () => {
     expect(body.registered).toEqual(addrs);
   });
 
+  it("reject_delivery not eligible in mock default state", async () => {
+    const res = await server.call("reject_delivery", { dealId: "1", mock: true });
+    const body = parse(res);
+    expect(body.success).toBe(false);
+  });
+
   it("reclaim_trusted_settlement not reclaimable in mock", async () => {
     const res = await server.call("reclaim_trusted_settlement", { dealId: "1", mock: true });
     const body = parse(res);
@@ -173,7 +180,7 @@ describe("MCP settlement tools", () => {
 });
 
 describe("McpServer Zod v4 registration", () => {
-  it("registers all fifteen tools without schema errors", () => {
+  it("registers all sixteen tools without schema errors", () => {
     const mcp = new McpServer({ name: "test", version: "1.0.0" });
     expect(() => registerSettlementTools(mcp)).not.toThrow();
     const names = Object.keys(getRegisteredTools(mcp)).sort();

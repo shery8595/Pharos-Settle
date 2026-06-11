@@ -6,6 +6,7 @@ import {
   simulateTrustedSettlement,
   getSettlementStatus,
   reclaimTrustedSettlement,
+  rejectDeliveryForDeal,
   registerRecipients,
   completeClaimForDeal,
   fundDealSettlement,
@@ -355,6 +356,26 @@ export function registerSettlementTools(mcpServer: McpServer) {
     async ({ dealId, mock }) => {
       try {
         const result = await reclaimTrustedSettlement(dealId, mcpConfig(mock));
+        return formatResult(result);
+      } catch (e) {
+        return formatError(e);
+      }
+    }
+  );
+
+  mcpServer.registerTool(
+    "reject_delivery",
+    {
+      description:
+        "Payer only: reject invalid delivery during dispute window — immediate full refund to payer.",
+      inputSchema: {
+        dealId: z.string(),
+        mock: z.boolean().optional(),
+      },
+    },
+    async ({ dealId, mock }) => {
+      try {
+        const result = await rejectDeliveryForDeal(dealId, mcpConfig(mock));
         return formatResult(result);
       } catch (e) {
         return formatError(e);

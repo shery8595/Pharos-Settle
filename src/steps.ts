@@ -3,6 +3,7 @@ export {
   settle,
   fundDeal,
   reclaimDeal,
+  rejectDeal,
   submitDelivery,
   submitDeliveryWithHash,
   attestRelease,

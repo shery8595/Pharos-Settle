@@ -61,6 +61,7 @@ async function deployContract(name: string, args: unknown[] = []) {
       abi: artifact.abi as never,
       bytecode: artifact.bytecode as Hex,
       args: args as never,
+      gas: 15_000_000n,
     })
   );
   const receipt = await withRetry(`receipt ${name}`, () =>

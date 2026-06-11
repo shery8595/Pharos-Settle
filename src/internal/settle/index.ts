@@ -296,6 +296,31 @@ export async function reclaimDeal(dealId: string, config: SettlementConfig = {})
   });
 }
 
+export async function rejectDeal(dealId: string, config: SettlementConfig = {}): Promise<Hash> {
+  if (config.mock) return ("0x" + "66".repeat(32)) as Hash;
+
+  const deployments = loadDeployments(resolveDeploymentNetwork(config));
+  const rpcUrl = config.rpcUrl ?? ATLANTIC.rpcUrl;
+  const router = (config.routerAddress ?? deployments.settlementRouter) as Address;
+  const payerAccount = accountFromKey(config.payerSigner);
+  const chain = {
+    ...pharosChain,
+    id: deployments.chainId,
+    rpcUrls: { default: { http: [rpcUrl] } },
+  } as const;
+  const client = createWalletClient({
+    account: payerAccount,
+    chain,
+    transport: transportFromConfig(config, rpcUrl),
+  });
+  return client.writeContract({
+    address: router,
+    abi: settlementRouterAbi,
+    functionName: "rejectDelivery",
+    args: [BigInt(dealId)],
+  });
+}
+
 export {
   submitDelivery,
   submitDeliveryWithHash,

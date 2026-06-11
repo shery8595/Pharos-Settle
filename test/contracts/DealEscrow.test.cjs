@@ -43,4 +43,48 @@ describe("DealEscrow", function () {
 
     expect(await fx.escrow.canClaim(1n)).to.equal(false);
   });
+
+  it("only router can rejectDelivery", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("1");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("junk"));
+    await expect(fx.escrow.connect(fx.payer).rejectDelivery(1n)).to.be.revertedWith("only router");
+  });
+
+  it("rejectDelivery transitions to Refunded", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("1");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.ZeroHash);
+    await fx.router.connect(fx.payer).rejectDelivery(1n);
+
+    expect((await fx.escrow.getDeal(1n)).state).to.equal(4);
+  });
 });
