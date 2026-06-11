@@ -19,7 +19,7 @@ Then configure MCP for your IDE — see [docs/mcp/modes.md](docs/mcp/modes.md) (
 | Mode | When | MCP config |
 |------|------|------------|
 | **project** (default) | Judges, repo-only work | Committed `.cursor/mcp.json` — open Pharos-Settle as workspace root |
-| **global** | Use settlement from any workspace | Cursor **Settings → MCP → global** — paste `.pharos-settle/mcp-bin.generated.json` |
+| **global** | Use settlement from any workspace | Setup writes **`~/.cursor/mcp.json`** (`npm run mcp:install-global`); reload MCP in Settings |
 
 Full guide: [docs/mcp/modes.md](docs/mcp/modes.md).
 
@@ -38,11 +38,13 @@ When an agent runs `npm run setup`, the terminal often has **no TTY** — prompt
 | 1 | `mcpMode` is `null` / missing | **Project MCP** (open Pharos-Settle as workspace root) vs **Global MCP** (any workspace — paste `mcp-bin.generated.json`) |
 | 2 | `runMode` is `null` / missing | **Demo / mock** vs **Live Atlantic test** |
 
-After the user answers, **write** `mcpMode` and/or `runMode` into `.pharos-settle/setup-checklist.json`. If they chose **global**, mention copying `.pharos-settle/mcp-bin.generated.json` to Cursor global MCP.
+After the user answers, **write** `mcpMode` and/or `runMode` into `.pharos-settle/setup-checklist.json`. If they chose **global**, run **`npm run mcp:install-global`** (writes `~/.cursor/mcp.json` and sets `globalMcpInstalled: true` in the checklist).
 
 **Parent-folder clone** (e.g. workspace is `skill_test` but repo is `skill_test/Pharos-Settle`): recommend **global** MCP unless they will re-open Pharos-Settle as workspace root.
 
 ### MCP confirmation (after `mcpMode` is known)
+
+**Auto-skip:** If **`pharos-settle` MCP tools are available in this chat session**, set `awaitingConfirmation: false` and `confirmedAt` in the checklist — do **not** ask the user.
 
 Read **`mcpMode`** (`"project"` or `"global"`).
 
@@ -57,14 +59,15 @@ If **no** → [docs/mcp/modes.md](docs/mcp/modes.md#project-mode-default). Do **
 
 ### Global mode (`mcpMode: "global"`)
 
-Confirm **both**:
+Setup (or `npm run mcp:install-global`) writes **`pharos-settle`** to **`~/.cursor/mcp.json`**. Do **not** ask whether the user pasted JSON manually when **`globalMcpInstalled`** is `true` in the checklist.
 
-1. Did you add **`pharos-settle`** as a **global MCP server** (from `.pharos-settle/mcp-bin.generated.json`)?
-2. Is **`pharos-settle` MCP** connected/reloaded?
+Confirm **only**:
+
+1. Is **`pharos-settle` MCP** connected/reloaded? (Skip if tools are already available in this session.)
 
 Workspace root does **not** need to be Pharos-Settle. Keys still live in the clone at `repoPath` in the checklist.
 
-If **no** → [docs/mcp/modes.md](docs/mcp/modes.md#global-mode). Do **not** call settlement MCP tools.
+If MCP is not connected → [docs/mcp/modes.md](docs/mcp/modes.md#global-mode). Do **not** call settlement MCP tools.
 
 ### After MCP is confirmed
 

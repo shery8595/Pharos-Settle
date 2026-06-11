@@ -17,12 +17,14 @@ Guide: [docs/mcp/modes.md](docs/mcp/modes.md).
 
 If `needsSetupChoices` is true or `mcpMode` / `runMode` is null — **ask first** (AskQuestion):
 
-1. **Project MCP** vs **Global MCP** → save `mcpMode` in checklist  
+1. **Project MCP** vs **Global MCP** → save `mcpMode` in checklist; if **global**, run **`npm run mcp:install-global`**
 2. **Demo** vs **Live** → save `runMode` in checklist  
 
 Parent workspace (repo not root, e.g. `skill_test/Pharos-Settle`) → suggest **global** MCP.
 
 ## 3. MCP confirmation (use AskQuestion when available)
+
+**Auto-skip:** If **`pharos-settle` MCP tools are in this session**, set `awaitingConfirmation: false` in the checklist and proceed — no prompts.
 
 ### Project mode
 
@@ -33,9 +35,10 @@ Parent workspace (repo not root, e.g. `skill_test/Pharos-Settle`) → suggest **
 
 ### Global mode
 
+When **`globalMcpInstalled`** is `true`, skip the manual-paste question — setup already wrote `~/.cursor/mcp.json`.
+
 | Prompt | Options |
 |--------|---------|
-| Did you add **`pharos-settle`** as a **global MCP server** (from `.pharos-settle/mcp-bin.generated.json`)? | **Yes, added global MCP** / **Not yet** |
 | Is **`pharos-settle` MCP** connected/reloaded? | **Yes, connected** / **Not yet** |
 
 Workspace root does **not** need to be Pharos-Settle in global mode.
@@ -43,7 +46,7 @@ Workspace root does **not** need to be Pharos-Settle in global mode.
 ## 4. If anything is not ready
 
 - **Project / wrong workspace:** `File → Open Folder → Pharos-Settle` (repo root with `.cursor/mcp.json`).
-- **Global / MCP not added:** Cursor → Settings → MCP → global server — paste from `.pharos-settle/mcp-bin.generated.json` — [docs/mcp/modes.md](docs/mcp/modes.md).
+- **Global / MCP not added:** Run **`npm run mcp:install-global`**, then reload MCP — [docs/mcp/modes.md](docs/mcp/modes.md).
 - **MCP not reloaded:** Settings → MCP → restart **pharos-settle** (Cursor) or restart IDE (Claude Desktop).
 - Do **not** call Pharos MCP tools or claim MCP is connected.
 - Offer terminal fallback: `npm run agent:doctor:mock` and `npm run demo:simulate`.

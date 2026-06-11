@@ -17,7 +17,7 @@ npm run setup
 `npm run setup` installs dependencies, builds the SDK, creates `.env`, and asks **project/global** MCP mode then **demo/live** run mode — see [MCP modes](../mcp/modes.md). Live mode prompts you to set keys in `.env`.
 
 - **Project (default):** open this folder as IDE workspace root, reload MCP  
-- **Global:** paste `.pharos-settle/mcp-bin.generated.json` into Cursor global MCP — use from any workspace
+- **Global:** setup writes `~/.cursor/mcp.json` (`npm run mcp:install-global`) — reload MCP; use from any workspace
 
 **Atlantic demo:** Both demo wallets are pre-registered on Atlantic — clone, add keys to `.env`, run `npm run demo:pharos`. See [Atlantic quickstart](quickstart-atlantic.md).
 

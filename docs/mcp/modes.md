@@ -7,10 +7,10 @@ Pharos Settle supports two ways to connect MCP in Cursor (and similar IDEs). `np
 | | **Project mode** | **Global mode** |
 |---|------------------|-----------------|
 | **Best for** | Judges, first demo, working only in this repo | Your own agent app in another folder |
-| **Cursor MCP config** | Committed `.cursor/mcp.json` (`cwd`: `${workspaceFolder}`) | **Settings → MCP → Add global server** |
+| **Cursor MCP config** | Committed `.cursor/mcp.json` (`cwd`: `${workspaceFolder}`) | Setup writes **`~/.cursor/mcp.json`** — reload in Settings → MCP |
 | **Workspace** | Open **Pharos-Settle** as workspace root | Any project — MCP points at fixed Pharos clone path |
 | **Skill location** | `.cursor/skills/trusted-agent-settlement/` (setup copies here) | `~/.cursor/skills/trusted-agent-settlement/` (setup copies here too) |
-| **Generated config** | `.cursor/mcp.json` already works after reload | Paste from `.pharos-settle/mcp-bin.generated.json` |
+| **Generated config** | `.cursor/mcp.json` already works after reload | Auto-merged from `.pharos-settle/mcp-bin.generated.json` (`npm run mcp:install-global`) |
 
 Both modes use the **same MCP server** and **same `.env`** in your Pharos-Settle clone. Keys are read from that clone on every tool call.
 
@@ -48,21 +48,12 @@ Committed config:
 Use settlement tools from **any** Cursor workspace while MCP runs from one Pharos install on disk.
 
 1. `git clone` → `cd Pharos-Settle` → `npm run setup` → choose **2** (global)
-2. **Cursor → Settings → MCP → Add new global MCP server**
-3. Paste the `pharos-settle` block from **`.pharos-settle/mcp-bin.generated.json`** (recommended — no `cwd` needed):
+2. Setup merges **`pharos-settle`** into **`~/.cursor/mcp.json`** (or run `npm run mcp:install-global`)
+3. Reload **pharos-settle** in **Settings → MCP**
+4. Open **any** project in Cursor — global MCP + global skill apply
+5. Agent confirms MCP reload only (or auto-skips if tools are in session) — see [AGENTS.md](../../AGENTS.md)
 
-```json
-"pharos-settle": {
-  "command": "node",
-  "args": ["E:/path/to/Pharos-Settle/bin/pharos-settle-mcp.mjs"]
-}
-```
-
-Or use **`.pharos-settle/mcp.generated.json`** (absolute `cwd` + `npx tsx`).
-
-4. Reload **pharos-settle** in MCP settings
-5. Open **any** project in Cursor — global MCP + global skill apply
-6. Agent confirms global MCP connected (not workspace root) — see [AGENTS.md](../../AGENTS.md)
+Manual paste (optional): **`.pharos-settle/mcp-bin.generated.json`** or **`.pharos-settle/mcp.generated.json`** (absolute `cwd` + `npx tsx`).
 
 **Keys:** still live in `<Pharos-Settle>/.env` on disk, not in the project you have open.
 

@@ -10,6 +10,7 @@ import { dirname, join } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { fileURLToPath } from "node:url";
+import { installGlobalCursorMcp } from "./lib/cursor-global-mcp.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -269,7 +270,7 @@ function createEnvFromExample() {
   return { envPath, created: true };
 }
 
-function modeSteps(mcpMode, runMode, keysConfigured) {
+function modeSteps(mcpMode, runMode, keysConfigured, globalMcpInstalled) {
   const steps = [];
 
   if (mcpMode == null) {
@@ -277,11 +278,17 @@ function modeSteps(mcpMode, runMode, keysConfigured) {
       "Ask user: project MCP (open Pharos-Settle as workspace root) vs global MCP (any workspace) — save mcpMode in checklist"
     );
   } else if (mcpMode === "global") {
-    steps.push(
-      "Add pharos-settle from .pharos-settle/mcp-bin.generated.json to Cursor Settings → MCP → global servers",
-      "Reload MCP so pharos-settle is connected",
-      "Open any workspace — MCP runs from the Pharos-Settle clone at repoPath"
-    );
+    if (globalMcpInstalled) {
+      steps.push(
+        "Setup wrote pharos-settle to Cursor global MCP (~/.cursor/mcp.json) — reload MCP in Settings",
+        "Open any workspace — MCP runs from the Pharos-Settle clone at repoPath"
+      );
+    } else {
+      steps.push(
+        "Run npm run mcp:install-global (or npm run setup -- --mode=global) to write ~/.cursor/mcp.json",
+        "Reload MCP so pharos-settle is connected"
+      );
+    }
   } else {
     steps.push(
       "Open Pharos-Settle as workspace / project root (not a parent folder)",
@@ -304,17 +311,20 @@ function modeSteps(mcpMode, runMode, keysConfigured) {
   return steps;
 }
 
-function checklistMessage(mcpMode, runMode) {
+function checklistMessage(mcpMode, runMode, globalMcpInstalled) {
   if (mcpMode == null || runMode == null) {
     return "Agent: ask project vs global MCP and demo vs live (setup ran non-interactively). See AGENTS.md";
   }
   if (mcpMode === "global") {
-    return "Agent: confirm global MCP connected; runMode chosen at setup. See AGENTS.md";
+    if (globalMcpInstalled) {
+      return "Agent: global MCP installed by setup — confirm reload only (or skip if pharos-settle tools are in session). See AGENTS.md";
+    }
+    return "Agent: run mcp:install-global after user picks global; then confirm reload. See AGENTS.md";
   }
   return "Agent: confirm workspace root + MCP reload; runMode chosen at setup. See AGENTS.md";
 }
 
-function writePortableArtifacts(envInfo, mcpMode, runMode, keysConfigured) {
+function writePortableArtifacts(envInfo, mcpMode, runMode, keysConfigured, globalMcpInstall) {
   mkdirSync(portableDir, { recursive: true });
   const repoPath = root.replace(/\\/g, "/");
 
@@ -330,15 +340,18 @@ function writePortableArtifacts(envInfo, mcpMode, runMode, keysConfigured) {
         runMode,
         setupInteractive: mcpMode != null && runMode != null,
         needsSetupChoices: mcpMode == null || runMode == null,
+        globalMcpInstalled: globalMcpInstall?.installed ?? false,
+        globalMcpPath: globalMcpInstall?.path?.replace(/\\/g, "/") ?? null,
+        globalMcpInstalledAt: globalMcpInstall?.installed ? new Date().toISOString() : null,
         keysConfigured: runMode === "live" ? keysConfigured : null,
         repoPath,
-        message: checklistMessage(mcpMode, runMode),
+        message: checklistMessage(mcpMode, runMode, globalMcpInstall?.installed ?? false),
         env: {
           path: ".env",
           createdFromExample: envInfo.created,
           examplePath: ".env.example",
         },
-        steps: modeSteps(mcpMode, runMode, keysConfigured),
+        steps: modeSteps(mcpMode, runMode, keysConfigured, globalMcpInstall?.installed ?? false),
         ideDocs: "docs/mcp/other-ides.md",
       },
       null,
@@ -382,7 +395,25 @@ function writePortableArtifacts(envInfo, mcpMode, runMode, keysConfigured) {
     "utf-8"
   );
 
-  return { checklistPath, mcpGeneratedPath, mcpBinPath };
+  return { checklistPath, mcpGeneratedPath, mcpBinPath, mcpServers: mcpBlock };
+}
+
+function installGlobalMcpIfNeeded(mcpMode, repoPath) {
+  if (mcpMode !== "global") return null;
+  const pharosServers = {
+    "pharos-settle": {
+      command: "node",
+      args: [join(repoPath, "bin/pharos-settle-mcp.mjs").replace(/\\/g, "/")],
+    },
+  };
+  try {
+    const result = installGlobalCursorMcp(pharosServers);
+    return { installed: true, ...result };
+  } catch (e) {
+    console.error(`\n⚠ Could not write Cursor global MCP: ${e.message}`);
+    console.error("  Paste manually from .pharos-settle/mcp-bin.generated.json — docs/mcp/modes.md\n");
+    return { installed: false, error: e.message };
+  }
 }
 
 function printRunNextSteps(runMode, keysConfigured) {
@@ -411,20 +442,31 @@ function printRunNextSteps(runMode, keysConfigured) {
 `);
 }
 
-function printModeNextSteps(mcpMode, { mcpGeneratedPath, mcpBinPath }) {
+function printModeNextSteps(mcpMode, { mcpGeneratedPath, mcpBinPath }, globalMcpInstall) {
   if (mcpMode == null) return;
 
   if (mcpMode === "global") {
-    console.log(`
+    if (globalMcpInstall?.installed) {
+      console.log(`
 Next (global MCP — use from any workspace):
-  1. Cursor → Settings → MCP → Add new global MCP server
-  2. Paste pharos-settle from ${mcpBinPath.replace(/\\/g, "/")}
-  3. Reload pharos-settle
-  4. Skill installed globally → ~/.cursor/skills/trusted-agent-settlement/
-  5. Keys still live in this clone's .env — see docs/mcp/modes.md
+  1. Reload pharos-settle in Cursor Settings → MCP
+  2. Global config → ${globalMcpInstall.path.replace(/\\/g, "/")}
+  3. Skill installed globally → ~/.cursor/skills/trusted-agent-settlement/
+  4. Keys still live in this clone's .env — see docs/mcp/modes.md
 
   Ask your agent: "What settlement tools do you have?"
 `);
+    } else {
+      console.log(`
+Next (global MCP — use from any workspace):
+  1. npm run mcp:install-global   (writes ~/.cursor/mcp.json)
+  2. Or paste pharos-settle from ${mcpBinPath.replace(/\\/g, "/")}
+  3. Reload pharos-settle in Cursor Settings → MCP
+  4. Skill installed globally → ~/.cursor/skills/trusted-agent-settlement/
+
+  Ask your agent: "What settlement tools do you have?"
+`);
+    }
     return;
   }
 
@@ -482,10 +524,15 @@ if (runMode === "live") {
   console.log(keysConfigured ? "✓ Live keys configured" : "⚠ Live keys pending — edit .env before on-chain tools");
 }
 
-const portable = writePortableArtifacts(envInfo, mcpMode, runMode, keysConfigured);
+const repoPath = root.replace(/\\/g, "/");
+const globalMcpInstall = installGlobalMcpIfNeeded(mcpMode, repoPath);
+const portable = writePortableArtifacts(envInfo, mcpMode, runMode, keysConfigured, globalMcpInstall);
 console.log(`✓ Setup checklist → ${portable.checklistPath.replace(/\\/g, "/")}`);
 console.log(`✓ MCP config (project / other IDEs) → ${portable.mcpGeneratedPath.replace(/\\/g, "/")}`);
 console.log(`✓ MCP config (global / bin) → ${portable.mcpBinPath.replace(/\\/g, "/")}`);
+if (globalMcpInstall?.installed) {
+  console.log(`✓ Cursor global MCP → ${globalMcpInstall.path.replace(/\\/g, "/")}`);
+}
 
-printModeNextSteps(mcpMode, portable);
+printModeNextSteps(mcpMode, portable, globalMcpInstall);
 printRunNextSteps(runMode, keysConfigured);

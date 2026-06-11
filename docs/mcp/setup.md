@@ -21,8 +21,8 @@ Setup copies **`.env.example` → `.env`** (skips if `.env` already exists). Key
 
 ### Global mode
 
-1. **Settings → MCP → Add global server** — paste from `.pharos-settle/mcp-bin.generated.json`
-2. Reload **pharos-settle** — works from **any** workspace
+1. Setup writes **`~/.cursor/mcp.json`** (`npm run mcp:install-global` if needed)
+2. Reload **pharos-settle** in Settings → MCP — works from **any** workspace
 
 ### Then (both modes)
 

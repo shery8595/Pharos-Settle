@@ -21,6 +21,7 @@
   },
   "scripts": {
     "setup": "node scripts/setup.mjs",
+    "mcp:install-global": "node scripts/install-global-mcp.mjs",
     "build": "tsc",
     "gates:atlantic": "tsx scripts/gates/validate-atlantic.ts",
     "check:balance": "tsx scripts/check-balance.ts",
