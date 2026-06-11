@@ -1,0 +1,63 @@
+{
+  "name": "pharos-trusted-settlement",
+  "version": "1.1.0",
+  "description": "Pharos Settle — agent commerce state machine on Pharos Atlantic",
+  "type": "module",
+  "main": "dist/trustedAgentSettlement.js",
+  "exports": {
+    ".": "./dist/trustedAgentSettlement.js",
+    "./steps": "./dist/steps.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "gates:atlantic": "tsx scripts/gates/validate-atlantic.ts",
+    "check:balance": "tsx scripts/check-balance.ts",
+    "agent:doctor": "tsx scripts/agent-doctor.ts",
+    "agent:doctor:mock": "tsx scripts/agent-doctor.ts --mock",
+    "test": "npm run build && hardhat test && vitest run",
+    "test:contracts": "hardhat test --grep \"SDK integration\" --invert",
+    "test:integration": "hardhat test --grep \"SDK integration\"",
+    "test:unit": "vitest run --exclude test/atlantic/**",
+    "test:atlantic": "vitest run test/atlantic",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "e2e:local": "hardhat run scripts/deploy.ts --network localhost && hardhat run scripts/seed.ts --network localhost && tsx scripts/demo.ts --network localhost",
+    "deploy:pharos": "tsx scripts/deploy-viem.ts",
+    "seed:local": "hardhat run scripts/seed.ts --network localhost",
+    "seed:pharos": "hardhat run scripts/seed.ts --network pharos",
+    "demo": "tsx scripts/demo.ts",
+    "demo:pharos": "tsx scripts/demo.ts --network pharos",
+    "demo:simulate": "tsx scripts/demo.ts --simulate",
+    "demo:spv": "tsx scripts/demo.ts --network pharos --prove-tier spv",
+    "demo:reclaim": "tsx scripts/demo.ts --network pharos --reclaim",
+    "demo:agent": "tsx examples/agent-consumer/openai-agent.ts",
+    "demo:pipeline": "tsx examples/pipeline/run-pipeline.ts",
+    "demo:batch": "tsx examples/pipeline/run-batch.ts",
+    "demo:batch:simulate": "tsx examples/pipeline/run-batch.ts --simulate",
+    "demo:batch:split": "tsx examples/pipeline/run-batch-split.ts",
+    "demo:batch:split:simulate": "tsx examples/pipeline/run-batch-split.ts --simulate",
+    "demo:ghost-payer": "tsx examples/ghost-payer/run-ghost-payer.ts",
+    "demo:ghost-payer:simulate": "tsx examples/ghost-payer/run-ghost-payer.ts --simulate",
+    "mcp": "tsx mcp/server.ts",
+    "mcp:http": "tsx mcp/http.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "dotenv": "^16.4.5",
+    "viem": "^2.21.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.1.0",
+    "@types/node": "^22.9.0",
+    "chai": "^4.5.0",
+    "ethers": "^6.13.4",
+    "hardhat": "^2.22.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
+  }
+}

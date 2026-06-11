@@ -1,0 +1,10 @@
+{
+  "mockToken": "0xAD2935E147b61175D5dc3A9e7bDa93B0975A43BA",
+  "agentRegistry": "0x00CAC06Dd0BB4103f8b62D280fE9BCEE8f26fD59",
+  "tokenAllowlist": "0x4951A1C579039EbfCBA0BE33D2cd3A6D30b0f802",
+  "dealEscrow": "0x2e8880cAdC08E9B438c6052F5ce3869FBd6cE513",
+  "settlementRouter": "0xb007167714e2940013EC3bb551584130B7497E22",
+  "network": "localhost",
+  "chainId": 31337,
+  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+}

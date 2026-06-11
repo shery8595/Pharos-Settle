@@ -1,0 +1,75 @@
+{
+  "version": "1.1.0",
+  "network": "pharos",
+  "networkName": "Pharos Atlantic",
+  "chainId": 688689,
+  "rpcUrl": "https://atlantic.dplabs-internal.com",
+  "explorerUrl": "https://atlantic.pharosscan.xyz",
+  "deployer": "0xb8664841528e9Bd60D91AbB1bCF2975e67Fa0e17",
+  "mockToken": "0xde18fab2b974db730aeda8c6187ba37b1d6a3be9",
+  "agentRegistry": "0x8871d3538153eae0711fa6d01a0ed311a6b13e17",
+  "tokenAllowlist": "0x37e128f57732e951f8f2aecf8bce6129ebc08b21",
+  "dealEscrow": "0xd019258710faf17d0952c91d66e0e11e5631c814",
+  "settlementRouter": "0x4c6e7be366dc9c4c358f85faa98a471fdaa4ad94",
+  "contracts": {
+    "mockToken": {
+      "address": "0xde18fab2b974db730aeda8c6187ba37b1d6a3be9",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0xde18fab2b974db730aeda8c6187ba37b1d6a3be9"
+    },
+    "agentRegistry": {
+      "address": "0x8871d3538153eae0711fa6d01a0ed311a6b13e17",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0x8871d3538153eae0711fa6d01a0ed311a6b13e17"
+    },
+    "tokenAllowlist": {
+      "address": "0x37e128f57732e951f8f2aecf8bce6129ebc08b21",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0x37e128f57732e951f8f2aecf8bce6129ebc08b21"
+    },
+    "dealEscrow": {
+      "address": "0xd019258710faf17d0952c91d66e0e11e5631c814",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0xd019258710faf17d0952c91d66e0e11e5631c814"
+    },
+    "settlementRouter": {
+      "address": "0x4c6e7be366dc9c4c358f85faa98a471fdaa4ad94",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0x4c6e7be366dc9c4c358f85faa98a471fdaa4ad94"
+    }
+  },
+  "allowedTokens": [
+    {
+      "symbol": "TEST",
+      "name": "Test Agent Token",
+      "decimals": 18,
+      "address": "0xde18fab2b974db730aeda8c6187ba37b1d6a3be9"
+    },
+    {
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6,
+      "address": "0xcfC8330f4BCAB529c625D12781b1C19466A9Fc8B"
+    },
+    {
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6,
+      "address": "0xE7E84B8B4f39C507499c40B4ac199B050e2882d5"
+    },
+    {
+      "symbol": "WBTC",
+      "name": "Wrapped BTC",
+      "decimals": 18,
+      "address": "0x0c64F03EEa5c30946D5c55B4b532D08ad74638a4"
+    },
+    {
+      "symbol": "WETH",
+      "name": "Wrapped ETH",
+      "decimals": 18,
+      "address": "0x7d211F77525ea39A0592794f793cC1036eEaccD5"
+    },
+    {
+      "symbol": "WPHRS",
+      "name": "Wrapped PHRS",
+      "decimals": 18,
+      "address": "0x838800b758277CC111B2d48Ab01e5E164f8E9471"
+    }
+  ],
+  "notes": "Live on Pharos Atlantic testnet. Redeployed 2026-06-10 with non-default deployer wallet. SDK reads this file via loadDeployments('atlantic'). Run npm run seed:pharos after deploy to register demo wallets and allow tokens."
+}
