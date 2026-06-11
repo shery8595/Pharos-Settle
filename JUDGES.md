@@ -87,7 +87,7 @@ Chain ID **688689** · RPC `https://atlantic.dplabs-internal.com` · Gas: **PHRS
 ## 4. Mock demo — no keys (try this first)
 
 ```bash
-git clone <your-repo-url> && cd pharos
+git clone https://github.com/shery8595/Pharos-Settle.git && cd Pharos-Settle
 npm install
 npm run agent:doctor:mock
 npm run demo:simulate

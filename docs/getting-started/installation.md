@@ -9,7 +9,7 @@
 ## Clone and install
 
 ```bash
-git clone <repo-url> pharos
+git clone https://github.com/shery8595/Pharos-Settle.git
 cd pharos
 npm install
 ```
