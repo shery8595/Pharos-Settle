@@ -3,12 +3,14 @@ export {
   computePreflightHash,
   verifyPreflightHash,
   canonicalJsonStringify,
+  rejectionReasonHash,
 } from "./internal/preflight/index.js";
 export {
   settle,
   fundDeal,
   reclaimDeal,
   rejectDeal,
+  resolveDisputeDeal,
   submitDelivery,
   submitDeliveryWithHash,
   attestRelease,

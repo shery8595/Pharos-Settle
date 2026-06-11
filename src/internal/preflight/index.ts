@@ -7,7 +7,12 @@ import { agentRegistryAbi, erc20Abi, tokenAllowlistAbi } from "../../shared/abis
 import { loadDeployments, resolveDeploymentNetwork } from "../../shared/chain.js";
 import { computePreflightHash, verifyPreflightHash } from "./hash.js";
 
-export { computePreflightHash, verifyPreflightHash, canonicalJsonStringify } from "./hash.js";
+export {
+  computePreflightHash,
+  verifyPreflightHash,
+  canonicalJsonStringify,
+  rejectionReasonHash,
+} from "./hash.js";
 import { mockIsRegistered } from "../onboard/mockRegistry.js";
 
 export type PreflightResult = {

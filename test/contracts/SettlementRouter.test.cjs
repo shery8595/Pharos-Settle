@@ -5,6 +5,8 @@ const { deployFullStack, mintAndApprove } = require("../helpers/hardhat-fixture.
 
 const { ethers } = hre;
 
+const REASON = ethers.id("junk-delivery");
+
 describe("SettlementRouter + DealEscrow", function () {
   it("fund → accept → claim releases to payee (legacy)", async function () {
     const fx = await deployFullStack();
@@ -23,7 +25,7 @@ describe("SettlementRouter + DealEscrow", function () {
 
     await fx.router.claim(1n, ethers.id("proof"));
     expect(await fx.token.balanceOf(fx.payee.address)).to.equal(amount);
-    expect((await fx.escrow.getDeal(1n)).state).to.equal(3);
+    expect((await fx.escrow.getDeal(1n)).state).to.equal(4);
   });
 
   it("reclaim returns funds after deadline (ghost payee)", async function () {
@@ -45,7 +47,7 @@ describe("SettlementRouter + DealEscrow", function () {
     await fx.router.reclaim(1n);
 
     expect(await fx.token.balanceOf(fx.payer.address)).to.equal(amount);
-    expect((await fx.escrow.getDeal(1n)).state).to.equal(4);
+    expect((await fx.escrow.getDeal(1n)).state).to.equal(5);
   });
 
   it("atomic settle completes in one router call", async function () {
@@ -125,7 +127,8 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payer).attestRelease(1n, ethers.id("result"));
@@ -148,7 +151,8 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("result"));
@@ -173,7 +177,8 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      disputeWindow
+      disputeWindow,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("delivered"));
@@ -199,7 +204,8 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("delivered"));
@@ -223,17 +229,18 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      disputeWindow
+      disputeWindow,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.ZeroHash);
     expect(await fx.router.canClaim(1n)).to.equal(false);
 
-    await fx.router.connect(fx.payer).rejectDelivery(1n);
+    await fx.router.connect(fx.payer).rejectDelivery(1n, REASON);
 
     expect(await fx.token.balanceOf(fx.payer.address)).to.equal(payerBefore);
     expect(await fx.token.balanceOf(fx.payee.address)).to.equal(0n);
-    expect((await fx.escrow.getDeal(1n)).state).to.equal(4);
+    expect((await fx.escrow.getDeal(1n)).state).to.equal(5);
     expect(await fx.router.canClaim(1n)).to.equal(false);
   });
 
@@ -251,11 +258,12 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("junk"));
-    await expect(fx.router.connect(fx.payee).rejectDelivery(1n)).to.be.revertedWith("only payer");
+    await expect(fx.router.connect(fx.payee).rejectDelivery(1n, REASON)).to.be.revertedWith("only payer");
   });
 
   it("rejectDelivery reverts after dispute window elapsed", async function () {
@@ -273,12 +281,13 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      disputeWindow
+      disputeWindow,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("junk"));
     await time.increase(61);
-    await expect(fx.router.connect(fx.payer).rejectDelivery(1n)).to.be.revertedWith(
+    await expect(fx.router.connect(fx.payer).rejectDelivery(1n, REASON)).to.be.revertedWith(
       "dispute window elapsed"
     );
   });
@@ -297,12 +306,13 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("result"));
     await fx.router.connect(fx.payer).attestRelease(1n, ethers.id("result"));
-    await expect(fx.router.connect(fx.payer).rejectDelivery(1n)).to.be.revertedWith(
+    await expect(fx.router.connect(fx.payer).rejectDelivery(1n, REASON)).to.be.revertedWith(
       "already attested"
     );
   });
@@ -322,11 +332,12 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.ZeroHash);
-    await fx.router.connect(fx.payer).rejectDelivery(1n);
+    await fx.router.connect(fx.payer).rejectDelivery(1n, REASON);
 
     expect(await fx.token.balanceOf(fx.payer.address)).to.equal(amount);
     expect(await fx.token.balanceOf(fx.feeRecipient.address)).to.equal(0n);
@@ -405,7 +416,8 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await expect(fx.router.connect(fx.payer).submitDelivery(1n, ethers.id("x"))).to.be.revertedWith(
@@ -427,11 +439,44 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await expect(fx.router.connect(fx.payee).attestRelease(1n, ethers.id("x"))).to.be.revertedWith(
       "only payer"
     );
+  });
+
+  it("arbiter reject opens dispute; only arbiter can resolve", async function () {
+    const fx = await deployFullStack();
+    const [, , , arbiter] = await ethers.getSigners();
+    const amount = ethers.parseEther("2");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n,
+      arbiter.address
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("delivered"));
+    await fx.router.connect(fx.payer).rejectDelivery(1n, REASON);
+
+    expect((await fx.escrow.getDeal(1n)).state).to.equal(3);
+    await expect(fx.router.connect(fx.payer).resolveDispute(1n, 1, 0)).to.be.revertedWith(
+      "only arbiter"
+    );
+
+    await fx.router.connect(arbiter).resolveDispute(1n, 1, 0);
+    expect((await fx.escrow.getDeal(1n)).state).to.equal(5);
+    expect(await fx.token.balanceOf(fx.payer.address)).to.equal(amount);
   });
 });

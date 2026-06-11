@@ -7,6 +7,7 @@ import {
   getSettlementStatus,
   reclaimTrustedSettlement,
   rejectDeliveryForDeal,
+  resolveDisputeForDeal,
   registerRecipients,
   completeClaimForDeal,
   fundDealSettlement,
@@ -40,6 +41,10 @@ const settlementFields = {
   ttlSeconds: z.number().optional().describe("Deal deadline seconds (default 3600)"),
   disputeWindowSeconds: z.number().optional().describe("Auto-release window after delivery (default 259200)"),
   requiresHybridRelease: z.boolean().optional().describe("Work-based hybrid release (default true)"),
+  arbiter: z
+    .string()
+    .optional()
+    .describe("Optional dispute arbiter address; 0x0 = cooperative instant-refund rejection"),
 };
 
 const settlementInputSchema = z.object(settlementFields);
@@ -367,15 +372,47 @@ export function registerSettlementTools(mcpServer: McpServer) {
     "reject_delivery",
     {
       description:
-        "Payer only: reject invalid delivery during dispute window — immediate full refund to payer.",
+        "Payer only: reject delivery during dispute window with auditable reasonHash. Cooperative deals (no arbiter) refund immediately; arbiter deals enter Disputed.",
       inputSchema: {
         dealId: z.string(),
+        reason: z.string().optional().describe("Human-readable rejection reason (hashed on-chain)"),
+        reasonHash: z.string().optional().describe("Precomputed bytes32 reason hash"),
         mock: z.boolean().optional(),
       },
     },
-    async ({ dealId, mock }) => {
+    async ({ dealId, reason, reasonHash, mock }) => {
       try {
-        const result = await rejectDeliveryForDeal(dealId, mcpConfig(mock));
+        const result = await rejectDeliveryForDeal(dealId, { reason, reasonHash }, mcpConfig(mock));
+        return formatResult(result);
+      } catch (e) {
+        return formatError(e);
+      }
+    }
+  );
+
+  mcpServer.registerTool(
+    "resolve_dispute",
+    {
+      description:
+        "Arbiter only: resolve a Disputed deal — release to payee, refund payer, or split (fee on payee share).",
+      inputSchema: {
+        dealId: z.string(),
+        outcome: z.enum(["release", "refund", "split"]),
+        payeeBps: z
+          .number()
+          .optional()
+          .describe("Required for split: payee share in bps (1-9999)"),
+        mock: z.boolean().optional(),
+      },
+    },
+    async ({ dealId, outcome, payeeBps, mock }) => {
+      try {
+        const result = await resolveDisputeForDeal(
+          dealId,
+          outcome,
+          mcpConfig(mock),
+          payeeBps ?? 0
+        );
         return formatResult(result);
       } catch (e) {
         return formatError(e);

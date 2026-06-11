@@ -8,7 +8,10 @@ stateDiagram-v2
   Created --> Funded: fund
   Funded --> Accepted: accept
   Accepted --> Released: claim
-  Accepted --> Refunded: reclaim
+  Accepted --> Refunded: reclaim_or_cooperative_reject
+  Accepted --> Disputed: arbiter_mode_reject
+  Disputed --> Released: resolve_release_or_split
+  Disputed --> Refunded: resolve_refund
   Funded --> Refunded: reclaim
 ```
 
@@ -47,15 +50,15 @@ stateDiagram-v2
 
 Blocked if `deliverySubmittedAt > 0`.
 
-### Junk delivery (reject)
+### Junk delivery / rejection (v1.2)
 
-> **⚠️ Trust assumption:** Phase 1 `rejectDelivery` is for **cooperative** junk review. The payer can reject any delivery during the window with no on-chain proof of invalidity — including valid work already accessed off-chain. See [threat-model.md](../security/threat-model.md#payer-rejection-rug-vector-asymmetric-power).
+1. Payee `submitDelivery(resultHash)`
+2. During dispute window: payer `rejectDelivery(dealId, reasonHash)` — **required non-zero `reasonHash`**
+3. **Cooperative** (`arbiter == 0x0`): immediate full refund, no fee
+4. **Arbiter mode**: state → `Disputed`; arbiter `resolveDispute` (release / refund / split)
+5. If payer does nothing: ghost-payer auto-release after `disputeWindow`
 
-1. Payee `submitDelivery(resultHash)` (any hash — no on-chain quality check)
-2. During dispute window: payer `rejectDelivery` — immediate full refund, no fee
-3. If payer does not reject and does not attest: ghost-payer auto-release after `disputeWindow`
-
-Blocked after dispute window elapses (payee can claim via auto-release).
+> Cooperative mode: payer can reject valid work — [threat-model.md](../security/threat-model.md#payer-rejection-rug-vector-asymmetric-power). Use arbiter mode for adversarial payments.
 
 ## Fee rules
 
@@ -73,7 +76,8 @@ Blocked after dispute window elapses (payee can claim via auto-release).
 |----------|--------|
 | `submitDelivery` | Payee only (enforced at router) |
 | `attestRelease` | Payer only (enforced at router) |
-| `rejectDelivery` | Payer only (enforced at router) |
+| `rejectDelivery` | Payer only (enforced at router); requires `reasonHash` |
+| `resolveDispute` | Arbiter only (enforced at router) |
 | `claim` | Anyone (router delegates to escrow) |
 | `reclaim` | Anyone (router delegates to escrow) |
 | `fund`, `accept`, `createDeal` | Router only (escrow) |

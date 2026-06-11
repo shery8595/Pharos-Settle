@@ -1,6 +1,27 @@
 # Judge Quickstart
 
-**Start here.** No keys required for step 4.
+**Start here.** No keys required for the mock demo.
+
+## Judge in 3 minutes
+
+1. `npm run demo:judge` — one-command mock flow (no keys)
+2. Watch demo video for live Atlantic txs _(link in [SUBMISSION.md](SUBMISSION.md))_
+3. Reusable surfaces: [SKILL.md](skills/trusted-agent-settlement/SKILL.md) · 17 MCP tools · TypeScript SDK · smart contracts · batch manifest handoff
+4. Click PharosScan proofs: [SUBMISSION.md](SUBMISSION.md#live-proof-pharosscan)
+
+## Why this wins Phase 1
+
+Agents cannot safely hire each other with raw transfers. Pharos Settle gives them a **reusable settlement Skill**: simulate first, escrow funds, prove delivery, recover from ghosting, and batch-pay workers on Pharos.
+
+| Reusable surface | Where |
+|------------------|-------|
+| Agent Skill | `skills/trusted-agent-settlement/SKILL.md` |
+| MCP (17 tools) | `npm run mcp` |
+| TypeScript SDK | `src/trustedAgentSettlement.ts` + `steps.ts` |
+| Smart contracts | `deployments/atlantic.json` |
+| Batch manifest handoff | payer `fund_deals_batch` → payee `complete_claims_batch` |
+
+> **v1.2.0:** Auditable `reasonHash` on reject; optional **arbiter** freezes funds until `resolve_dispute`. Cooperative mode still has payer-rug risk — [threat-model](docs/security/threat-model.md). Phase 2: reputation + marketplace.
 
 ---
 
@@ -15,7 +36,7 @@ One AI agent pays another for work. Money sits in escrow until the job is proven
 | If… | Then… |
 |-----|-------|
 | Worker never delivers | Payer gets money back |
-| Worker submits junk delivery | Payer **rejects** during dispute window |
+| Worker submits junk delivery | Payer **safety valve** during dispute window (`reject_delivery`, cooperative review) |
 | Payer disappears after delivery | Worker still gets paid |
 | Both do their part | Instant settlement |
 
@@ -56,7 +77,7 @@ Pharos Settle ships that primitive today: contracts live on Atlantic, agents plu
 | Plain English | Technical name |
 |---------------|----------------|
 | “Can I pay safely?” dry-run | **Preflight** / `simulateTrustedSettlement` |
-| Plug-in for Cursor / Claude | **MCP** (`npm run mcp`, 16 tools) |
+| Plug-in for Cursor / Claude | **MCP** (`npm run mcp`, 17 tools) |
 | Agent instruction file | **Skill** (`skills/trusted-agent-settlement/`) |
 | Pay only after work proof | **Hybrid release** (deliver → attest → claim) |
 | Batch payroll to many agents | **SALI FastPay** (`batchMode: saliFast`) |
@@ -70,11 +91,11 @@ Pharos Settle ships that primitive today: contracts live on Atlantic, agents plu
 |----------------------|-----------------------------------|
 | Smart contracts | Agent marketplace |
 | TypeScript SDK | Reputation scores |
-| MCP server (16 tools) | On-chain arbitration |
+| MCP server (17 tools) | On-chain arbitration |
 | Agent Skill module | |
 | Live Atlantic deployment | |
-| 130 tests (`npm test`) | |
-| Junk-delivery protection | |
+| 145 tests (`npm test`) | |
+| Cooperative junk review (`reject_delivery` safety valve) | |
 
 Details: [docs/PHASES.md](docs/PHASES.md)
 
@@ -104,6 +125,12 @@ npm run setup
 ```
 
 Then **open `Pharos-Settle` as the workspace root** (not a parent folder), **reload MCP** (Cursor: Settings → MCP; Claude: see [docs/mcp/other-ides.md](docs/mcp/other-ides.md)), and let the agent confirm both (yes/no) per [AGENTS.md](AGENTS.md).
+
+```bash
+npm run demo:judge
+```
+
+Or step-by-step:
 
 ```bash
 npm run agent:doctor:mock
@@ -145,7 +172,7 @@ More live demos:
 npm run demo:batch          # batch payroll (SALI FastPay)
 npm run demo:ghost-payee    # payee ghosts → payer reclaims
 npm run demo:ghost-payer    # payer ghosts → payee still paid
-npm test                    # 130 tests
+npm test                    # 145 tests
 ```
 
 Key demos table: [docs/examples/demos.md](docs/examples/demos.md).
@@ -160,7 +187,7 @@ Key demos table: [docs/examples/demos.md](docs/examples/demos.md).
 
 - `ready: true`
 - `role: "mock"` (or `demo` if both keys set)
-- List of allowed tools — should be **15**
+- List of allowed tools — should be **16**
 
 ### `npm run demo:simulate`
 
@@ -190,7 +217,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 
 | Layer | Surface |
 |-------|---------|
-| Skill / MCP | 16 tools (`fund_deal`, `submit_delivery`, `reject_delivery`, …) |
+| Skill / MCP | 17 tools (`fund_deal`, `submit_delivery`, `reject_delivery`, …) |
 | SDK ergonomic | `simulateTrustedSettlement`, `fundDealSettlement`, … |
 | Primitives | `preflight`, `submitDelivery`, `claimDeal`, … via `steps.ts` |
 
@@ -205,7 +232,8 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 | Attest | `attest_release` | payer | release permission |
 | Claim | `complete_claim_for_deal` | payee | settlement tx |
 | Reclaim | `reclaim_trusted_settlement` | payer | refund tx |
-| Reject junk | `reject_delivery` | payer | refund tx |
+| Reject junk (safety valve) | `reject_delivery` + `reason` | payer | refund or dispute (if arbiter set) |
+| Resolve dispute | `resolve_dispute` | arbiter | release / refund / split |
 
 ### Composable patterns
 
@@ -225,7 +253,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 | **`nextAction` driven** | Agents loop without hardcoded flow logic |
 | **`dealId` handoff** | Payer and payee in separate processes |
 | **`preflightHash` audit log** | Simulate checks hashed and stored on-chain (off-chain verifiable) |
-| **`reject_delivery` junk protection** | Payer can refund invalid delivery during dispute window |
+| **`reject_delivery` safety valve** | Payer-side cooperative junk review during dispute window; Phase 2 adds neutral arbitration |
 | **`resultHash` delivery** | Work proof without revealing full details |
 | **MCP / SDK parity** | Same workflow via tools or code |
 

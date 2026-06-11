@@ -1,41 +1,20 @@
-# Data model
+# Data model (off-chain + on-chain)
 
-## TrustedSettlementInput
+Cross-reference for SDK types and contract structs. **v1.2.0** adds `Disputed`, `arbiter`, `rejectionReasonHash`.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `agentA` | string | Payer address |
-| `agentB` | string | Payee address |
-| `token` | string | ERC-20 contract address |
-| `amount` | string | Amount in token wei |
-| `workDescription` | string | Hashed to `workHash` on-chain |
-| `ttlSeconds` | number? | Deal deadline from fund (default 3600) |
-| `requiresHybridRelease` | boolean? | Work-based release (default true) |
-| `disputeWindowSeconds` | number? | Auto-release window (default 72h) |
+## SettlementStatus (SDK)
 
-## SettlementConfig
+Returned by `getSettlementStatus` / MCP `get_settlement_status`:
 
-See [SDK configuration](../sdk/configuration.md) for all fields.
-
-## TrustedSettlementOutput
-
-```typescript
-{
-  success: boolean;
-  dealId?: string;
-  routerAddress: string;
-  nextAction?: NextAction;
-  feeQuote?: FeeQuote;
-  stages: {
-    preflight: { ready, checks, preflightHash? };
-    onboard?: { registerTx?, recipients, explorerLink? };
-    prove: { preSettlement?, postSettlement? };
-    settle?: { fundTx?, deliverTx?, attestTx?, claimTx?, settlementReceipt? };
-  };
-  explorerLink?: string;
-  totalDurationMs: number;
-}
-```
+| Field | Type | Notes |
+|-------|------|-------|
+| `state` | DealState name | Includes `Disputed` |
+| `rejectEligible` | bool | Payer can reject during window |
+| `disputeOpen` | bool | `state == Disputed` |
+| `resolveEligible` | bool | Arbiter can resolve |
+| `arbiter` | address | `0x0` = cooperative mode |
+| `rejectionReasonHash` | string \| null | Set after reject |
+| `nextAction` | NextAction | Includes `resolve` when disputed |
 
 `success` requires post-settlement prove verification when `claimTx` is present.
 
@@ -45,13 +24,15 @@ Used by `getSettlementStatus` and `computeNextAction`:
 
 | Field | Source |
 |-------|--------|
-| `state` | DealState enum (0–4) |
+| `state` | DealState enum (0–5) |
 | `deadline` | Unix timestamp |
 | `requiresHybridRelease` | bool |
 | `deliverySubmittedAt` | uint64 |
 | `disputeWindow` | uint64 |
 | `payerAttested` | bool |
 | `canClaim` | `canClaim(dealId)` |
+| `arbiter` | address |
+| `rejectionReasonHash` | bytes32 |
 
 ## NextAction values
 
@@ -62,11 +43,13 @@ Used by `getSettlementStatus` and `computeNextAction`:
 | `attest` | Payer attests release |
 | `claim` | Payee claims |
 | `reclaim` | Payer reclaims after TTL |
+| `reject` | Payer rejects with reason (eligible window) |
+| `resolve` | Arbiter resolves open dispute |
 | `wait` | Poll until auto-release or deadline |
 | `done` | Settlement complete |
 | `onboardRecipient` | Register payee first |
 
-## On-chain Deal struct
+## On-chain Deal struct (v1.2)
 
 ```solidity
 struct Deal {
@@ -84,6 +67,8 @@ struct Deal {
   uint64 deliverySubmittedAt;
   uint64 disputeWindow;
   bool payerAttested;
+  address arbiter;
+  bytes32 rejectionReasonHash;
 }
 ```
 
@@ -94,8 +79,9 @@ struct Deal {
 | 0 | Created |
 | 1 | Funded |
 | 2 | Accepted |
-| 3 | Released |
-| 4 | Refunded |
+| 3 | Disputed |
+| 4 | Released |
+| 5 | Refunded |
 
 ## Related source
 

@@ -2,7 +2,7 @@
 
 Single entrypoint for agent settlements. Enforces registry + allowlist, delegates escrow operations.
 
-**Source:** `contracts/SettlementRouter.sol`
+**Source:** `contracts/SettlementRouter.sol` · **v1.2.0**
 
 ## Constructor
 
@@ -16,10 +16,11 @@ constructor(address registry_, address allowlist_, address escrow_)
 |----------|--------|-------------|
 | `settle(...)` | anyone | Atomic: create + fund + accept + claim (non-hybrid) |
 | `fundAndAccept(...)` | anyone | Create + fund + accept (non-hybrid) |
-| `fundAndAcceptHybrid(...)` | anyone | Create + fund + accept (optional hybrid) |
+| `fundAndAcceptHybrid(..., arbiter)` | anyone | Create + fund + accept (optional hybrid + arbiter) |
 | `submitDelivery(dealId, resultHash)` | payee only | Submit work delivery |
 | `attestRelease(dealId, resultHash)` | payer only | Payer fast-path attestation |
-| `rejectDelivery(dealId)` | payer only | Reject junk delivery during dispute window — immediate refund |
+| `rejectDelivery(dealId, reasonHash)` | payer only | Reject with auditable hash — cooperative refund or arbiter dispute |
+| `resolveDispute(dealId, outcome, payeeBps)` | arbiter only | Release, refund, or split |
 | `claim(dealId, proofHash)` | anyone | Release to payee (minus fee) |
 | `reclaim(dealId)` | anyone | Refund payer after deadline |
 | `canClaim(dealId)` | view | Hybrid claim eligibility |
@@ -32,6 +33,8 @@ constructor(address registry_, address allowlist_, address escrow_)
 - `"token not allowed"` — allowlist check
 - `"only payee"` — `submitDelivery` caller ≠ deal.payee
 - `"only payer"` — `attestRelease` or `rejectDelivery` caller ≠ deal.payer
+- `"only arbiter"` — `resolveDispute` caller ≠ deal.arbiter
+- `"zero reason"` — `rejectDelivery` without reasonHash
 
 ## Events
 
@@ -45,9 +48,9 @@ Maps `dealId` → `keccak256(block.number, dealId, proofHash)` after claim.
 
 ## Related tests
 
-`test/contracts/SettlementRouter.test.cjs` — hybrid, reclaim, reject, reverts
+`test/contracts/SettlementRouter.test.cjs` — hybrid, reclaim, reject, arbiter resolve, reverts
 
 ## Related source
 
-- `src/shared/abis.ts` — `settlementRouterAbi`
-- `src/internal/settle/index.ts`
+- `mcp/tools.ts` — `reject_delivery`, `resolve_dispute`
+- `src/trustedAgentSettlement.ts` — `rejectDeliveryForDeal`, `resolveDisputeForDeal`

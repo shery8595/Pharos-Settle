@@ -1,4 +1,4 @@
-import { keccak256, toBytes } from "viem";
+import { keccak256, toBytes, type Hash } from "viem";
 import type { TrustedSettlementInput, CheckResult } from "../../shared/schemas.js";
 
 /** Canonical JSON: sorted object keys at every level; array order preserved. */
@@ -31,6 +31,11 @@ export function computePreflightHash(input: TrustedSettlementInput, checks: Chec
 }
 
 /** Off-chain audit: compare on-chain `preflightHash` to a re-run of preflight checks. */
+/** Canonical rejection reason hash for on-chain `rejectDelivery`. */
+export function rejectionReasonHash(reason: string): Hash {
+  return keccak256(toBytes(`rejection:${reason}`));
+}
+
 export function verifyPreflightHash(
   onChainHash: string,
   input: TrustedSettlementInput,

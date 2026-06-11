@@ -1,20 +1,20 @@
 # MCP tools
 
-**16 tools** — canonical list: [README.md](README.md#tools-16). Same list in [SKILL.md](../../skills/trusted-agent-settlement/SKILL.md).
+**17 tools** — canonical list: [README.md](README.md#tools-17). Same list in [SKILL.md](../../skills/trusted-agent-settlement/SKILL.md).
 
-All tools return JSON in `content[0].text`. Errors set `isError: true`. See [roles.md](roles.md) for payer vs payee.
+All tools return JSON in `content[0].text`. Errors set `isError: true`. See [roles.md](roles.md) for payer vs payee vs arbiter.
 
 ## get_agent_readiness
 
-Role-aware doctor: `payer` | `payee` | `demo` | `mock`. Returns `allowedTools`, `checks`, `nextStep`.
+Role-aware doctor: `payer` | `payee` | `arbiter` | `demo` | `mock`. Returns `allowedTools`, `checks`, `nextStep`.
 
 ## simulate_trusted_settlement
 
-Dry-run preflight + fee quote + `nextAction`. Args: settlement fields + `mode` + `mock`.
+Dry-run preflight + fee quote + `nextAction`. Args: settlement fields + optional `arbiter` + `mode` + `mock`.
 
 ## fund_deal (payer)
 
-Fund escrow only. Returns `{ dealId, fundTx, nextAction: "deliver", terms }`. Supports `autoOnboardRecipients`.
+Fund escrow only. Returns `{ dealId, fundTx, nextAction: "deliver", terms }`. Supports `autoOnboardRecipients`, optional `arbiter`.
 
 ## submit_delivery (payee)
 
@@ -30,7 +30,7 @@ Args: `dealId`, optional `amount`/`agentB` (defaults from on-chain `terms`), `mo
 
 ## get_settlement_status
 
-Returns `SettlementStatus` + `terms` (`payer`, `payee`, `token`, `amount`, `workHash`, `onChainResultHash`, `rejectEligible`).
+Returns `SettlementStatus` + `terms` (`rejectEligible`, `disputeOpen`, `resolveEligible`, `arbiter`, `rejectionReasonHash`).
 
 ## register_recipients (payer)
 
@@ -42,15 +42,24 @@ Args: `dealId`, `mock`. Use when payee never delivered and TTL expired.
 
 ## reject_delivery (payer)
 
-Args: `dealId`, `mock`. Reject invalid/junk delivery during dispute window — immediate full refund to payer.
+Args: `dealId`, **`reason`** or **`reasonHash`** (required), `mock`.
+
+- **Cooperative** (no arbiter on deal): immediate full refund with auditable hash.
+- **Arbiter mode**: opens `Disputed` — funds frozen until `resolve_dispute`.
+
+Not neutral quality arbitration in cooperative mode — see [threat-model.md](../security/threat-model.md).
+
+## resolve_dispute (arbiter)
+
+Args: `dealId`, `outcome` (`release` | `refund` | `split`), `payeeBps` (required for split), `mock`. Requires `ARBITER_PRIVATE_KEY`.
 
 ## execute_trusted_settlement (demo shortcut)
 
-Both keys in one process: full fund → deliver → attest → claim. Args include `skipAttest`, `autoOnboardRecipients`.
+Both keys in one process: full fund → deliver → attest → claim. Args include `skipAttest`, `autoOnboardRecipients`, optional `arbiter`.
 
 ## fund_deals_batch (payer)
 
-Args: `jobs[]`, `batchMode` (`saliFast` | `hybridWork`), `mock`, `autoOnboardRecipients`. Returns `manifest` for payee handoff.
+Args: `jobs[]` (optional `arbiter` per job), `batchMode` (`saliFast` | `hybridWork`), `mock`, `autoOnboardRecipients`. Returns `manifest` for payee handoff.
 
 ## submit_deliveries_batch (payee, hybridWork)
 

@@ -4,6 +4,8 @@ const { deployFullStack, mintAndApprove } = require("../helpers/hardhat-fixture.
 
 const { ethers } = hre;
 
+const REASON = ethers.id("junk-delivery");
+
 describe("DealEscrow", function () {
   it("setFeeConfig rejects fee above MAX_FEE_BPS", async function () {
     const fx = await deployFullStack();
@@ -38,7 +40,8 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     expect(await fx.escrow.canClaim(1n)).to.equal(false);
@@ -58,14 +61,17 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("junk"));
-    await expect(fx.escrow.connect(fx.payer).rejectDelivery(1n)).to.be.revertedWith("only router");
+    await expect(fx.escrow.connect(fx.payer).rejectDelivery(1n, REASON)).to.be.revertedWith(
+      "only router"
+    );
   });
 
-  it("rejectDelivery transitions to Refunded", async function () {
+  it("rejectDelivery requires non-zero reasonHash", async function () {
     const fx = await deployFullStack();
     const amount = ethers.parseEther("1");
     await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
@@ -79,12 +85,153 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
 
     await fx.router.connect(fx.payee).submitDelivery(1n, ethers.ZeroHash);
-    await fx.router.connect(fx.payer).rejectDelivery(1n);
+    await expect(fx.router.connect(fx.payer).rejectDelivery(1n, ethers.ZeroHash)).to.be.revertedWith(
+      "zero reason"
+    );
+  });
+
+  it("cooperative rejectDelivery transitions to Refunded", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("1");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n,
+      ethers.ZeroAddress
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.ZeroHash);
+    await fx.router.connect(fx.payer).rejectDelivery(1n, REASON);
+
+    const deal = await fx.escrow.getDeal(1n);
+    expect(deal.state).to.equal(5);
+    expect(deal.rejectionReasonHash).to.equal(REASON);
+  });
+
+  it("arbiter rejectDelivery transitions to Disputed", async function () {
+    const fx = await deployFullStack();
+    const [, , , arbiter] = await ethers.getSigners();
+    const amount = ethers.parseEther("1");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n,
+      arbiter.address
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("delivered"));
+    await fx.router.connect(fx.payer).rejectDelivery(1n, REASON);
+
+    const deal = await fx.escrow.getDeal(1n);
+    expect(deal.state).to.equal(3);
+    expect(deal.rejectionReasonHash).to.equal(REASON);
+    expect(await fx.token.balanceOf(fx.payer.address)).to.equal(0n);
+  });
+
+  it("resolveDispute ReleaseToPayee pays payee with fee", async function () {
+    const fx = await deployFullStack();
+    const [, , , arbiter] = await ethers.getSigners();
+    const amount = ethers.parseEther("100");
+    await fx.escrow.setFeeConfig(100, fx.feeRecipient.address);
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n,
+      arbiter.address
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("delivered"));
+    await fx.router.connect(fx.payer).rejectDelivery(1n, REASON);
+    await fx.router.connect(arbiter).resolveDispute(1n, 0, 0);
 
     expect((await fx.escrow.getDeal(1n)).state).to.equal(4);
+    expect(await fx.token.balanceOf(fx.payee.address)).to.equal(ethers.parseEther("99"));
+    expect(await fx.token.balanceOf(fx.feeRecipient.address)).to.equal(ethers.parseEther("1"));
+  });
+
+  it("resolveDispute RefundPayer returns full amount", async function () {
+    const fx = await deployFullStack();
+    const [, , , arbiter] = await ethers.getSigners();
+    const amount = ethers.parseEther("2");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n,
+      arbiter.address
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("delivered"));
+    await fx.router.connect(fx.payer).rejectDelivery(1n, REASON);
+    await fx.router.connect(arbiter).resolveDispute(1n, 1, 0);
+
+    expect((await fx.escrow.getDeal(1n)).state).to.equal(5);
+    expect(await fx.token.balanceOf(fx.payer.address)).to.equal(amount);
+  });
+
+  it("resolveDispute Split applies fee on payee share only", async function () {
+    const fx = await deployFullStack();
+    const [, , , arbiter] = await ethers.getSigners();
+    const amount = ethers.parseEther("100");
+    await fx.escrow.setFeeConfig(100, fx.feeRecipient.address);
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await fx.router.fundAndAcceptHybrid(
+      fx.payer.address,
+      fx.payee.address,
+      await fx.token.getAddress(),
+      amount,
+      3600n,
+      ethers.id("work"),
+      ethers.id("pf"),
+      true,
+      3600n,
+      arbiter.address
+    );
+
+    await fx.router.connect(fx.payee).submitDelivery(1n, ethers.id("delivered"));
+    await fx.router.connect(fx.payer).rejectDelivery(1n, REASON);
+    await fx.router.connect(arbiter).resolveDispute(1n, 2, 7000);
+
+    expect((await fx.escrow.getDeal(1n)).state).to.equal(4);
+    expect(await fx.token.balanceOf(fx.payee.address)).to.equal(ethers.parseEther("69.3"));
+    expect(await fx.token.balanceOf(fx.payer.address)).to.equal(ethers.parseEther("30"));
+    expect(await fx.token.balanceOf(fx.feeRecipient.address)).to.equal(ethers.parseEther("0.7"));
   });
 });

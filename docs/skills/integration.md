@@ -65,7 +65,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 
 | Layer | Surface |
 |-------|---------|
-| Skill / MCP | 16 tools — see [roles](../mcp/roles.md) |
+| Skill / MCP | 17 tools — see [roles](../mcp/roles.md) |
 | SDK ergonomic | `trustedAgentSettlement.ts` |
 | Primitives | `steps.ts` — `preflight`, `submitDelivery`, `claimDeal`, … |
 
@@ -92,7 +92,7 @@ See [SALI FastPay](../mcp/batch-sali.md) and the Skill's batch section.
 
 ### Option A: MCP (recommended for Cursor)
 
-Plug in MCP server — **16 tools**; payer/payee split or demo shortcuts.
+Plug in MCP server — **17 tools**; payer/payee split or demo shortcuts.
 
 See [MCP setup](../mcp/setup.md) and [roles](../mcp/roles.md).
 

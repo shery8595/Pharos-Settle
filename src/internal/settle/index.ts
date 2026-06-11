@@ -95,6 +95,7 @@ export async function fundDeal(
           preflightHash as `0x${string}`,
           true,
           disputeWindow,
+          (input.arbiter ?? "0x0000000000000000000000000000000000000000") as Address,
         ],
       })
     : await payerClient.writeContract({
@@ -194,6 +195,7 @@ export async function settle(
           preflightHash as `0x${string}`,
           true,
           disputeWindow,
+          (input.arbiter ?? "0x0000000000000000000000000000000000000000") as Address,
         ],
       })
     : await payerClient.writeContract({
@@ -296,7 +298,11 @@ export async function reclaimDeal(dealId: string, config: SettlementConfig = {})
   });
 }
 
-export async function rejectDeal(dealId: string, config: SettlementConfig = {}): Promise<Hash> {
+export async function rejectDeal(
+  dealId: string,
+  reasonHash: `0x${string}`,
+  config: SettlementConfig = {}
+): Promise<Hash> {
   if (config.mock) return ("0x" + "66".repeat(32)) as Hash;
 
   const deployments = loadDeployments(resolveDeploymentNetwork(config));
@@ -317,7 +323,45 @@ export async function rejectDeal(dealId: string, config: SettlementConfig = {}):
     address: router,
     abi: settlementRouterAbi,
     functionName: "rejectDelivery",
-    args: [BigInt(dealId)],
+    args: [BigInt(dealId), reasonHash],
+  });
+}
+
+function normalizeArbiterKey(key?: string): Hex {
+  const pk = (key ?? process.env.ARBITER_PRIVATE_KEY)?.trim();
+  if (!pk || pk === "0x" || pk.length < 66) {
+    throw new Error("Missing arbiter private key (ARBITER_PRIVATE_KEY or arbiterSigner)");
+  }
+  return pk as Hex;
+}
+
+export async function resolveDisputeDeal(
+  dealId: string,
+  outcome: number,
+  payeeBps: number,
+  config: SettlementConfig = {}
+): Promise<Hash> {
+  if (config.mock) return ("0x" + "77".repeat(32)) as Hash;
+
+  const deployments = loadDeployments(resolveDeploymentNetwork(config));
+  const rpcUrl = config.rpcUrl ?? ATLANTIC.rpcUrl;
+  const router = (config.routerAddress ?? deployments.settlementRouter) as Address;
+  const arbiterAccount = privateKeyToAccount(normalizeArbiterKey(config.arbiterSigner));
+  const chain = {
+    ...pharosChain,
+    id: deployments.chainId,
+    rpcUrls: { default: { http: [rpcUrl] } },
+  } as const;
+  const client = createWalletClient({
+    account: arbiterAccount,
+    chain,
+    transport: transportFromConfig(config, rpcUrl),
+  });
+  return client.writeContract({
+    address: router,
+    abi: settlementRouterAbi,
+    functionName: "resolveDispute",
+    args: [BigInt(dealId), outcome, payeeBps],
   });
 }
 

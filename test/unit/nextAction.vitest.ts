@@ -3,6 +3,7 @@ import {
   computeNextAction,
   computeReclaimable,
   computeRejectEligible,
+  computeResolveEligible,
   type DealSnapshot,
 } from "../../src/internal/commerce/nextAction.js";
 
@@ -21,8 +22,12 @@ function snap(overrides: Partial<DealSnapshot>): DealSnapshot {
 
 describe("computeNextAction", () => {
   it("returns done for Released and Refunded", () => {
-    expect(computeNextAction(snap({ state: 3 }), 1000)).toBe("done");
     expect(computeNextAction(snap({ state: 4 }), 1000)).toBe("done");
+    expect(computeNextAction(snap({ state: 5 }), 1000)).toBe("done");
+  });
+
+  it("returns resolve for Disputed", () => {
+    expect(computeNextAction(snap({ state: 3 }), 1000)).toBe("resolve");
   });
 
   it("returns fund for Created and Funded", () => {
@@ -70,9 +75,10 @@ describe("computeNextAction", () => {
 });
 
 describe("computeReclaimable", () => {
-  it("false when released or refunded", () => {
+  it("false when disputed, released, or refunded", () => {
     expect(computeReclaimable(snap({ state: 3 }), 2000)).toBe(false);
     expect(computeReclaimable(snap({ state: 4 }), 2000)).toBe(false);
+    expect(computeReclaimable(snap({ state: 5 }), 2000)).toBe(false);
   });
 
   it("false when delivery submitted", () => {
@@ -128,5 +134,16 @@ describe("computeRejectEligible", () => {
         2000
       )
     ).toBe(false);
+  });
+
+  it("false when Disputed", () => {
+    expect(computeRejectEligible(snap({ state: 3 }), 2000)).toBe(false);
+  });
+});
+
+describe("computeResolveEligible", () => {
+  it("true only in Disputed state", () => {
+    expect(computeResolveEligible(snap({ state: 3 }))).toBe(true);
+    expect(computeResolveEligible(snap({ state: 2 }))).toBe(false);
   });
 });

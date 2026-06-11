@@ -19,6 +19,7 @@ export const EXPECTED_MCP_TOOLS = [
   "get_settlement_status",
   "reclaim_trusted_settlement",
   "reject_delivery",
+  "resolve_dispute",
   "register_recipients",
   "simulate_trusted_settlement",
   "submit_delivery",
@@ -146,7 +147,21 @@ describe("MCP settlement tools", () => {
   });
 
   it("reject_delivery not eligible in mock default state", async () => {
-    const res = await server.call("reject_delivery", { dealId: "1", mock: true });
+    const res = await server.call("reject_delivery", {
+      dealId: "1",
+      reason: "junk output",
+      mock: true,
+    });
+    const body = parse(res);
+    expect(body.success).toBe(false);
+  });
+
+  it("resolve_dispute not eligible in mock default state", async () => {
+    const res = await server.call("resolve_dispute", {
+      dealId: "1",
+      outcome: "refund",
+      mock: true,
+    });
     const body = parse(res);
     expect(body.success).toBe(false);
   });

@@ -16,7 +16,9 @@ Full settlement pipeline: preflight → optional onboard → settle → prove.
 
 **Returns:** `TrustedSettlementOutput`
 
-**Config highlights:** `mode`, `mock`, `skipAttest`, `autoOnboardRecipients`, `payerSigner`, `payeeSigner`
+**Config highlights:** `mode`, `mock`, `skipAttest`, `autoOnboardRecipients`, `payerSigner`, `payeeSigner`, `arbiterSigner`
+
+**Input highlights:** optional `arbiter` on `TrustedSettlementInput` (v1.2)
 
 Caches successful results by input key (same agentA/B/amount/workDescription).
 
@@ -33,6 +35,23 @@ Uses **chain block timestamp** for time-based fields (not wall clock).
 Payer refund when deadline passed and no delivery. Checks `reclaimable` first.
 
 **Returns:** `ReclaimOutput` — `{ success, dealId, refundTx?, reason?, nextAction? }`
+
+### rejectDeliveryForDeal(dealId, { reason?, reasonHash? }, config?)
+
+Payer rejects delivery during dispute window. **Requires** `reason` or `reasonHash` (non-zero).
+
+- Cooperative (`arbiter` unset / `0x0`): instant refund
+- Arbiter mode: opens `Disputed`; returns `{ disputed: true, nextAction: "resolve" }`
+
+**Returns:** `RejectOutput` — `{ success, dealId, refundTx?, reasonHash?, disputed?, reason?, nextAction? }`
+
+### resolveDisputeForDeal(dealId, outcome, config?, payeeBps?)
+
+Arbiter resolves open dispute. `outcome`: `"release"` | `"refund"` | `"split"`. Split requires `0 < payeeBps < 10000`.
+
+**Config:** `arbiterSigner` or env `ARBITER_PRIVATE_KEY`
+
+**Returns:** `ResolveDisputeOutput`
 
 ### completeClaimForDeal(dealId, input, config?)
 
@@ -87,6 +106,9 @@ Import: `pharos-trusted-settlement/steps`. Mirrors [architecture overview](../ar
 | `fundDeal` | settle/index | Payer fund (requires `preflightHash` from `preflight`) |
 | `settle` | settle/index | Full fund → deliver → attest → claim orchestrator |
 | `reclaimDeal` | settle/index | On-chain reclaim tx |
+| `rejectDeal` | settle/index | On-chain reject with `reasonHash` |
+| `resolveDisputeDeal` | settle/index | Arbiter resolve dispute |
+| `rejectionReasonHash` | preflight/hash | Canonical reject reason hash |
 | `submitDelivery` / `submitDeliveryWithHash` | settle/delivery | Payee delivery |
 | `attestRelease` / `attestReleaseWithHash` | settle/delivery | Payer attestation |
 | `claimDeal` | settle/delivery | Payee claim |

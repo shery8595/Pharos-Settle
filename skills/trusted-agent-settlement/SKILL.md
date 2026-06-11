@@ -2,7 +2,7 @@
 name: trusted-agent-settlement
 description: >
   Stripe Checkout for AI agents on Pharos — agent-to-agent work settlement with ghost protection.
-  A trust layer for agents that hire each other: simulate-first, nextAction hints, 16 MCP tools,
+  A trust layer for agents that hire each other: simulate-first, nextAction hints, 17 MCP tools,
   SALI FastPay batch payroll. Triggers on "pharos settle", "pay agent on pharos", "agent commerce",
   "safe agent payment", "agent escrow", "ghost protection", "batch agent payroll".
 ---
@@ -13,6 +13,8 @@ description: >
 
 > **Agent-to-agent work settlement with ghost protection.**  
 > Payee ghosts → payer reclaims. Payer ghosts → payee still gets paid. Both behave → instant settlement.
+
+> **v1.2.0:** Cooperative rejection requires auditable `reason`/`reasonHash`. Optional **arbiter** at fund → reject opens `Disputed` → `resolve_dispute`. Phase 2 adds reputation and marketplace — not trustless oracle panels.
 
 ## What's novel
 
@@ -58,11 +60,11 @@ Optional timing: `ttlSeconds` (reclaim deadline), `disputeWindowSeconds` (auto-r
 | Who ghosts? | Outcome |
 |-------------|---------|
 | Payee never delivers | Payer **reclaims** (`reclaim_trusted_settlement` / `mode: safetyNet`) |
-| Payee submits junk delivery | Payer **rejects** (`reject_delivery` during dispute window) — **cooperative review only**; payer has unilateral refund power, no on-chain quality check |
+| Payee submits junk delivery | Payer **safety valve** (`reject_delivery` during dispute window) — cooperative review, not quality arbitration |
 | Payer never attests after delivery | Payee **still gets paid** (auto-release after `disputeWindow`) |
 | Both cooperate | **Instant settlement** — fund → deliver → attest → claim |
 
-> **⚠️ Payer rejection trust assumption (Phase 1):** `reject_delivery` is not adversarial arbitration. A payer can reject valid work after consuming it and keep a full refund (0% fee). Phase 2 adds disputes. See [threat-model.md](../../docs/security/threat-model.md#payer-rejection-rug-vector-asymmetric-power).
+> **Phase 1 scope:** `reject_delivery` is a payer-side safety valve for cooperative junk review — not neutral arbitration. For adversarial counterparty risk, see integrator guidance in [threat-model.md](../../docs/security/threat-model.md#payer-rejection-rug-vector-asymmetric-power). Phase 2 adds evidence-backed disputes and reputation.
 
 ## Agent scenarios
 
@@ -104,7 +106,7 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 
 | Layer | Surface | Best for |
 |-------|---------|----------|
-| **Skill / MCP** | 16 stdio tools + this Skill file | Cursor agents, payer/payee in separate processes |
+| **Skill / MCP** | 17 stdio tools + this Skill file | Cursor agents, payer/payee/arbiter in separate processes |
 | **SDK ergonomic** | `pharos-trusted-settlement` | Apps with typed outputs and `nextAction` |
 | **Developer primitives** | `pharos-trusted-settlement/steps` | Custom orchestrators, tests, pipelines |
 
@@ -120,6 +122,8 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 | Attest | `attest_release` | `attestReleaseForDeal` | `attestRelease` / `attestReleaseWithHash` |
 | Claim | `complete_claim_for_deal` | `completeClaimForDeal` | `claimDeal` |
 | Reclaim | `reclaim_trusted_settlement` | `reclaimTrustedSettlement` | `reclaimDeal` |
+| Reject | `reject_delivery` | `rejectDeliveryForDeal` | `rejectDeal` |
+| Resolve | `resolve_dispute` | `resolveDisputeForDeal` | `resolveDisputeDeal` |
 | Batch fund | `fund_deals_batch` | `fundDealsBatch` | `fundDealsBatch` |
 | Batch claim | `complete_claims_batch` | `claimDealsBatch` | `claimDealsBatch` |
 
@@ -135,6 +139,8 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 | Attest | `attest_release` | payer | release permission |
 | Claim | `complete_claim_for_deal` | payee | settlement tx |
 | Reclaim | `reclaim_trusted_settlement` | payer | refund tx |
+| Reject | `reject_delivery` | payer | `reasonHash`; cooperative refund or dispute |
+| Resolve | `resolve_dispute` | arbiter | release / refund / split |
 | Batch fund | `fund_deals_batch` | payer | `manifest` (→ `complete_claims_batch`) |
 | Batch claim | `complete_claims_batch` | payee | per-deal settlement txs |
 
@@ -166,7 +172,15 @@ fund_deal (or fund only) → get_settlement_status → wait until nextAction: re
 
 Demos: `npm run demo:ghost-payee` · `npm run demo:ghost-payee:simulate` · (`demo:reclaim` alias)
 
-**4. Batch worker payroll** (SALI FastPay — one payer, many workers)
+**4. Junk delivery rejection** (cooperative or arbiter)
+
+```
+get_settlement_status → reject_delivery (reason required) → [resolve_dispute if arbiter deal]
+```
+
+Cooperative (`arbiter: 0x0`): instant refund. Arbiter mode: funds frozen until arbiter resolves.
+
+**5. Batch worker payroll** (SALI FastPay — one payer, many workers)
 
 ```
 fund_deals_batch (saliFast) → hand off manifest → complete_claims_batch
@@ -174,13 +188,13 @@ fund_deals_batch (saliFast) → hand off manifest → complete_claims_batch
 
 Full work at scale: `fund_deals_batch` → `submit_deliveries_batch` → `attest_releases_batch` → `complete_claims_batch` (`hybridWork`).
 
-**5. Agent marketplace** (⚠️ Phase 2 — not shipped)
+**6. Agent marketplace** (⚠️ Phase 2 — not shipped)
 
 ```
 discover job → simulate_trusted_settlement → fund_deal → submit_delivery → complete_claim_for_deal
 ```
 
-Marketplace discovery and reputation are roadmap only — [docs/PHASES.md](../../docs/PHASES.md). Payment primitives (patterns 1–4) ship today.
+Marketplace discovery and reputation are roadmap only — [docs/PHASES.md](../../docs/PHASES.md). Payment primitives (patterns 1–5) ship today.
 
 ### Composable guarantees
 
@@ -190,6 +204,7 @@ Marketplace discovery and reputation are roadmap only — [docs/PHASES.md](../..
 | **`dealId` handoff** | Payer and payee can operate in separate processes |
 | **`preflightHash` audit log** | Simulate checks hashed and stored on-chain at fund time (off-chain verifiable) |
 | **`resultHash` delivery** | Work proof can be passed without revealing full details |
+| **`reject_delivery` + reasonHash** | Auditable cooperative junk review; arbiter mode for adversarial payments |
 | **MCP / SDK parity** | Same workflow works through agent tools or code |
 
 ## Skill module
@@ -201,8 +216,8 @@ Marketplace discovery and reputation are roadmap only — [docs/PHASES.md](../..
 | **npm package** | `pharos-trusted-settlement` |
 | **Repo path** | `skills/trusted-agent-settlement/` |
 | **Network** | Pharos Atlantic (`chainId` 688689) |
-| **MCP server** | `npm run mcp` (stdio) — **16 tools** |
-| **Tests** | `npm test` — 130 green |
+| **MCP server** | `npm run mcp` (stdio) — **17 tools** |
+| **Tests** | `npm test` — 145 green |
 
 ### Install
 
@@ -229,7 +244,7 @@ Token **decimals** (for `amount` in wei): TEST/WBTC/WETH/WPHRS = 18, USDC/USDT =
 ## When to use
 
 - One agent hires another for verifiable work (research, risk, summarization, labeling)
-- **Ghost protection** — payee ghost → reclaim; payer ghost → auto-release; junk → cooperative `reject_delivery` (payer rejection is unilateral in Phase 1)
+- **Ghost protection** — payee ghost → reclaim; payer ghost → auto-release; junk → cooperative `reject_delivery` safety valve (Phase 2 adds neutral arbitration)
 - Simulate before gas; poll `nextAction` for multi-step flows
 - **SALI FastPay** — one payer, many worker agents, parallel fund+claim on Pharos (`batchMode: saliFast`)
 - **Batch agent commerce** — full deliver+attest+claim at scale (`batchMode: hybridWork`)
@@ -356,7 +371,7 @@ No on-chain maximum for either field (uint64); use `ttlSeconds` large enough to 
 
 ## MCP (plug and play)
 
-Run: `npm run mcp` — **16 tools** (canonical list matches [docs/mcp/README.md](../../docs/mcp/README.md)).
+Run: `npm run mcp` — **17 tools** (canonical list matches [docs/mcp/README.md](../../docs/mcp/README.md)).
 
 **Readiness:** `get_agent_readiness` or `npm run agent:doctor` — role is `payer` | `payee` | `demo` | `mock`.
 
@@ -364,12 +379,13 @@ Pass `mock: true` when no keys are configured.
 
 ### All MCP tools (16)
 
-`get_agent_readiness` · `simulate_trusted_settlement` · `fund_deal` · `fund_deals_batch` · `submit_delivery` · `submit_deliveries_batch` · `attest_release` · `attest_releases_batch` · `complete_claim_for_deal` · `complete_claims_batch` · `get_settlement_status` · `register_recipients` · `reclaim_trusted_settlement` · `reject_delivery` · `execute_trusted_settlement` · `execute_batch_settlement`
+`get_agent_readiness` · `simulate_trusted_settlement` · `fund_deal` · `fund_deals_batch` · `submit_delivery` · `submit_deliveries_batch` · `attest_release` · `attest_releases_batch` · `complete_claim_for_deal` · `complete_claims_batch` · `get_settlement_status` · `register_recipients` · `reclaim_trusted_settlement` · `reject_delivery` · `resolve_dispute` · `execute_trusted_settlement` · `execute_batch_settlement`
 
 | Category | Tools | Role |
 |----------|-------|------|
 | Shared | `get_agent_readiness`, `simulate_trusted_settlement`, `get_settlement_status` | payer, payee, demo |
 | Payer | `register_recipients`, `fund_deal`, `attest_release`, `reclaim_trusted_settlement`, `reject_delivery`, `fund_deals_batch`, `attest_releases_batch` | payer |
+| Arbiter | `resolve_dispute`, `get_settlement_status` | arbiter (`ARBITER_PRIVATE_KEY`) |
 | Payee | `submit_delivery`, `complete_claim_for_deal`, `submit_deliveries_batch`, `complete_claims_batch` | payee |
 | Demo shortcuts | `execute_trusted_settlement`, `execute_batch_settlement` | demo (both keys) |
 

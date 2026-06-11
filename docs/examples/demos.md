@@ -2,6 +2,14 @@
 
 Canonical list of demo scripts. Entry points (README, SUBMISSION, JUDGES) mirror a shortened table from this file.
 
+## Judge mock flow (no keys, one command)
+
+```bash
+npm run demo:judge
+```
+
+Runs `agent:doctor:mock` then `demo:simulate`. Primary entry for hackathon judges — see [JUDGES.md](../../JUDGES.md).
+
 ## Simulation (no gas)
 
 ```bash
@@ -24,6 +32,7 @@ Full cooperative settlement with receipt prove.
 
 | Command | What it shows |
 |---------|----------------|
+| `npm run demo:judge` | **Judge path** — readiness + simulate in one command (no keys) |
 | `npm run demo:simulate` | Preflight + fee quote (no gas) |
 | `npm run demo:pharos` | End-to-end cooperative settlement on Atlantic |
 | `npm run demo:ghost-payee` | Ghost payee — payer reclaims when worker never delivers |
@@ -38,7 +47,7 @@ Full cooperative settlement with receipt prove.
 | `npm run demo:pipeline` | Composable Layer 2 pipeline (`steps.ts`) |
 | `npm run demo:spv` | SPV prove tier on Atlantic |
 | `npm run demo:reclaim` | **Alias** for `demo:ghost-payee` (backward compat) |
-| `npm run agent:doctor:mock` | MCP readiness — 16 tools, no keys |
+| `npm run agent:doctor:mock` | MCP readiness — 17 tools, no keys |
 
 ## Batch / SALI
 

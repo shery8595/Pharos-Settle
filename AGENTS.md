@@ -82,18 +82,18 @@ Set `"awaitingConfirmation": false` and `"confirmedAt"` in `.pharos-settle/setup
 
 | `runMode` | Behavior |
 |-----------|----------|
-| **`demo`** | `mock: true` on MCP tools, or `npm run agent:doctor:mock` / `npm run demo:simulate`. No keys needed. |
+| **`demo`** | `mock: true` on MCP tools, or `npm run demo:judge` (recommended). No keys needed. |
 | **`live`** | MCP without `mock: true` or `npm run agent:doctor` / `npm run demo:pharos` — only after keys are set. |
 
 **Live keys:** If `runMode` is `live` and `keysConfigured` is `false` (or keys missing in `.env` at `repoPath`), tell the user to set **`PRIVATE_KEY`** and **`AGENT_B_PRIVATE_KEY`** (full 32-byte hex, not `0x` placeholder), fund PHRS, save `.env`, then call any MCP tool (env reloads per request). Use AskQuestion: **Keys saved in .env?** before live settlement tools.
 
 Do **not** call live settlement tools (`fund_deal`, etc. without `mock: true`) until both keys are configured.
 
-If MCP tools are **not available** in this session, say so explicitly. Offer CLI fallback: `npm run agent:doctor:mock`, `npm run demo:simulate`.
+If MCP tools are **not available** in this session, say so explicitly. Offer CLI fallback: `npm run demo:judge` (or `npm run agent:doctor:mock` + `npm run demo:simulate`).
 
 ## What this project is
 
-**Pharos Settle** — agent-to-agent escrow on Pharos Atlantic with ghost protection. Use the **MCP server** (16 tools) or the **Skill** at `skills/trusted-agent-settlement/SKILL.md`.
+**Pharos Settle** — agent-to-agent escrow on Pharos Atlantic with ghost protection. Use the **MCP server** (17 tools) or the **Skill** at `skills/trusted-agent-settlement/SKILL.md`.
 
 | Layer | Path |
 |-------|------|
@@ -107,6 +107,8 @@ If MCP tools are **not available** in this session, say so explicitly. Offer CLI
 Do **not** use raw `cast send` for agent payments. Use MCP tools or SDK:
 
 `get_agent_readiness` → `simulate_trusted_settlement` → `fund_deal` → `submit_delivery` → `attest_release` → `complete_claim_for_deal`
+
+**Reject (v1.2):** `reject_delivery` requires `reason` or `reasonHash`. Optional `arbiter` on `fund_deal` / `simulate_trusted_settlement` — arbiter deals use `resolve_dispute` (`ARBITER_PRIVATE_KEY`).
 
 Mock mode: pass `mock: true` when no wallet keys are configured.
 

@@ -4,7 +4,7 @@
 
 **Stripe Checkout for AI agents on Pharos** · Agent-to-agent work settlement with **ghost protection**.
 
-**Package:** `pharos-trusted-settlement` · **Network:** Pharos Atlantic (`688689`) · **Tests:** 130 green
+**Package:** `pharos-trusted-settlement` · **Network:** Pharos Atlantic (`688689`) · **Tests:** 145 green
 
 ### What's novel
 
@@ -24,11 +24,11 @@
 |----------------------|--------------------------|
 | Smart contracts (4 + TEST token) | Agent marketplace |
 | TypeScript SDK | Reputation scores |
-| MCP server — 16 tools | On-chain arbitration |
+| MCP server — 17 tools | On-chain arbitration |
 | Agent Skill module | |
 | Live Atlantic deployment | |
-| 130 tests | |
-| Junk-delivery protection (`reject_delivery`) | |
+| 145 tests (50 Hardhat + 95 Vitest) | |
+| Cooperative junk review (`reject_delivery` safety valve) | |
 
 Roadmap detail: [docs/PHASES.md](docs/PHASES.md) · Threat model: [docs/security/threat-model.md](docs/security/threat-model.md)
 
@@ -43,7 +43,7 @@ One AI agent hires another. Money locks in escrow until work is proven. Then pay
 | If… | Then… |
 |-----|-------|
 | Worker never delivers | Payer gets money back |
-| Worker submits junk delivery | Payer **rejects** during dispute window |
+| Worker submits junk delivery | Payer **safety valve** during dispute window (`reject_delivery`, cooperative review) |
 | Payer disappears after delivery | Worker still gets paid |
 | Both cooperate | Instant settlement |
 
@@ -77,7 +77,7 @@ Tutorials show “10 TEST on Atlantic” as one instance — the Skill is parame
 |-------|-------------|
 | On-chain | Router + escrow + registry + allowlist — [live addresses](deployments/atlantic.json) |
 | SDK | `simulateTrustedSettlement` → `executeTrustedSettlement` + `nextAction` |
-| MCP | 16 tools — payer/payee split + batch |
+| MCP | 17 tools — payer/payee split + batch |
 | Skill | `skills/trusted-agent-settlement/` — composable agent economy primitive |
 
 ### Composability design
@@ -97,7 +97,9 @@ Tutorials show “10 TEST on Atlantic” as one instance — the Skill is parame
 
 **Patterns:** (1) human-triggered payment · (2) payee recovery when payer ghosts · (3) reclaim when payee ghosts · (4) reject junk delivery · (5) SALI FastPay batch · (6) marketplace *(Phase 2)*  
 
-**Guarantees:** `nextAction` loops · `dealId` handoff · `preflightHash` audit log (off-chain verifiable) · `reject_delivery` junk protection · `resultHash` delivery · MCP/SDK parity  
+**Guarantees:** `nextAction` loops · `dealId` handoff · `preflightHash` audit log · `reject_delivery` + `reasonHash` · optional arbiter + `resolve_dispute` · `resultHash` delivery · MCP/SDK parity  
+
+> **v1.2.0:** Auditable `reasonHash` on reject; optional **arbiter** → `Disputed` → `resolve_dispute`. Cooperative mode: payer-rug risk documented in [threat-model](docs/security/threat-model.md). Phase 2: reputation + marketplace.
 
 → [SKILL.md](skills/trusted-agent-settlement/SKILL.md) · [JUDGES.md](JUDGES.md)
 
@@ -129,8 +131,7 @@ flowchart LR
 
 ```bash
 npm install
-npm run agent:doctor:mock
-npm run demo:simulate
+npm run demo:judge
 ```
 
 ### Live Atlantic (keys in `.env`)
@@ -148,7 +149,7 @@ See [JUDGES.md](JUDGES.md) for what to look for in the output.
 | `npm run demo:ghost-payer:simulate` | Ghost payer — payee paid when payer ghosts (mock) |
 | `npm run demo:batch` | SALI FastPay — parallel batch payroll |
 | `npm run demo:pharos` | Live cooperative settlement |
-| `npm test` | 130 tests |
+| `npm test` | 145 tests |
 
 Full list: [docs/examples/demos.md](docs/examples/demos.md) · `demo:reclaim` aliases `demo:ghost-payee`.
 
@@ -174,20 +175,22 @@ Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) · Proof: [
 
 **Title:** Pharos Settle — Stripe Checkout for AI agents on Pharos  
 **Tags:** AgentSkill, MCP, Payments, Onchain, Pharos  
-**One-liner:** Dual-ghost protection + agent-native API (Skill + 16 MCP tools) for agent-to-agent work settlement on Pharos — simulate-first, `nextAction` loops, junk-delivery reject, SALI FastPay batch payroll. Live Atlantic, 130 tests.
+**One-liner:** Dual-ghost protection + agent-native API (Skill + 17 MCP tools) for agent-to-agent work settlement on Pharos — auditable reject, optional arbiter disputes, SALI FastPay batch payroll. Live Atlantic v1.2.0.
 
 **Demo video:** _(paste URL — script: [docs/demo-script.md](docs/demo-script.md))_
 
 ### Live proof (PharosScan)
 
+Run live demos with keys in `.env` — each prints a PharosScan link in stdout. Tx hashes for this table will be refreshed before final submission.
+
 | Flow | Tx hash | Notes |
 |------|---------|-------|
-| Cooperative settlement | _(paste)_ | `npm run demo:pharos` |
-| SALI batch fund | _(paste)_ | `npm run demo:batch` |
-| Ghost payee reclaim | _(paste)_ | `npm run demo:ghost-payee` |
-| Ghost payer claim | _(paste)_ | `npm run demo:ghost-payer` |
+| Cooperative settlement | _(refresh before submit)_ | `npm run demo:pharos` |
+| SALI batch fund | _(refresh before submit)_ | `npm run demo:batch` |
+| Ghost payee reclaim | _(refresh before submit)_ | `npm run demo:ghost-payee` |
+| Ghost payer claim | _(refresh before submit)_ | `npm run demo:ghost-payer` |
 
-Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz)
+Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) · Contracts: [`deployments/atlantic.json`](deployments/atlantic.json)
 
 ---
 

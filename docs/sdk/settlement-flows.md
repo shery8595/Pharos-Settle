@@ -66,6 +66,36 @@ const reclaim = await reclaimTrustedSettlement(dealId, { mode: "safetyNet" });
 
 Blocked if delivery was submitted.
 
+## Junk delivery — cooperative reject (v1.2)
+
+Default when no `arbiter` on fund:
+
+```typescript
+import { rejectDeliveryForDeal, rejectionReasonHash } from "./src/trustedAgentSettlement.js";
+
+const result = await rejectDeliveryForDeal(
+  dealId,
+  { reason: "output does not match spec section 3" },
+  { payerSigner: process.env.PRIVATE_KEY }
+);
+// result.reasonHash on-chain; cooperative → instant refund
+```
+
+## Adversarial payment — arbiter dispute (v1.2)
+
+```typescript
+const input = {
+  ...baseInput,
+  arbiter: "0xYourReviewerAddress",
+  requiresHybridRelease: true,
+};
+
+await fundDealSettlement(input, config);
+// payee delivers, payer rejects with reason → Disputed (funds frozen)
+
+await resolveDisputeForDeal(dealId, "split", { arbiterSigner: process.env.ARBITER_PRIVATE_KEY }, 7000);
+```
+
 ## Onboard then settle
 
 ```typescript
@@ -92,6 +122,7 @@ await executeTrustedSettlement(input, {
 | Delivered | `attest` or `wait` |
 | Attested / auto-release | `claim` |
 | Expired, no delivery | `reclaim` |
+| Disputed (arbiter mode) | `resolve` |
 | Complete | `done` |
 
 ## Related docs

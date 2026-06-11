@@ -41,7 +41,18 @@ contract SettlementRouter {
         registry.requireRegistered(payee);
         allowlist.requireAllowed(token);
 
-        dealId = escrow.createDeal(payer, payee, token, amount, ttlSeconds, workHash, preflightHash, false, 0);
+        dealId = escrow.createDeal(
+            payer,
+            payee,
+            token,
+            amount,
+            ttlSeconds,
+            workHash,
+            preflightHash,
+            false,
+            0,
+            address(0)
+        );
         emit SettlementInitiated(dealId, payer, payee, token, amount, preflightHash);
 
         escrow.fund(dealId);
@@ -60,7 +71,18 @@ contract SettlementRouter {
         bytes32 workHash,
         bytes32 preflightHash
     ) external returns (uint256 dealId) {
-        return fundAndAcceptHybrid(payer, payee, token, amount, ttlSeconds, workHash, preflightHash, false, 0);
+        return fundAndAcceptHybrid(
+            payer,
+            payee,
+            token,
+            amount,
+            ttlSeconds,
+            workHash,
+            preflightHash,
+            false,
+            0,
+            address(0)
+        );
     }
 
     function fundAndAcceptHybrid(
@@ -72,7 +94,8 @@ contract SettlementRouter {
         bytes32 workHash,
         bytes32 preflightHash,
         bool requiresHybridRelease,
-        uint64 disputeWindow
+        uint64 disputeWindow,
+        address arbiter
     ) public returns (uint256 dealId) {
         registry.requireRegistered(payer);
         registry.requireRegistered(payee);
@@ -87,7 +110,8 @@ contract SettlementRouter {
             workHash,
             preflightHash,
             requiresHybridRelease,
-            disputeWindow
+            disputeWindow,
+            arbiter
         );
         emit SettlementInitiated(dealId, payer, payee, token, amount, preflightHash);
         escrow.fund(dealId);
@@ -115,10 +139,16 @@ contract SettlementRouter {
         escrow.reclaim(dealId);
     }
 
-    function rejectDelivery(uint256 dealId) external {
+    function rejectDelivery(uint256 dealId, bytes32 reasonHash) external {
         DealEscrow.Deal memory deal = escrow.getDeal(dealId);
         require(msg.sender == deal.payer, "only payer");
-        escrow.rejectDelivery(dealId);
+        escrow.rejectDelivery(dealId, reasonHash);
+    }
+
+    function resolveDispute(uint256 dealId, uint8 outcome, uint16 payeeBps) external {
+        DealEscrow.Deal memory deal = escrow.getDeal(dealId);
+        require(msg.sender == deal.arbiter, "only arbiter");
+        escrow.resolveDispute(dealId, outcome, payeeBps);
     }
 
     function canClaim(uint256 dealId) external view returns (bool) {
@@ -134,4 +164,3 @@ contract SettlementRouter {
         return deal.state == DealEscrow.DealState.Released;
     }
 }
-

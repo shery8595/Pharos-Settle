@@ -114,7 +114,7 @@ After you edit `.env`, the next MCP tool call **re-reads `.env` from disk** — 
 ## Verify
 
 1. Restart Cursor / reload MCP
-2. List tools — should see **16 tools** (see [roles.md](roles.md))
+2. List tools — should see **17 tools** (see [roles.md](roles.md))
 3. `get_agent_readiness` with `mock: true`
 4. `simulate_trusted_settlement` with mock addresses
 

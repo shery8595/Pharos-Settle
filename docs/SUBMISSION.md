@@ -6,12 +6,12 @@ That file includes live Atlantic contract addresses (from `deployments/atlantic.
 
 ## Checklist (maintainers)
 
-- [x] Pharos Settle Skill module (`skills/trusted-agent-settlement/` — 16 MCP tools in `SKILL.md`)
+- [x] Pharos Settle Skill module (`skills/trusted-agent-settlement/` — 17 MCP tools in `SKILL.md`)
 - [x] Two-mode API + `nextAction` + `feeQuote`
 - [x] Protocol-compliant MCP (`npm run mcp`) + [mcp/setup.md](mcp/setup.md)
 - [x] Hybrid release: delivery + attest + ghost-payer auto-release + junk-delivery reject
 - [x] Protocol fees on success (no fee on reclaim/reject)
-- [x] Contracts + tests green — **130 tests** (`npm test`: 44 Hardhat + 86 Vitest)
+- [x] Contracts + tests green — **145 tests** (`npm test`: 50 Hardhat + 95 Vitest)
 - [x] Hybrid SALI batch — `saliFast` + `hybridWork` MCP tools + split demo
 - [x] Live Atlantic deployment — [`deployments/atlantic.json`](../deployments/atlantic.json)
 - [x] Ghost payee reclaim demo (`demo:ghost-payee`, `demo:reclaim` alias)

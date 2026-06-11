@@ -9,6 +9,8 @@ import type {
   SettlementStatus,
   ReclaimOutput,
   RejectOutput,
+  ResolveDisputeOutput,
+  DisputeOutcomeName,
   RegisterRecipientsOutput,
   SettlementMode,
   FundDealOutput,
@@ -28,6 +30,7 @@ import {
   fundDeal,
   reclaimDeal,
   rejectDeal,
+  resolveDisputeDeal,
   claimDeal,
   readCanClaim,
   executeBatchSettlement,
@@ -44,7 +47,14 @@ import { getAgentReadiness } from "./internal/agent/readiness.js";
 import { prove } from "./internal/prove/index.js";
 import { settlementRouterAbi, DEAL_STATE, type NextAction } from "./shared/abis.js";
 import { getFeeQuote } from "./internal/commerce/feeQuote.js";
-import { computeNextAction, computeReclaimable, computeRejectEligible, type DealSnapshot } from "./internal/commerce/nextAction.js";
+import {
+  computeNextAction,
+  computeReclaimable,
+  computeRejectEligible,
+  computeResolveEligible,
+  type DealSnapshot,
+} from "./internal/commerce/nextAction.js";
+import { rejectionReasonHash } from "./internal/preflight/hash.js";
 import { computeProofHash } from "./internal/prove/index.js";
 import { onlyPayeeNeedsOnboarding } from "./internal/preflight/onboarding.js";
 import { ensureRecipientsOnboarded } from "./internal/onboard/ensure.js";
@@ -252,6 +262,8 @@ async function fetchDealSnapshot(
     disputeWindow: BigInt(deal.disputeWindow),
     payerAttested: deal.payerAttested,
     canClaim,
+    arbiter: deal.arbiter,
+    rejectionReasonHash: String(deal.rejectionReasonHash),
   };
   return { deal: snapshot, raw: deal };
 }
@@ -274,6 +286,8 @@ function mockDeal(dealId: string) {
     deliverySubmittedAt: 0n,
     disputeWindow: 3600n,
     payerAttested: false,
+    arbiter: ("0x0000000000000000000000000000000000000000") as Address,
+    rejectionReasonHash: zero,
   };
 }
 
@@ -306,6 +320,8 @@ export async function getSettlementStatus(
   const state = DEAL_STATE[snapshot.state] ?? "Created";
   const reclaimable = computeReclaimable(snapshot, now);
   const rejectEligible = computeRejectEligible(snapshot, now);
+  const resolveEligible = computeResolveEligible(snapshot);
+  const disputeOpen = snapshot.state === 3;
   const nextAction = computeNextAction(snapshot, now);
   const autoReleaseAt =
     snapshot.deliverySubmittedAt > 0n
@@ -315,6 +331,10 @@ export async function getSettlementStatus(
   const zeroHash = ("0x" + "00".repeat(32)) as `0x${string}`;
   const onChainResultHash =
     deal.resultHash && deal.resultHash !== zeroHash ? String(deal.resultHash) : null;
+  const rejectionHash =
+    deal.rejectionReasonHash && deal.rejectionReasonHash !== zeroHash
+      ? String(deal.rejectionReasonHash)
+      : null;
   const terms: DealTerms = {
     payer: deal.payer,
     payee: deal.payee,
@@ -336,6 +356,10 @@ export async function getSettlementStatus(
     deadline: deal.deadline.toString(),
     reclaimable,
     rejectEligible,
+    disputeOpen,
+    resolveEligible,
+    arbiter: deal.arbiter,
+    rejectionReasonHash: rejectionHash,
     requiresHybridRelease: deal.requiresHybridRelease,
     deliverySubmitted: snapshot.deliverySubmittedAt > 0n,
     payerAttested: deal.payerAttested,
@@ -445,6 +469,7 @@ export async function reclaimTrustedSettlement(
 
 export async function rejectDeliveryForDeal(
   dealId: string,
+  args: { reason?: string; reasonHash?: string },
   config: SettlementConfig = {}
 ): Promise<RejectOutput> {
   const status = await getSettlementStatus(dealId, config);
@@ -457,17 +482,85 @@ export async function rejectDeliveryForDeal(
           ? "already refunded"
           : status.state === "Released"
             ? "already released"
-            : !status.deliverySubmitted
-              ? "no delivery submitted"
-              : status.payerAttested
-                ? "already attested"
-                : "dispute window elapsed or deal expired",
+            : status.state === "Disputed"
+              ? "dispute already open"
+              : !status.deliverySubmitted
+                ? "no delivery submitted"
+                : status.payerAttested
+                  ? "already attested"
+                  : "dispute window elapsed or deal expired",
       nextAction: status.nextAction,
     };
   }
-  const refundTx = await rejectDeal(dealId, config);
-  return { success: true, dealId, refundTx, nextAction: "done" };
+
+  const hash = (
+    args.reasonHash ??
+    (args.reason ? rejectionReasonHash(args.reason) : undefined)
+  ) as `0x${string}` | undefined;
+  if (!hash || hash === ("0x" + "00".repeat(32))) {
+    return {
+      success: false,
+      dealId,
+      reason: "reason or reasonHash required (non-zero)",
+      nextAction: status.nextAction,
+    };
+  }
+
+  const tx = await rejectDeal(dealId, hash, config);
+  const arbiterSet = status.arbiter.toLowerCase() !== "0x0000000000000000000000000000000000000000";
+  return {
+    success: true,
+    dealId,
+    refundTx: arbiterSet ? undefined : tx,
+    reasonHash: hash,
+    disputed: arbiterSet,
+    nextAction: arbiterSet ? "resolve" : "done",
+  };
 }
+
+const OUTCOME_INDEX: Record<DisputeOutcomeName, number> = {
+  release: 0,
+  refund: 1,
+  split: 2,
+};
+
+export async function resolveDisputeForDeal(
+  dealId: string,
+  outcome: DisputeOutcomeName,
+  config: SettlementConfig = {},
+  payeeBps = 0
+): Promise<ResolveDisputeOutput> {
+  const status = await getSettlementStatus(dealId, config);
+  if (!status.resolveEligible) {
+    return {
+      success: false,
+      dealId,
+      outcome,
+      reason: status.state === "Disputed" ? "not eligible" : "no open dispute",
+      nextAction: status.nextAction,
+    };
+  }
+  if (outcome === "split" && (payeeBps <= 0 || payeeBps >= 10_000)) {
+    return {
+      success: false,
+      dealId,
+      outcome,
+      reason: "split requires 0 < payeeBps < 10000",
+      nextAction: status.nextAction,
+    };
+  }
+  const resolveTx = await resolveDisputeDeal(dealId, OUTCOME_INDEX[outcome], payeeBps, config);
+  return {
+    success: true,
+    dealId,
+    resolveTx,
+    outcome,
+    payeeBps: outcome === "split" ? payeeBps : undefined,
+    nextAction: "done",
+  };
+}
+
+export { rejectionReasonHash };
 
 /** Complete claim for a deal that is already eligible (e.g. after auto-release window). */
 export async function completeClaimForDeal(

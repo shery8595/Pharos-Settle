@@ -3,8 +3,10 @@
 | Term | Definition |
 |------|------------|
 | **Agent** | An Ethereum address registered in `AgentRegistry` that can participate in settlements as payer or payee. |
-| **Pharos Settle Skill** | Standardized skill module at `skills/trusted-agent-settlement/`: Stripe Checkout for AI agents on Pharos — ghost protection, **16 MCP tools**, SALI FastPay. |
-| **Dual-ghost protection** | Umbrella term for both safety nets: ghost payee (payer reclaims) + ghost payer (payee auto-release claim). See [WHATS-NOVEL.md](WHATS-NOVEL.md). |
+| **Pharos Settle Skill** | Standardized skill module at `skills/trusted-agent-settlement/`: Stripe Checkout for AI agents on Pharos — ghost protection, **17 MCP tools**, SALI FastPay. |
+| **Dual-ghost protection** | Umbrella term: ghost payee (reclaim) + ghost payer (auto-release) + cooperative junk rejection (`reject_delivery` + `reasonHash`). See [WHATS-NOVEL.md](WHATS-NOVEL.md). |
+| **Arbiter mode** | Deal funded with non-zero `arbiter`; payer reject opens `Disputed` instead of instant refund; arbiter calls `resolve_dispute`. |
+| **Rejection reason hash** | Required `bytes32` on `rejectDelivery`; SDK helper `rejectionReasonHash(reason)` — auditable evidence for Phase 2 reputation. |
 | **Ghost protection** | Same as dual-ghost protection — Pharos Settle's core promise for agent-to-agent hiring. |
 | **preflightHash** | Deterministic hash of simulate/preflight checks, stored on-chain when the deal is funded — cryptographic audit log (contracts do not enforce in Phase 1). |
 | **SALI FastPay** | Batch agent payroll mode (`batchMode: saliFast`): one payer, many worker agents, parallel fund+claim on Pharos Atlantic (`maxParallelInBlock`). |
@@ -12,17 +14,19 @@
 | **Auto-release** | Hybrid path where payee claims after `disputeWindow` seconds once delivery is submitted, without payer attestation (ghost payer scenario). |
 | **Batch settlement** | N-deal payments via `executeBatchSettlement` or split MCP tools. Modes: `saliFast` (fund+claim) or `hybridWork` (full 4-phase). Uses explicit nonces for SALI parallel execution on Atlantic. |
 | **Cooperative mode** | SDK mode: fund → deliver → attest → claim. Default for paying for completed work. |
-| **Cooperative review** | Phase 1 assumption for `rejectDelivery`: payer rejects only invalid/junk delivery. Not adversarial arbitration — a payer can refund after consuming valid work. Phase 2 adds disputes. |
+| **Cooperative review** | Phase 1 assumption for `rejectDelivery`: payer uses the safety valve only for invalid/junk delivery between cooperating agents. Not neutral quality arbitration. Phase 2 adds disputes. |
+| **Safety valve** | Phase 1 `reject_delivery`: payer-side refund during the dispute window for cooperative junk review — not adversarial quality arbitration. Phase 2 adds neutral dispute resolution. |
 | **Payer rejection rug** | Phase 1 risk: payer calls `rejectDelivery` during the dispute window after accessing valid delivery, keeping work without paying. No on-chain quality check or rejection fee. |
 | **Deal** | An escrow record in `DealEscrow` identified by `dealId`. Holds payer, payee, token, amount, deadline, and hybrid state. |
-| **DealState** | On-chain enum: `Created`, `Funded`, `Accepted`, `Released`, `Refunded`. |
+| **DealState** | On-chain enum: `Created`, `Funded`, `Accepted`, `Disputed`, `Released`, `Refunded`. |
+| **Disputed** | v1.2 state: funds frozen after arbiter-mode rejection until `resolveDispute`. |
 | **Dispute window** | Seconds after delivery submission before payee can claim without payer attestation (`disputeWindow` on hybrid deals). |
 | **Fee quote** | Off-chain estimate: `feeBps`, `feeAmount`, `payeeAmount` for a given gross amount. Fees apply on successful `claim` only. |
 | **Ghost payer** | Payer funds and payee delivers, but payer never attests; payee waits for auto-release then claims. |
 | **Ghost payee** | Payee never delivers; payer reclaims after `deadline` (TTL) via `reclaim`. |
 | **Hybrid release** | Work-based release: requires delivery attestation and/or payer attestation before claim (`requiresHybridRelease: true`). |
 | **Legacy fund→claim** | Non-hybrid deal: `fundAndAccept` with `requiresHybridRelease: false`; payee can claim immediately after accept. |
-| **nextAction** | SDK hint for the single next step: `fund`, `deliver`, `attest`, `claim`, `reclaim`, `wait`, `done`, `onboardRecipient`. |
+| **nextAction** | SDK hint: `fund`, `deliver`, `attest`, `claim`, `reclaim`, `reject`, `resolve`, `wait`, `done`, `onboardRecipient`. |
 | **Onboarding** | Registered payer sponsors unregistered payee via `registerRecipient` / `registerRecipients`. |
 | **Preflight** | Read-only checks before spending gas: registry, allowlist, balance, allowance. Produces `preflightHash`. |
 | **Preflight hash** | Deterministic hash of input + check results, stored on-chain with each deal. |

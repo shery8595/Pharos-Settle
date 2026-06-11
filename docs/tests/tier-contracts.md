@@ -2,16 +2,16 @@
 
 **Runner:** Hardhat + Mocha  
 **Path:** `test/contracts/**/*.test.cjs`  
-**Count:** 34 tests
+**Count:** 40 tests (v1.2 dispute coverage)
 
 ## Files
 
 | File | Tests | Coverage |
 |------|-------|----------|
-| `SettlementRouter.test.cjs` | 19 | Legacy fund→claim, hybrid, reclaim, reject, fees, reverts |
+| `SettlementRouter.test.cjs` | 20 | Legacy fund→claim, hybrid, reclaim, reject, arbiter resolve, fees, reverts |
 | `AgentRegistry.test.cjs` | 6 | Owner register/remove, onboarding, batch skip |
 | `TokenAllowlist.test.cjs` | 3 | allow/disallow, requireAllowed, batch Atlantic tokens |
-| `DealEscrow.test.cjs` | 6 | MAX_FEE_BPS, router-only fund/claim, canClaim, rejectDelivery |
+| `DealEscrow.test.cjs` | 11 | MAX_FEE_BPS, router-only, canClaim, cooperative/arbiter reject, resolveDispute split |
 
 ## Fixture
 

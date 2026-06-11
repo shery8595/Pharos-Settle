@@ -373,6 +373,7 @@ export async function fundDealsBatch(
             pfHash,
             true,
             disputeWindow,
+            (job.arbiter ?? "0x0000000000000000000000000000000000000000") as Address,
           ],
           ...(nonce !== undefined ? { nonce } : {}),
         })

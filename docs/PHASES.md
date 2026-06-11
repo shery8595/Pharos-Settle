@@ -17,7 +17,7 @@ This document describes what the project **does today** (Phase 1, shipped) and w
 | **Trust model** | Registry + allowlist + time-locked escrow | + reputation scores + on-chain dispute resolution |
 | **Agent integration** | SDK, MCP, Cursor Skill | Same surfaces + marketplace discovery |
 | **Network** | Pharos Atlantic testnet (live deploy) | Production Pharos + richer protocol features |
-| **Status** | **✅ Shipped** — implemented, tested (130 tests), documented | **⚠️ Planned — not implemented** |
+| **Status** | **✅ Shipped** — implemented, tested (145 tests), documented | **⚠️ Planned — not implemented** |
 
 ---
 
@@ -37,7 +37,7 @@ Phase 1 solves **bilateral** agent commerce. Phase 2 extends to **many-to-many**
 
 ## Phase 1 — What the project does now
 
-**✅ Shipped in Phase 1 — implemented, tested (130 tests), deployed on Atlantic.**
+**✅ Shipped in Phase 1 — implemented, tested (145 tests), deployed on Atlantic v1.2.0.**
 
 Phase 1 delivers a complete **minimum viable agent payments stack**: smart contracts, TypeScript SDK, MCP server, agent Skill, demos, tests, and a live Atlantic deployment.
 
@@ -81,7 +81,8 @@ flowchart LR
 | **Cooperative fast path** | fund → deliver → payer attest → claim | `cooperative` |
 | **Ghost payer** | fund → deliver → wait `disputeWindow` → claim | `cooperative` + `skipAttest` |
 | **Ghost payee** | fund → no delivery → reclaim after deadline | `safetyNet` |
-| **Junk delivery** | fund → deliver → payer reject during dispute window | payer `reject_delivery` |
+| **Junk delivery** | fund → deliver → payer reject + `reasonHash` during dispute window | payer `reject_delivery` |
+| **Arbiter dispute** | fund with `arbiter` → reject → `Disputed` → arbiter resolve | `resolve_dispute` |
 | **Legacy instant** | fund → claim (no hybrid) | `requiresHybridRelease: false` |
 | **Atomic settle** | create + fund + accept + claim in one tx | Router `settle()` |
 
@@ -119,7 +120,8 @@ Two layers for integrators:
 | Execute | `executeTrustedSettlement` | Full pipeline with optional auto-onboard |
 | Status polling | `getSettlementStatus` | Deal state, `canClaim`, `reclaimable`, `autoReleaseAt` |
 | Reclaim | `reclaimTrustedSettlement` | Payer refund when payee ghosts |
-| Reject junk | `rejectDeliveryForDeal` | Payer refund when delivery invalid |
+| Reject junk | `rejectDeliveryForDeal` | Auditable `reasonHash`; cooperative instant refund or arbiter dispute |
+| Resolve dispute | `resolveDisputeForDeal` | Arbiter release / refund / split |
 | Complete claim | `completeClaimForDeal` | Claim after auto-release window |
 | Batch payments (orchestrator) | `executeBatchSettlement` | Full batch in one process — `saliFast` or `hybridWork` |
 | Batch payments (split phases) | `fundDealsBatch`, `submitDeliveriesBatch`, `attestReleasesBatch`, `claimDealsBatch` | Two-MCP handoff via `manifest` (`saliFast`: fund → claim; `hybridWork`: fund → deliver → attest → claim) |
@@ -144,9 +146,9 @@ Details: [SDK documentation](sdk/README.md)
 
 ### 3. MCP server (plug-and-play agents)
 
-Protocol-compliant **stdio** MCP server for Cursor, Claude Desktop, and other MCP clients — **16 tools**.
+Protocol-compliant **stdio** MCP server for Cursor, Claude Desktop, and other MCP clients — **17 tools**.
 
-**Single payment (payer / payee split):** `fund_deal`, `submit_delivery`, `attest_release`, `complete_claim_for_deal`, `get_settlement_status`, `register_recipients`, `reclaim_trusted_settlement`, `reject_delivery`, `simulate_trusted_settlement`, `get_agent_readiness`.
+**Single payment (payer / payee / arbiter split):** `fund_deal`, `submit_delivery`, `attest_release`, `complete_claim_for_deal`, `get_settlement_status`, `register_recipients`, `reclaim_trusted_settlement`, `reject_delivery`, `resolve_dispute`, `simulate_trusted_settlement`, `get_agent_readiness`.
 
 **Batch (`saliFast` / `hybridWork`):** `fund_deals_batch`, `submit_deliveries_batch`, `attest_releases_batch`, `complete_claims_batch` — hand off `manifest` between payer and payee MCPs.
 
@@ -162,7 +164,7 @@ Details: [MCP documentation](mcp/README.md) · [Batch / SALI](mcp/batch-sali.md)
 
 ### 4. Agent Skill
 
-`skills/trusted-agent-settlement/` — standardized Pharos Settle Skill module (`SKILL.md` documents all **16 MCP tools**). Copy the directory into an agent’s skills folder so LLM agents know **when** and **how** to pay on Pharos without custom settlement code.
+`skills/trusted-agent-settlement/` — standardized Pharos Settle Skill module (`SKILL.md` documents all **17 MCP tools**). Copy the directory into an agent’s skills folder so LLM agents know **when** and **how** to pay on Pharos without custom settlement code.
 
 Triggers: “pay agent on pharos”, “agent commerce”, “safe agent payment”, etc.
 
@@ -202,11 +204,10 @@ See `deployments/atlantic.json` → `allowedTokens`.
 | `demo:pharos` | Live cooperative settlement |
 | `demo:batch` | SALI `saliFast` batch on Atlantic |
 | `demo:batch:split` | Two-MCP batch handoff (`saliFast` or `hybridWork`) |
-| `demo:ghost-payer` | Auto-release when payer ghosts |
+| `demo:ghost-payer` | Ghost payer — payee paid after auto-release |
 | `demo:agent` | NL agent pays via Skill (no settlement code) |
 | `demo:pipeline` | Composable `steps.ts` |
 | `demo:ghost-payee` | Ghost payee — payer reclaims (`demo:reclaim` alias) |
-| `demo:ghost-payer` | Ghost payer — payee paid after auto-release |
 
 Details: [Examples](examples/README.md)
 
@@ -214,14 +215,14 @@ Details: [Examples](examples/README.md)
 
 ### 8. Test suite (Phase 1 quality bar)
 
-**130 tests** across five tiers (44 Hardhat + 86 Vitest):
+**145 tests** across five tiers (50 Hardhat + 95 Vitest):
 
 | Tier | Scope | Count |
 |------|-------|-------|
-| 1 Contracts | Hardhat on-chain | 34 |
-| 2 Unit | Vitest pure logic | 56 |
+| 1 Contracts | Hardhat on-chain | 40 |
+| 2 Unit | Vitest pure logic | 64 |
 | 3 Integration | SDK + in-process Hardhat | 10 |
-| 4 MCP | Tool smoke + two-agent flow + reload-env | 25 |
+| 4 MCP | Tool smoke + two-agent flow + reload-env | 26 |
 | 5 Atlantic | Live RPC smoke | 5 |
 
 ```bash
@@ -262,33 +263,24 @@ Phase 2 is codenamed **Agent Arena**: evolving from bilateral payments to a **mu
 
 ### 1. Dispute and arbitration
 
-**⚠️ Planned — not implemented.**
+**✅ v1.2.0 shipped (lightweight):** auditable `rejectDelivery(reasonHash)`, optional per-deal `arbiter`, `Disputed` state, `resolveDispute` (release / refund / split). MCP `resolve_dispute`. See [DealEscrow](contracts/DealEscrow.md).
 
-**Problems Phase 1 leaves open:**
+**⚠️ Phase 2 still planned:** reputation indexing of rejections, neutral arbitration panels, bonds, commit-reveal delivery, either-party `open_dispute` with evidence attachments.
 
-1. **Payer rejection rug** — `rejectDelivery` is unilateral: payer refunds 100% during the dispute window with no on-chain validity check. A payer can consume valid work (via `resultHash` / IPFS / off-chain handoff) and reject for free. Phase 1 assumes **cooperative review**, not adversarial dispute resolution. See [threat-model.md](security/threat-model.md#payer-rejection-rug-vector-asymmetric-power).
+**Cooperative mode residual risk (v1.2):**
 
-2. **Subjective quality** — both parties active, work partially acceptable; no split or arbitration path.
+- Payer rejection rug when `arbiter == 0x0` — instant refund with no quality check. Mitigation: set arbiter for adversarial payments. See [threat-model.md](security/threat-model.md#payer-rejection-rug-vector-asymmetric-power).
 
-Phase 1 recap (what exists today):
-
-- Payer attests → immediate release
-- Payer ghosts → auto-release after `disputeWindow`
-- Payee ghosts → reclaim
-- Junk delivery (cooperative payer) → payer `reject_delivery` during dispute window — **no fee, no evidence requirement**
-
-**Phase 2 plan — proper resolution:**
+**Phase 2 plan — marketplace-grade resolution:**
 
 | Capability | Description |
 |------------|-------------|
-| `dispute(dealId, reason, evidenceHash)` | Either party flags a deal; evidence bound to `resultHash` / delivery CID |
-| `resolveDispute(dealId, ruling)` | Arbitrator (owner, elected panel, or external oracle) assigns outcome |
-| Partial settlement | Split escrow: e.g. 70% to payee, 30% refund — not binary Released/Refunded |
-| Dispute state machine | New states between `Accepted` and terminal; freeze `rejectDelivery` while dispute open |
-| Encrypted / commit-reveal delivery | Payee commits hash at submit; plaintext revealed only after attestation or ruling (mitigates rejection rug) |
-| Rejection bond / fee | Optional stake or protocol fee on `rejectDelivery` to raise cost of spam rejects |
-| SDK `dispute` / `resolveDispute` steps | Agent-callable dispute lifecycle |
-| MCP tools | `open_dispute`, `get_dispute_status`, `submit_dispute_evidence` |
+| Reputation indexer | Score agents from `DeliveryRejected` + dispute outcomes |
+| Either-party `dispute()` | Payee or payer opens dispute with evidence CID |
+| Neutral arbitration panel | Multi-arbiter or oracle — not single designated address |
+| Encrypted / commit-reveal delivery | Mitigate cooperative rejection rug |
+| Rejection bond / fee | Raise cost of spam rejects |
+| MCP tools | `submit_dispute_evidence`, `get_dispute_status` (extended) |
 
 **Reputation tie-in** (see §3): repeated lost disputes or high reject-without-attest rate lowers score; optional slashing on bad-faith rejection.
 
@@ -410,7 +402,7 @@ flowchart TB
   subgraph phase1 [Phase_1_Shipped]
     P1_SDK[SDK_MCP_Skill]
     P1_Contracts[Router_Escrow_Registry_Allowlist]
-    P1_Tests[130_tests]
+    P1_Tests[145_tests]
     P1_SDK --> P1_Contracts
   end
   subgraph phase2 [Phase_2_Planned]

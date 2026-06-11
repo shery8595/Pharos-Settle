@@ -17,6 +17,8 @@ export type TrustedSettlementInput = {
   ttlSeconds?: number;
   requiresHybridRelease?: boolean;
   disputeWindowSeconds?: number;
+  /** Optional dispute arbiter; address(0) = cooperative instant-refund rejection. */
+  arbiter?: string;
 };
 
 export type BatchMode = "saliFast" | "hybridWork";
@@ -24,6 +26,7 @@ export type BatchMode = "saliFast" | "hybridWork";
 export type SettlementConfig = {
   payerSigner?: string;
   payeeSigner?: string;
+  arbiterSigner?: string;
   mode?: SettlementMode | "demo";
   proveTier?: "receipt" | "spv";
   rpcUrl?: string;
@@ -163,7 +166,7 @@ export type DealTerms = {
 
 export type SettlementStatus = {
   dealId: string;
-  state: "Created" | "Funded" | "Accepted" | "Released" | "Refunded";
+  state: "Created" | "Funded" | "Accepted" | "Disputed" | "Released" | "Refunded";
   payer: string;
   payee: string;
   token: string;
@@ -171,6 +174,10 @@ export type SettlementStatus = {
   deadline: string;
   reclaimable: boolean;
   rejectEligible: boolean;
+  disputeOpen: boolean;
+  resolveEligible: boolean;
+  arbiter: string;
+  rejectionReasonHash: string | null;
   requiresHybridRelease: boolean;
   deliverySubmitted: boolean;
   payerAttested: boolean;
@@ -195,7 +202,7 @@ export type FundDealOutput = {
   reason?: string;
 };
 
-export type AgentRole = "payer" | "payee" | "demo" | "mock";
+export type AgentRole = "payer" | "payee" | "arbiter" | "demo" | "mock";
 
 export type AgentReadinessCheck = {
   name: string;
@@ -231,6 +238,20 @@ export type RejectOutput = {
   success: boolean;
   dealId: string;
   refundTx?: string;
+  reasonHash?: string;
+  disputed?: boolean;
+  reason?: string;
+  nextAction?: NextAction;
+};
+
+export type DisputeOutcomeName = "release" | "refund" | "split";
+
+export type ResolveDisputeOutput = {
+  success: boolean;
+  dealId: string;
+  resolveTx?: string;
+  outcome: DisputeOutcomeName;
+  payeeBps?: number;
   reason?: string;
   nextAction?: NextAction;
 };

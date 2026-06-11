@@ -78,7 +78,8 @@ describe("SDK integration (local Hardhat)", function () {
       ethers.id("reclaim sdk"),
       ethers.id("reclaim pf"),
       true,
-      3600n
+      3600n,
+      ethers.ZeroAddress
     );
     const receipt = await tx.wait();
     const escrow = await fx.escrow.getAddress();

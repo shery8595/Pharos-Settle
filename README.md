@@ -2,10 +2,35 @@
 
 **Stripe Checkout for AI agents on Pharos** — a trust layer for agents that hire each other.
 
-[![Tests](https://img.shields.io/badge/tests-130-brightgreen)](#tests) [![Chain](https://img.shields.io/badge/chain-Pharos%20Atlantic%20(688689)-blue)](deployments/atlantic.json) [![Phase](https://img.shields.io/badge/phase-1%20shipped-success)](docs/PHASES.md)
+[![Tests](https://img.shields.io/badge/tests-145-brightgreen)](#tests) [![Chain](https://img.shields.io/badge/chain-Pharos%20Atlantic%20(688689)-blue)](deployments/atlantic.json) [![Phase](https://img.shields.io/badge/phase-1%20shipped-success)](docs/PHASES.md)
 
 > **Agent-to-agent work settlement with ghost protection.**  
-> Payee ghosts → payer reclaims. Junk delivery → payer rejects. Payer ghosts → payee still gets paid. Both behave → instant settlement.
+> Payee ghosts → payer reclaims. Junk delivery → payer safety valve. Payer ghosts → payee still gets paid. Both behave → instant settlement.
+
+> **v1.2.0:** Cooperative rejection requires auditable `reasonHash`. Optional **arbiter** at fund time freezes funds on reject until `resolve_dispute`. Phase 2 adds reputation indexing, marketplace, and bonds — not trustless oracle panels.
+
+### Reusable surfaces
+
+```mermaid
+flowchart TB
+  subgraph surfaces [Reusable surfaces]
+    Skill[Agent_Skill]
+    MCP[MCP_17_tools]
+    SDK[TypeScript_SDK]
+  end
+  subgraph chain [Pharos Atlantic]
+    Router[SettlementRouter]
+    Escrow[DealEscrow]
+    Registry[AgentRegistry]
+    Allowlist[TokenAllowlist]
+  end
+  Skill --> MCP
+  MCP --> SDK
+  SDK --> Router
+  Router --> Escrow
+```
+
+**Hackathon judges:** `npm run demo:judge` (mock, no keys) · [JUDGES.md](JUDGES.md) · [SUBMISSION.md](SUBMISSION.md)
 
 ### What's novel
 
@@ -17,7 +42,7 @@
 
 → [docs/WHATS-NOVEL.md](docs/WHATS-NOVEL.md)
 
-**Hackathon judges → [JUDGES.md](JUDGES.md)** (mock demo first, no keys) · [SUBMISSION.md](SUBMISSION.md) · **Any IDE → [AGENTS.md](AGENTS.md)** · [MCP other IDEs](docs/mcp/other-ides.md)
+**Any IDE → [AGENTS.md](AGENTS.md)** · [MCP other IDEs](docs/mcp/other-ides.md)
 
 ### Workflow parameters
 
@@ -53,12 +78,14 @@ flowchart LR
   AT -->|Payer_attests| CL[Claim_release]
   AT -->|Payer_ghosts| AR[Auto_release_claim]
   AT -->|Payee_ghosts| RC[Reclaim_refund]
+  AT -->|Junk_delivery| RJ[Reject_reasonHash]
+  RJ --> DONE
   CL --> DONE[Settlement_done]
   AR --> DONE
   RC --> DONE
 ```
 
-Reusable on Pharos Atlantic: four contracts, one state machine, Skill + 16 MCP tools.
+Reusable on Pharos Atlantic: four contracts, one state machine, Skill + 17 MCP tools.
 
 ### Example agent transcript
 
@@ -77,8 +104,8 @@ Pharos Settle: Payer attested. Claim complete. dealId=42 · PharosScan ✓
 |-------|-------------|
 | **Contracts** | SettlementRouter · DealEscrow · AgentRegistry · TokenAllowlist |
 | **SDK** | `simulateTrustedSettlement` / `executeTrustedSettlement` + `nextAction` hints |
-| **MCP** | `npm run mcp` — 16 tools; payer/payee split + batch (`saliFast` / `hybridWork`) |
-| **Skill** | [`skills/trusted-agent-settlement/`](skills/trusted-agent-settlement/SKILL.md) — Pharos Settle Skill module (16 MCP tools) |
+| **MCP** | `npm run mcp` — 17 tools; payer/payee split + batch (`saliFast` / `hybridWork`) |
+| **Skill** | [`skills/trusted-agent-settlement/`](skills/trusted-agent-settlement/SKILL.md) — Pharos Settle Skill module (17 MCP tools) |
 
 **Why four contracts?** [SettlementRouter enforces access, DealEscrow owns state and funds, AgentRegistry separates identity from payment logic, TokenAllowlist keeps the attack surface minimal.](docs/architecture/overview.md#on-chain-contracts)
 
@@ -97,7 +124,9 @@ if (sim.stages.preflight.ready) {
 
 ## Quick start (< 2 minutes)
 
-**Both demo wallets are pre-registered on Atlantic — clone, add keys to `.env`, run `npm run demo:pharos`.**
+**Judges (no keys):** `npm run demo:judge` — see [JUDGES.md](JUDGES.md).
+
+**Live Atlantic:** Both demo wallets are pre-registered — clone, add keys to `.env`, run `npm run demo:pharos`.
 
 ```bash
 npm run setup          # install, build, skill + MCP mode (project or global)
@@ -178,6 +207,8 @@ Legacy HTTP bridge: `npm run mcp:http`
 |-------------|---------|
 | Payee never delivers | Payer **reclaims** (`safetyNet`) |
 | Payer never attests | Payee **still gets paid** (auto-release) |
+| Junk delivery (cooperative) | Payer **reject_delivery** + `reason` → instant refund |
+| Adversarial payment | Fund with **arbiter** → reject opens dispute → arbiter **resolve_dispute** |
 | Both cooperate | **Instant settlement** — fund → deliver → attest → claim |
 
 `getSettlementStatus` returns `nextAction` so agents always know the single next step.
@@ -215,7 +246,7 @@ await claimDealsBatch(manifestToClaims(matched), { payeeSigner: AGENT_B_KEY });
 ## Tests
 
 ```bash
-npm test   # 130 tests — 44 Hardhat + 86 Vitest (Atlantic smoke needs seeded wallets)
+npm test   # 145 tests — 50 Hardhat + 95 Vitest (Atlantic smoke needs seeded wallets)
 ```
 
 | Tier | Path |

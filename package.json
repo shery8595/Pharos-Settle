@@ -1,6 +1,6 @@
 {
   "name": "pharos-trusted-settlement",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Pharos Settle — agent commerce state machine on Pharos Atlantic",
   "type": "module",
   "bin": {
@@ -43,6 +43,7 @@
     "seed:pharos": "hardhat run scripts/seed.ts --network pharos",
     "demo": "tsx scripts/demo.ts",
     "demo:pharos": "tsx scripts/demo.ts --network pharos",
+    "demo:judge": "node scripts/demo-judge.mjs",
     "demo:simulate": "tsx scripts/demo.ts --simulate",
     "demo:spv": "tsx scripts/demo.ts --network pharos --prove-tier spv",
     "demo:reclaim": "tsx examples/ghost-payee/run-ghost-payee.ts",

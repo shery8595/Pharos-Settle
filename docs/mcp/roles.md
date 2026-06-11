@@ -6,9 +6,10 @@ Pharos Settle supports **one key per MCP process**. Use two MCP configs for real
 
 | Role | Env keys | Use case |
 |------|----------|----------|
-| `payer` | `PRIVATE_KEY` only | Fund, onboard, attest, reclaim, reject, batch fund/attest |
+| `payer` | `PRIVATE_KEY` only | Fund, onboard, attest, reclaim, reject (+ `reason`), batch fund/attest |
 | `payee` | `AGENT_B_PRIVATE_KEY` only | Deliver, claim, batch deliver/claim |
-| `demo` | Both keys | `execute_trusted_settlement` / `execute_batch_settlement` shortcuts |
+| `arbiter` | `ARBITER_PRIVATE_KEY` only | `resolve_dispute` on open disputes |
+| `demo` | Both keys (+ optional arbiter) | `execute_trusted_settlement` / `execute_batch_settlement` shortcuts |
 | `mock` | Neither | Safe exploration |
 
 Detect role: `get_agent_readiness` or `npm run agent:doctor`.
@@ -31,6 +32,7 @@ Detect role: `get_agent_readiness` or `npm run agent:doctor`.
 | `get_settlement_status` | yes | yes | yes |
 | `reclaim_trusted_settlement` | yes | no | yes |
 | `reject_delivery` | yes | no | yes |
+| `resolve_dispute` | no | no | yes (arbiter key) |
 | `execute_trusted_settlement` | shortcut | shortcut | yes |
 | `execute_batch_settlement` | shortcut | shortcut | yes |
 

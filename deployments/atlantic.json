@@ -1,36 +1,36 @@
 {
-  "version": "1.1.1",
+  "version": "1.2.0",
   "network": "pharos",
   "networkName": "Pharos Atlantic",
   "chainId": 688689,
   "rpcUrl": "https://atlantic.dplabs-internal.com",
   "explorerUrl": "https://atlantic.pharosscan.xyz",
   "deployer": "0xb8664841528e9Bd60D91AbB1bCF2975e67Fa0e17",
-  "mockToken": "0xf32692cc87145bb9b9892ca449fee889363ebe26",
-  "agentRegistry": "0x42aff253e3e07d8b1a7a54aafd72cf9dbafeaa5d",
-  "tokenAllowlist": "0x9d8e069ce233e2c14b5a6194784043b73d51299a",
-  "dealEscrow": "0xff528f1ee4cb5a22d68d1c9f29bf70ca4c4197d1",
-  "settlementRouter": "0xb5291b7342a6588ba675b08be7cebc7c6e547bdb",
+  "mockToken": "0x625e10db28639bc663f2e32e781804984b2dc6b3",
+  "agentRegistry": "0x59f98951f5755b8fbb78f65f949ae7541eeeac19",
+  "tokenAllowlist": "0xd3346371182356c5ffa1975cf13d04b0663497dc",
+  "dealEscrow": "0x611012929c84e1de6cbe0ed998dd617a8bdeaa7a",
+  "settlementRouter": "0x16bb93a34af2a4d32dbfd03d4b82f5f2bba084ca",
   "contracts": {
     "mockToken": {
-      "address": "0xf32692cc87145bb9b9892ca449fee889363ebe26",
-      "explorer": "https://atlantic.pharosscan.xyz/address/0xf32692cc87145bb9b9892ca449fee889363ebe26"
+      "address": "0x625e10db28639bc663f2e32e781804984b2dc6b3",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0x625e10db28639bc663f2e32e781804984b2dc6b3"
     },
     "agentRegistry": {
-      "address": "0x42aff253e3e07d8b1a7a54aafd72cf9dbafeaa5d",
-      "explorer": "https://atlantic.pharosscan.xyz/address/0x42aff253e3e07d8b1a7a54aafd72cf9dbafeaa5d"
+      "address": "0x59f98951f5755b8fbb78f65f949ae7541eeeac19",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0x59f98951f5755b8fbb78f65f949ae7541eeeac19"
     },
     "tokenAllowlist": {
-      "address": "0x9d8e069ce233e2c14b5a6194784043b73d51299a",
-      "explorer": "https://atlantic.pharosscan.xyz/address/0x9d8e069ce233e2c14b5a6194784043b73d51299a"
+      "address": "0xd3346371182356c5ffa1975cf13d04b0663497dc",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0xd3346371182356c5ffa1975cf13d04b0663497dc"
     },
     "dealEscrow": {
-      "address": "0xff528f1ee4cb5a22d68d1c9f29bf70ca4c4197d1",
-      "explorer": "https://atlantic.pharosscan.xyz/address/0xff528f1ee4cb5a22d68d1c9f29bf70ca4c4197d1"
+      "address": "0x611012929c84e1de6cbe0ed998dd617a8bdeaa7a",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0x611012929c84e1de6cbe0ed998dd617a8bdeaa7a"
     },
     "settlementRouter": {
-      "address": "0xb5291b7342a6588ba675b08be7cebc7c6e547bdb",
-      "explorer": "https://atlantic.pharosscan.xyz/address/0xb5291b7342a6588ba675b08be7cebc7c6e547bdb"
+      "address": "0x16bb93a34af2a4d32dbfd03d4b82f5f2bba084ca",
+      "explorer": "https://atlantic.pharosscan.xyz/address/0x16bb93a34af2a4d32dbfd03d4b82f5f2bba084ca"
     }
   },
   "allowedTokens": [
@@ -38,7 +38,7 @@
       "symbol": "TEST",
       "name": "Test Agent Token",
       "decimals": 18,
-      "address": "0xf32692cc87145bb9b9892ca449fee889363ebe26"
+      "address": "0x625e10db28639bc663f2e32e781804984b2dc6b3"
     },
     {
       "symbol": "USDC",
@@ -71,5 +71,5 @@
       "address": "0x838800b758277CC111B2d48Ab01e5E164f8E9471"
     }
   ],
-  "notes": "Redeployed 2026-06-11 with rejectDelivery (v1.1.1). SDK reads via loadDeployments('atlantic'). Run npm run seed:pharos after deploy."
+  "notes": "Redeployed 2026-06-11 v1.2.0: auditable rejectDelivery(reasonHash), optional arbiter, Disputed state, resolveDispute. v1.1.1 escrow/router remain for in-flight deals. Run npm run seed:pharos after deploy."
 }

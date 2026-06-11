@@ -30,6 +30,8 @@ describe("agent readiness", () => {
   it("mock readiness is ready without keys", async () => {
     const r = await getAgentReadiness({ mock: true, deploymentNetwork: "atlantic" });
     expect(r.role).toBe("mock");
-    expect(r.allowedTools.length).toBeGreaterThan(0);
+    expect(r.ready).toBe(true);
+    expect(r.checks[0]?.name).toBe("mock_mode");
+    expect(r.allowedTools.length).toBe(17);
   });
 });

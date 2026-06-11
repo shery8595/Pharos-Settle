@@ -50,6 +50,7 @@ export const settlementRouterAbi = [
       { name: "preflightHash", type: "bytes32" },
       { name: "requiresHybridRelease", type: "bool" },
       { name: "disputeWindow", type: "uint64" },
+      { name: "arbiter", type: "address" },
     ],
     outputs: [{ name: "dealId", type: "uint256" }],
   },
@@ -84,7 +85,27 @@ export const settlementRouterAbi = [
     outputs: [],
   },
   { name: "reclaim", type: "function", stateMutability: "nonpayable", inputs: [{ name: "dealId", type: "uint256" }], outputs: [] },
-  { name: "rejectDelivery", type: "function", stateMutability: "nonpayable", inputs: [{ name: "dealId", type: "uint256" }], outputs: [] },
+  {
+    name: "rejectDelivery",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "dealId", type: "uint256" },
+      { name: "reasonHash", type: "bytes32" },
+    ],
+    outputs: [],
+  },
+  {
+    name: "resolveDispute",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "dealId", type: "uint256" },
+      { name: "outcome", type: "uint8" },
+      { name: "payeeBps", type: "uint16" },
+    ],
+    outputs: [],
+  },
   { name: "canClaim", type: "function", stateMutability: "view", inputs: [{ name: "dealId", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
   {
     name: "getDeal",
@@ -110,6 +131,8 @@ export const settlementRouterAbi = [
           { name: "deliverySubmittedAt", type: "uint64" },
           { name: "disputeWindow", type: "uint64" },
           { name: "payerAttested", type: "bool" },
+          { name: "arbiter", type: "address" },
+          { name: "rejectionReasonHash", type: "bytes32" },
         ],
       },
     ],
@@ -154,7 +177,9 @@ export const tokenAllowlistAbi = [
   { name: "isAllowed", type: "function", stateMutability: "view", inputs: [{ name: "token", type: "address" }], outputs: [{ name: "", type: "bool" }] },
 ] as const;
 
-export const DEAL_STATE = ["Created", "Funded", "Accepted", "Released", "Refunded"] as const;
+export const DEAL_STATE = ["Created", "Funded", "Accepted", "Disputed", "Released", "Refunded"] as const;
+
+export const DISPUTE_OUTCOME = ["ReleaseToPayee", "RefundPayer", "Split"] as const;
 
 export type NextAction =
   | "fund"
@@ -163,5 +188,7 @@ export type NextAction =
   | "attest"
   | "claim"
   | "reclaim"
+  | "reject"
+  | "resolve"
   | "wait"
   | "done";
