@@ -113,6 +113,8 @@ async function main() {
   await sendTx(escrow, escrowArtifact.abi, "setRouter", [router]);
 
   const deployer = privateKeyToAccount(process.env.PRIVATE_KEY as Hex).address;
+  const rpcUrl = process.env.PHAROS_RPC_URL ?? "https://atlantic.dplabs-internal.com";
+  const explorerUrl = "https://atlantic.pharosscan.xyz";
   const atlanticTokens = JSON.parse(
     readFileSync(join(process.cwd(), "config", "atlantic-tokens.json"), "utf-8")
   ) as { symbol: string; name: string; decimals: number; address: string }[];
@@ -121,16 +123,34 @@ async function main() {
     ...atlanticTokens,
   ];
 
+  const contractEntry = (address: Address) => ({
+    address,
+    explorer: `${explorerUrl}/address/${address}`,
+  });
+
   const addresses = {
+    version: "1.3.0",
+    network: "pharos",
+    networkName: "Pharos Atlantic",
+    chainId: ATLANTIC.id,
+    rpcUrl,
+    explorerUrl,
+    deployer,
     mockToken: token,
     agentRegistry: registry,
     tokenAllowlist: allowlist,
     dealEscrow: escrow,
     settlementRouter: router,
-    network: "pharos",
-    chainId: ATLANTIC.id,
-    deployer,
+    contracts: {
+      mockToken: contractEntry(token),
+      agentRegistry: contractEntry(registry),
+      tokenAllowlist: contractEntry(allowlist),
+      dealEscrow: contractEntry(escrow),
+      settlementRouter: contractEntry(router),
+    },
     allowedTokens,
+    notes:
+      "Redeployed v1.3.0: payer-only funding (msg.sender == payer), hybrid disputeWindow < ttlSeconds guard. Run npm run seed:pharos after deploy.",
   };
 
   const outDir = join(process.cwd(), "deployments");

@@ -1,6 +1,6 @@
 # Test suite
 
-**145 tests** across 5 tiers (50 Hardhat + 95 Vitest). Verified: `npm test` (exit 0).
+**147 tests** across 5 tiers (52 Hardhat + 95 Vitest). Verified: `npm test` (exit 0).
 
 ```bash
 npm test                  # build + hardhat test + vitest run
@@ -27,7 +27,7 @@ flowchart TB
 
 | Tier | Runner | Files | Tests |
 |------|--------|-------|-------|
-| 1 Contracts | Hardhat | `test/contracts/*.test.cjs` | 40 |
+| 1 Contracts | Hardhat | `test/contracts/*.test.cjs` | 42 |
 | 2 Unit | Vitest | `test/unit/*.vitest.ts`, `test/cursor-global-mcp.vitest.ts` | 64 |
 | 3 Integration | Hardhat | `test/integration/*.test.cjs` | 10 |
 | 4 MCP | Vitest | `test/mcp/*.vitest.ts` | 26 |

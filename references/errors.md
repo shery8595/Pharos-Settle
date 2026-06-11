@@ -13,7 +13,8 @@
 | `nonce too low` | Pending tx conflict | Wait for prior tx or set `--nonce` |
 | `connection refused` | Missing `--rpc-url` | Always pass `--rpc-url $RPC` |
 | `only payee` | Wrong key for delivery/claim | Use payee's `$PRIVATE_KEY` |
-| `only payer` | Wrong key for attest/reject | Use payer's `$PRIVATE_KEY` |
+| `only payer` | Fund/attest/reject caller is not deal payer | Fund paths require payer wallet; use payer's `$PRIVATE_KEY` |
+| `dispute window >= ttl` | Hybrid deal: dispute window not shorter than TTL | Set `disputeWindowSeconds` < `ttlSeconds` (SDK default: 3d / 7d) |
 | `only arbiter` | Wrong key for resolve | Use `ARBITER_PRIVATE_KEY` |
 | `sponsor not registered` | Payer not on AgentRegistry | Register payer first (owner or sponsor flow) |
 | `token not allowed` | Token not on allowlist | Pick token from `assets/tokens.json` |

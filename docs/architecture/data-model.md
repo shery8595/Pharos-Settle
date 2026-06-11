@@ -1,6 +1,6 @@
 # Data model (off-chain + on-chain)
 
-Cross-reference for SDK types and contract structs. **v1.2.0** adds `Disputed`, `arbiter`, `rejectionReasonHash`.
+Cross-reference for SDK types and contract structs. **v1.3.0** adds payer-only funding and hybrid timing validation. **v1.2.0** adds `Disputed`, `arbiter`, `rejectionReasonHash`.
 
 ## SettlementStatus (SDK)
 

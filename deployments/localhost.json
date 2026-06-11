@@ -1,9 +1,9 @@
 {
-  "mockToken": "0xa85EffB2658CFd81e0B1AaD4f2364CdBCd89F3a1",
-  "agentRegistry": "0x8aAC5570d54306Bb395bf2385ad327b7b706016b",
-  "tokenAllowlist": "0x64f5219563e28EeBAAd91Ca8D31fa3b36621FD4f",
-  "dealEscrow": "0x1757a98c1333B9dc8D408b194B2279b5AFDF70Cc",
-  "settlementRouter": "0x6484EB0792c646A4827638Fc1B6F20461418eB00",
+  "mockToken": "0x88D1aF96098a928eE278f162c1a84f339652f95b",
+  "agentRegistry": "0x7Ce73F8f636C6bD3357A0A8a59e0ab6462C955B0",
+  "tokenAllowlist": "0x87c470437282174b3f8368c7CF1Ac03bcAe57954",
+  "dealEscrow": "0x746a48E39dC57Ff14B872B8979E20efE5E5100B1",
+  "settlementRouter": "0x96E303b6D807c0824E83f954784e2d6f3614f167",
   "network": "localhost",
   "chainId": 31337,
   "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"

@@ -1,10 +1,10 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "network": "atlantic",
-  "settlementRouter": "0x16bb93a34af2a4d32dbfd03d4b82f5f2bba084ca",
-  "dealEscrow": "0x611012929c84e1de6cbe0ed998dd617a8bdeaa7a",
-  "agentRegistry": "0x59f98951f5755b8fbb78f65f949ae7541eeeac19",
-  "tokenAllowlist": "0xd3346371182356c5ffa1975cf13d04b0663497dc",
-  "mockToken": "0x625e10db28639bc663f2e32e781804984b2dc6b3",
+  "settlementRouter": "0xb39f403f7f36a2a1f4c35a0808f3a024fb73452e",
+  "dealEscrow": "0x2911c456bf766661572eb8ab92f8cfd656661a9b",
+  "agentRegistry": "0xe4991f5a54b35cfbcf952c31ec7dfcf432a8c173",
+  "tokenAllowlist": "0x456848b1a38954a61ee7f34a997d468831f2d224",
+  "mockToken": "0x008f64b4da7ffcafad2706585cae349bd59b48bf",
   "deployer": "0xb8664841528e9Bd60D91AbB1bCF2975e67Fa0e17"
 }

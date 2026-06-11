@@ -2,7 +2,7 @@
 
 Single entrypoint for agent settlements. Enforces registry + allowlist, delegates escrow operations.
 
-**Source:** `contracts/SettlementRouter.sol` · **v1.2.0**
+**Source:** `contracts/SettlementRouter.sol` · **v1.3.0**
 
 ## Constructor
 
@@ -14,9 +14,9 @@ constructor(address registry_, address allowlist_, address escrow_)
 
 | Function | Access | Description |
 |----------|--------|-------------|
-| `settle(...)` | anyone | Atomic: create + fund + accept + claim (non-hybrid) |
-| `fundAndAccept(...)` | anyone | Create + fund + accept (non-hybrid) |
-| `fundAndAcceptHybrid(..., arbiter)` | anyone | Create + fund + accept (optional hybrid + arbiter) |
+| `settle(...)` | **payer only** (`msg.sender == payer`) | Atomic: create + fund + accept + claim (non-hybrid) |
+| `fundAndAccept(...)` | **payer only** | Create + fund + accept (non-hybrid) |
+| `fundAndAcceptHybrid(..., arbiter)` | **payer only** | Create + fund + accept (optional hybrid + arbiter) |
 | `submitDelivery(dealId, resultHash)` | payee only | Submit work delivery |
 | `attestRelease(dealId, resultHash)` | payer only | Payer fast-path attestation |
 | `rejectDelivery(dealId, reasonHash)` | payer only | Reject with auditable hash — cooperative refund or arbiter dispute |
@@ -29,6 +29,7 @@ constructor(address registry_, address allowlist_, address escrow_)
 
 ## Reverts (via dependencies)
 
+- `"only payer"` — fund paths (`settle`, `fundAndAccept`, `fundAndAcceptHybrid`) require `msg.sender == payer`
 - `"agent not registered"` — registry check on fund paths
 - `"token not allowed"` — allowlist check
 - `"only payee"` — `submitDelivery` caller ≠ deal.payee

@@ -1,6 +1,6 @@
 # Tests
 
-**145 tests** (50 Hardhat + 95 Vitest). Full documentation: **[docs/tests/README.md](../docs/tests/README.md)**
+**147 tests** (52 Hardhat + 95 Vitest). Full documentation: **[docs/tests/README.md](../docs/tests/README.md)**
 
 ```bash
 npm test                  # full suite (Hardhat + Vitest)

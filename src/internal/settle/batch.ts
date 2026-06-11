@@ -23,6 +23,11 @@ import { computeProofHash } from "../prove/index.js";
 import { getFeeQuote } from "../commerce/feeQuote.js";
 import { withRpcRetry } from "../../shared/rpc.js";
 import { transportFromConfig } from "../../shared/clients.js";
+import {
+  assertDisputeWindowLtTtl,
+  resolveDisputeWindowSeconds,
+  resolveTtlSeconds,
+} from "../../shared/settlementDefaults.js";
 import { onlyPayeeNeedsOnboarding, unregisteredPayeesFromJobs } from "../preflight/onboarding.js";
 import { registerRecipients, filterUnregistered } from "../onboard/recipients.js";
 import { resultHashFromWork } from "./delivery.js";
@@ -353,11 +358,14 @@ export async function fundDealsBatch(
     pfHash: `0x${string}`,
     nonce?: number
   ): Promise<Hash> {
-    const ttl = BigInt(job.ttlSeconds ?? 3600);
+    const ttlN = resolveTtlSeconds(job.ttlSeconds);
+    const ttl = BigInt(ttlN);
     const amount = BigInt(job.amount);
     const wh = workHash(job.workDescription);
     if (useHybrid) {
-      const disputeWindow = BigInt(job.disputeWindowSeconds ?? 72 * 3600);
+      const disputeN = resolveDisputeWindowSeconds(job.disputeWindowSeconds);
+      assertDisputeWindowLtTtl(ttlN, disputeN, true);
+      const disputeWindow = BigInt(disputeN);
       return withRpcRetry(`fund #${index}`, () =>
         clients.payerClient.writeContract({
           address: clients.router,

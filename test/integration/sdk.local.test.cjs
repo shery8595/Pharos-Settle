@@ -47,6 +47,7 @@ describe("SDK integration (local Hardhat)", function () {
       ...baseInput,
       workDescription: "hybrid full " + Date.now(),
       requiresHybridRelease: true,
+      ttlSeconds: 7200,
       disputeWindowSeconds: 3600,
     };
     const result = await sdk.executeTrustedSettlement(input, config);
@@ -78,7 +79,7 @@ describe("SDK integration (local Hardhat)", function () {
       ethers.id("reclaim sdk"),
       ethers.id("reclaim pf"),
       true,
-      3600n,
+      50n,
       ethers.ZeroAddress
     );
     const receipt = await tx.wait();
@@ -142,6 +143,7 @@ describe("SDK integration (local Hardhat)", function () {
       ...baseInput,
       workDescription: `split hybrid ${Date.now()} ${i}`,
       requiresHybridRelease: true,
+      ttlSeconds: 7200,
       disputeWindowSeconds: 3600,
     }));
     const funded = await sdk.fundDealsBatch(jobs, { ...config, batchMode: "hybridWork" });
@@ -180,6 +182,7 @@ describe("SDK integration (local Hardhat)", function () {
       ...baseInput,
       workDescription: "blocked reclaim " + Date.now(),
       ttlSeconds: 100,
+      disputeWindowSeconds: 50,
       requiresHybridRelease: true,
     };
     const result = await sdk.executeTrustedSettlement(input, { ...config, skipAttest: true });

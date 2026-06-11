@@ -15,7 +15,7 @@ flowchart TB
 `mcp/server.ts`:
 
 1. Loads `.env` via `mcp/reload-env.ts` (re-read on every tool call so key edits apply without restart)
-2. Creates `McpServer` (name: `trusted-agent-settlement`, v1.2.0)
+2. Creates `McpServer` (name: `trusted-agent-settlement`, v1.3.0)
 3. Registers tools, resources, prompts
 4. Connects `StdioServerTransport`
 

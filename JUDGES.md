@@ -21,7 +21,7 @@ Agents cannot safely hire each other with raw transfers. Pharos Settle gives the
 | Smart contracts | `deployments/atlantic.json` |
 | Batch manifest handoff | payer `fund_deals_batch` → payee `complete_claims_batch` |
 
-> **v1.2.0:** Auditable `reasonHash` on reject; optional **arbiter** freezes funds until `resolve_dispute`. Cooperative mode still has payer-rug risk — [threat-model](docs/security/threat-model.md). Phase 2: reputation + marketplace.
+> **v1.3.0 (Atlantic):** Payer-only funding; hybrid `disputeWindow < ttl` enforced on-chain. **v1.2.0:** auditable `reasonHash` on reject; optional **arbiter** disputes. Cooperative payer-rug risk — [threat-model](docs/security/threat-model.md).
 
 ---
 
@@ -48,7 +48,7 @@ One AI agent pays another for work. Money sits in escrow until the job is proven
 - **Manifest handoff** — payer MCP funds batch; payee MCP claims its rows
 - **SALI FastPay** — parallel batch payroll (`maxParallelInBlock`)
 
-→ [docs/WHATS-NOVEL.md](docs/WHATS-NOVEL.md)
+See [docs/WHATS-NOVEL.md](docs/WHATS-NOVEL.md)
 
 ### Workflow parameters (reuse any scenario)
 
@@ -87,14 +87,14 @@ Pharos Settle ships that primitive today: contracts live on Atlantic, agents plu
 
 ## Shipped vs planned
 
-| ✅ Shipped (Phase 1) | ⚠️ Not shipped (Phase 2 roadmap) |
+| **Shipped** (Phase 1) | **Planned** (Phase 2 roadmap) |
 |----------------------|-----------------------------------|
 | Smart contracts | Agent marketplace |
 | TypeScript SDK | Reputation scores |
 | MCP server (17 tools) | On-chain arbitration |
 | Agent Skill module | |
 | Live Atlantic deployment | |
-| 145 tests (`npm test`) | |
+| 147 tests (`npm test`) | |
 | Cooperative junk review (`reject_delivery` safety valve) | |
 
 Details: [docs/PHASES.md](docs/PHASES.md)
@@ -107,11 +107,11 @@ Proof: [`deployments/atlantic.json`](deployments/atlantic.json) · Explorer: [at
 
 | Contract | Address |
 |----------|---------|
-| SettlementRouter | `0x16bb93a34af2a4d32dbfd03d4b82f5f2bba084ca` |
-| DealEscrow | `0x611012929c84e1de6cbe0ed998dd617a8bdeaa7a` |
-| AgentRegistry | `0x59f98951f5755b8fbb78f65f949ae7541eeeac19` |
-| TokenAllowlist | `0xd3346371182356c5ffa1975cf13d04b0663497dc` |
-| TEST token | `0x625e10db28639bc663f2e32e781804984b2dc6b3` |
+| SettlementRouter | `0xb39f403f7f36a2a1f4c35a0808f3a024fb73452e` |
+| DealEscrow | `0x2911c456bf766661572eb8ab92f8cfd656661a9b` |
+| AgentRegistry | `0xe4991f5a54b35cfbcf952c31ec7dfcf432a8c173` |
+| TokenAllowlist | `0x456848b1a38954a61ee7f34a997d468831f2d224` |
+| TEST token | `0x008f64b4da7ffcafad2706585cae349bd59b48bf` |
 
 Chain ID **688689** · RPC `https://atlantic.dplabs-internal.com` · Gas: **PHRS** on Atlantic
 
@@ -171,7 +171,7 @@ More live demos:
 npm run demo:batch          # batch payroll (SALI FastPay)
 npm run demo:ghost-payee    # payee ghosts → payer reclaims
 npm run demo:ghost-payer    # payer ghosts → payee still paid
-npm test                    # 145 tests
+npm test                    # 147 tests
 ```
 
 Key demos table: [docs/examples/demos.md](docs/examples/demos.md).
@@ -266,7 +266,7 @@ Full mapping + patterns: [SKILL.md](SKILL.md)
 User:     Pay 1 TEST to the research agent if it delivers the market report.
 Pharos Settle: Preflight passed. nextAction: fund.
 Research: Delivery submitted.
-Pharos Settle: Claim complete. dealId=42 · PharosScan ✓
+Pharos Settle: Claim complete. dealId=42 · PharosScan (confirmed)
 ```
 
 ---

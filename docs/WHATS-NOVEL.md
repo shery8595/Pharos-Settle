@@ -1,6 +1,6 @@
 # What's novel about Pharos Settle
 
-Pharos Settle is **not** generic escrow with a README. The novelty is an **agent commerce layer** on Pharos Atlantic: simulate-first flows, `nextAction` loops, dual-ghost protection, manifest handoff for split identities, and SALI FastPay batch payroll — exposed through **17 MCP tools** and a portable **Skill**. **v1.2.0** adds auditable rejection (`reasonHash`) and optional per-deal arbiter disputes.
+Pharos Settle is **not** generic escrow with a README. The novelty is an **agent commerce layer** on Pharos Atlantic: simulate-first flows, `nextAction` loops, dual-ghost protection, manifest handoff for split identities, and SALI FastPay batch payroll — exposed through **17 MCP tools** and a portable **Skill**. **v1.3.0** adds payer-only funding and hybrid timing guards. **v1.2.0** adds auditable rejection (`reasonHash`) and optional per-deal arbiter disputes.
 
 > **Terminology:** **Dual-ghost protection** is the umbrella term (payee ghosts + payer ghosts + junk delivery rejection). Escrow mechanics exist elsewhere; what ships here is the agent-native orchestration surface.
 
@@ -22,10 +22,10 @@ Pharos Settle is **not** generic escrow with a README. The novelty is an **agent
 
 | Approach | Agent-native API | Ghost payee (no delivery) | Ghost payer (no attest) | Junk delivery | Simulate-first | Split identity (payer MCP ≠ payee MCP) | Batch payroll |
 |----------|------------------|---------------------------|-------------------------|---------------|----------------|----------------------------------------|---------------|
-| Raw token transfer | ❌ | ❌ | ❌ | ❌ | ❌ | N/A | Manual N txs |
-| Generic escrow contract | ❌ | Maybe (manual) | Maybe (manual) | ❌ | ❌ | ❌ | Manual |
-| x402 / API pay-per-call | HTTP-centric | ❌ | ❌ | ❌ | Partial | ❌ | Per-request |
-| **Pharos Settle** | ✅ Skill + 17 MCP tools + SDK | ✅ `reclaim_trusted_settlement` | ✅ auto-release + claim | ✅ `reject_delivery` + reasonHash; optional arbiter | ✅ `simulate_trusted_settlement` | ✅ manifest handoff | ✅ SALI FastPay |
+| Raw token transfer | No | No | No | No | No | N/A | Manual N txs |
+| Generic escrow contract | No | Maybe (manual) | Maybe (manual) | No | No | No | Manual |
+| x402 / API pay-per-call | HTTP-centric | No | No | No | Partial | No | Per-request |
+| **Pharos Settle** | Yes Skill + 17 MCP tools + SDK | Yes `reclaim_trusted_settlement` | Yes auto-release + claim | Yes `reject_delivery` + reasonHash; optional arbiter | Yes `simulate_trusted_settlement` | Yes manifest handoff | Yes SALI FastPay |
 
 **Honest boundary:** Time-locked escrow and refund-after-deadline are not new on-chain ideas. What **is** new here is packaging them for **autonomous agents**: `nextAction` hints, MCP tool parity, ghost demos you can run in mock in under 60s, and Atlantic live proof.
 
@@ -35,7 +35,7 @@ Pharos Settle is **not** generic escrow with a README. The novelty is an **agent
 
 | Artifact | Link |
 |----------|------|
-| Contract tests | `npm test` — 145 tests (50 Hardhat + 95 Vitest) — [docs/tests/README.md](tests/README.md) |
+| Contract tests | `npm test` — 147 tests (52 Hardhat + 95 Vitest) — [docs/tests/README.md](tests/README.md) |
 | Ghost payee demo | `npm run demo:ghost-payee:simulate` — [examples/ghost-payee.md](examples/ghost-payee.md) |
 | Ghost payer demo | `npm run demo:ghost-payer:simulate` — [examples/ghost-payer.md](examples/ghost-payer.md) |
 | SALI batch demo | `npm run demo:batch:simulate` — [examples/batch-pipeline.md](examples/batch-pipeline.md) |

@@ -38,8 +38,11 @@ const settlementFields = {
   token: z.string().describe("ERC20 token contract address"),
   amount: z.string().describe("Payment amount in token wei"),
   workDescription: z.string().describe("Description of work being paid for"),
-  ttlSeconds: z.number().optional().describe("Deal deadline seconds (default 3600)"),
-  disputeWindowSeconds: z.number().optional().describe("Auto-release window after delivery (default 259200)"),
+  ttlSeconds: z.number().optional().describe("Deal deadline seconds (default 604800 = 7d)"),
+  disputeWindowSeconds: z
+    .number()
+    .optional()
+    .describe("Auto-release window after delivery (default 259200 = 3d; must be < ttlSeconds)"),
   requiresHybridRelease: z.boolean().optional().describe("Work-based hybrid release (default true)"),
   arbiter: z
     .string()

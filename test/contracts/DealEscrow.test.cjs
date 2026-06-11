@@ -5,6 +5,8 @@ const { deployFullStack, mintAndApprove } = require("../helpers/hardhat-fixture.
 const { ethers } = hre;
 
 const REASON = ethers.id("junk-delivery");
+const HYBRID_TTL = 3600n;
+const HYBRID_DW = 1800n;
 
 describe("DealEscrow", function () {
   it("setFeeConfig rejects fee above MAX_FEE_BPS", async function () {
@@ -40,7 +42,7 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -61,7 +63,7 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -85,7 +87,7 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -109,7 +111,7 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -136,7 +138,7 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       arbiter.address
     );
 
@@ -165,7 +167,7 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       arbiter.address
     );
 
@@ -193,7 +195,7 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       arbiter.address
     );
 
@@ -221,7 +223,7 @@ describe("DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       arbiter.address
     );
 

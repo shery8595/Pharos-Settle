@@ -6,6 +6,9 @@ const { deployFullStack, mintAndApprove } = require("../helpers/hardhat-fixture.
 const { ethers } = hre;
 
 const REASON = ethers.id("junk-delivery");
+/** Hybrid deals require disputeWindow < ttlSeconds on-chain (v1.3+). */
+const HYBRID_TTL = 3600n;
+const HYBRID_DW = 1800n;
 
 describe("SettlementRouter + DealEscrow", function () {
   it("fund → accept → claim releases to payee (legacy)", async function () {
@@ -127,7 +130,7 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -151,7 +154,7 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -204,7 +207,7 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      50n,
       ethers.ZeroAddress
     );
 
@@ -216,7 +219,7 @@ describe("SettlementRouter + DealEscrow", function () {
   it("junk delivery: payer rejects during dispute window → full refund", async function () {
     const fx = await deployFullStack();
     const amount = ethers.parseEther("2");
-    const disputeWindow = 3600n;
+    const disputeWindow = HYBRID_DW;
     await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
     const payerBefore = await fx.token.balanceOf(fx.payer.address);
 
@@ -225,7 +228,7 @@ describe("SettlementRouter + DealEscrow", function () {
       fx.payee.address,
       await fx.token.getAddress(),
       amount,
-      3600n,
+      HYBRID_TTL,
       ethers.id("work"),
       ethers.id("pf"),
       true,
@@ -258,7 +261,7 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -306,7 +309,7 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -332,7 +335,7 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -347,10 +350,10 @@ describe("SettlementRouter + DealEscrow", function () {
     const fx = await deployFullStack();
     const [, , , stranger] = await ethers.getSigners();
     const amount = ethers.parseEther("1");
-    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+    await mintAndApprove(fx.token, stranger, await fx.escrow.getAddress(), amount);
 
     await expect(
-      fx.router.fundAndAccept(
+      fx.router.connect(stranger).fundAndAccept(
         stranger.address,
         fx.payee.address,
         await fx.token.getAddress(),
@@ -416,7 +419,7 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -439,7 +442,7 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       ethers.ZeroAddress
     );
 
@@ -463,7 +466,7 @@ describe("SettlementRouter + DealEscrow", function () {
       ethers.id("work"),
       ethers.id("pf"),
       true,
-      3600n,
+      HYBRID_DW,
       arbiter.address
     );
 
@@ -478,5 +481,44 @@ describe("SettlementRouter + DealEscrow", function () {
     await fx.router.connect(arbiter).resolveDispute(1n, 1, 0);
     expect((await fx.escrow.getDeal(1n)).state).to.equal(5);
     expect(await fx.token.balanceOf(fx.payer.address)).to.equal(amount);
+  });
+
+  it("fundAndAccept reverts if caller is not payer", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("1");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await expect(
+      fx.router.connect(fx.payee).fundAndAccept(
+        fx.payer.address,
+        fx.payee.address,
+        await fx.token.getAddress(),
+        amount,
+        3600n,
+        ethers.id("w"),
+        ethers.id("pf")
+      )
+    ).to.be.revertedWith("only payer");
+  });
+
+  it("fundAndAcceptHybrid reverts when dispute window >= ttl", async function () {
+    const fx = await deployFullStack();
+    const amount = ethers.parseEther("1");
+    await mintAndApprove(fx.token, fx.payer, await fx.escrow.getAddress(), amount);
+
+    await expect(
+      fx.router.fundAndAcceptHybrid(
+        fx.payer.address,
+        fx.payee.address,
+        await fx.token.getAddress(),
+        amount,
+        3600n,
+        ethers.id("work"),
+        ethers.id("pf"),
+        true,
+        3600n,
+        ethers.ZeroAddress
+      )
+    ).to.be.revertedWith("dispute window >= ttl");
   });
 });

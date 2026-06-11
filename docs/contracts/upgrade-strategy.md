@@ -24,6 +24,16 @@ Integrators should **pin** the deployment manifest version that matches their SD
 
 Atlantic addresses updated in `deployments/atlantic.json` (`version: "1.2.0"`). v1.1.1 escrow/router deals remain on old contracts until terminal.
 
+## v1.3.0 (2026-06-11)
+
+| Change | Notes |
+|--------|-------|
+| Payer-only funding | `settle`, `fundAndAccept`, `fundAndAcceptHybrid` require `msg.sender == payer` |
+| Hybrid timing guard | `createDeal` reverts if `disputeWindow >= ttlSeconds` when hybrid release is enabled |
+| SDK defaults | TTL 7d (`604800`), dispute window 3d (`259200`); preflight checks `disputeWindow < ttl` |
+
+Atlantic addresses in `deployments/atlantic.json` (`version: "1.3.0"`). v1.2.0 escrow/router deals remain on old contracts until terminal.
+
 ## When a loophole is found
 
 1. Patch contracts (e.g. auditable rejection, arbiter disputes).

@@ -24,7 +24,7 @@ Lock tokens in escrow for a registered payee. Hybrid release (`requiresHybridRel
 
 ```bash
 export ROUTER=$(jq -r .settlementRouter assets/deployments.json)
-export TOKEN=0x625e10db28639bc663f2e32e781804984b2dc6b3   # TEST — see assets/tokens.json
+export TOKEN=0x008f64b4da7ffcafad2706585cae349bd59b48bf   # TEST — see assets/tokens.json
 export AMOUNT=1000000000000000000                        # 1 TEST (18 decimals)
 
 cast send $TOKEN "approve(address,uint256)" $ROUTER $AMOUNT \
@@ -70,7 +70,7 @@ Tool: `fund_deal`
 {
   "agentA": "0xPayer...",
   "agentB": "0xPayee...",
-  "token": "0x625e10db28639bc663f2e32e781804984b2dc6b3",
+  "token": "0x008f64b4da7ffcafad2706585cae349bd59b48bf",
   "amount": "1000000000000000000",
   "workDescription": "my-task-id",
   "autoOnboardRecipients": true

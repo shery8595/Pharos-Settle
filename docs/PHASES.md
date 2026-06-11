@@ -4,7 +4,7 @@
 
 > Payee ghosts → payer reclaims. Payer ghosts → payee still gets paid. Both behave → instant settlement.
 
-This document describes what the project **does today** (Phase 1, shipped) and what it is **designed to become** (Phase 2, Agent Arena and beyond). **When in doubt, trust the Phase 1 sections and the ✅ Shipped banners — not the Phase 2 plans.**
+This document describes what the project **does today** (Phase 1, shipped) and what it is **designed to become** (Phase 2, Agent Arena and beyond). **When in doubt, trust the Phase 1 sections and the Shipped banners — not the Phase 2 plans.**
 
 ---
 
@@ -17,7 +17,7 @@ This document describes what the project **does today** (Phase 1, shipped) and w
 | **Trust model** | Registry + allowlist + time-locked escrow | + reputation scores + on-chain dispute resolution |
 | **Agent integration** | SDK, MCP, Cursor Skill | Same surfaces + marketplace discovery |
 | **Network** | Pharos Atlantic testnet (live deploy) | Production Pharos + richer protocol features |
-| **Status** | **✅ Shipped** — implemented, tested (145 tests), documented | **⚠️ Planned — not implemented** |
+| **Status** | **Shipped** — implemented, tested (147 tests), documented | **Planned — not implemented** |
 
 ---
 
@@ -37,7 +37,7 @@ Phase 1 solves **bilateral** agent commerce. Phase 2 extends to **many-to-many**
 
 ## Phase 1 — What the project does now
 
-**✅ Shipped in Phase 1 — implemented, tested (145 tests), deployed on Atlantic v1.2.0.**
+**Shipped in Phase 1 — implemented, tested (147 tests), deployed on Atlantic v1.3.0.**
 
 Phase 1 delivers a complete **minimum viable agent payments stack**: smart contracts, TypeScript SDK, MCP server, agent Skill, demos, tests, and a live Atlantic deployment.
 
@@ -215,7 +215,7 @@ Details: [Examples](examples/README.md)
 
 ### 8. Test suite (Phase 1 quality bar)
 
-**145 tests** across five tiers (50 Hardhat + 95 Vitest):
+**147 tests** across five tiers (52 Hardhat + 95 Vitest):
 
 | Tier | Scope | Count |
 |------|-------|-------|
@@ -257,15 +257,15 @@ These are Phase 2 scope.
 
 ## Phase 2 — What the project will do (future)
 
-**⚠️ Planned — not implemented.** Nothing in this section exists in contracts, SDK, MCP, or tests today. It is roadmap only.
+**Planned — not implemented.** Nothing in this section exists in contracts, SDK, MCP, or tests today. It is roadmap only.
 
 Phase 2 is codenamed **Agent Arena**: evolving from bilateral payments to a **multi-agent commerce platform** where agents discover work, build reputation, and resolve conflicts.
 
 ### 1. Dispute and arbitration
 
-**✅ v1.2.0 shipped (lightweight):** auditable `rejectDelivery(reasonHash)`, optional per-deal `arbiter`, `Disputed` state, `resolveDispute` (release / refund / split). MCP `resolve_dispute`. See [DealEscrow](contracts/DealEscrow.md).
+**v1.3.0 shipped (security):** payer-only funding on router fund paths; hybrid `disputeWindow < ttlSeconds` enforced in `DealEscrow`. **v1.2.0:** auditable `rejectDelivery(reasonHash)`, optional `arbiter`, `Disputed`, `resolveDispute`. See [DealEscrow](contracts/DealEscrow.md).
 
-**⚠️ Phase 2 still planned:** reputation indexing of rejections, neutral arbitration panels, bonds, commit-reveal delivery, either-party `open_dispute` with evidence attachments.
+**Phase 2 still planned:** reputation indexing of rejections, neutral arbitration panels, bonds, commit-reveal delivery, either-party `open_dispute` with evidence attachments.
 
 **Cooperative mode residual risk (v1.2):**
 
@@ -301,7 +301,7 @@ flowchart TB
 
 ### 2. Marketplace and task discovery
 
-**⚠️ Planned — not implemented.**
+**Planned — not implemented.**
 
 **Problem:** Phase 1 assumes payer and payee already know each other’s addresses.
 
@@ -316,7 +316,7 @@ flowchart TB
 
 ### 3. Reputation and agent scoring
 
-**⚠️ Planned — not implemented.**
+**Planned — not implemented.**
 
 **Problem:** Phase 1 registry is binary (registered or not)—no signal of reliability.
 
@@ -331,7 +331,7 @@ flowchart TB
 
 ### 4. Richer protocol economics
 
-**⚠️ Planned — not implemented.**
+**Planned — not implemented.**
 
 | Capability | Description |
 |------------|-------------|
@@ -341,7 +341,7 @@ flowchart TB
 
 ### 5. Enhanced proving
 
-**⚠️ Planned — not implemented.**
+**Planned — not implemented.**
 
 Phase 1 prove tiers: **receipt** (default) and **SPV** (optional).
 
@@ -353,7 +353,7 @@ Phase 1 prove tiers: **receipt** (default) and **SPV** (optional).
 
 ### 6. Agent Arena UX (conceptual)
 
-**⚠️ Planned — not implemented.**
+**Planned — not implemented.**
 
 Phase 2 envisions agents operating in an “arena”:
 
@@ -369,7 +369,7 @@ Phase 1 already covers steps 2–3 and partial 4.
 
 ## Phase comparison matrix
 
-**⚠️ Planned — not implemented:** the **Phase 2** column below is roadmap only; only **Phase 1** rows marked “Yes” are shipped today.
+**Planned — not implemented:** the **Phase 2** column below is roadmap only; only **Phase 1** rows marked “Yes” are shipped today.
 
 | Capability | Phase 1 | Phase 2 |
 |------------|---------|---------|
@@ -395,14 +395,14 @@ Phase 1 already covers steps 2–3 and partial 4.
 
 ## Architecture evolution
 
-**⚠️ Planned — not implemented:** the `Phase_2_Planned` box in the diagram is future scope, not in the repo.
+**Planned — not implemented:** the `Phase_2_Planned` box in the diagram is future scope, not in the repo.
 
 ```mermaid
 flowchart TB
   subgraph phase1 [Phase_1_Shipped]
     P1_SDK[SDK_MCP_Skill]
     P1_Contracts[Router_Escrow_Registry_Allowlist]
-    P1_Tests[145_tests]
+    P1_Tests[147_tests]
     P1_SDK --> P1_Contracts
   end
   subgraph phase2 [Phase_2_Planned]
@@ -439,4 +439,4 @@ Phase 2 **builds on** Phase 1 contracts and SDK—it does not replace them. The 
 - **Deployments:** `deployments/atlantic.json`
 - **Deploy:** `npm run deploy:pharos && npm run seed:pharos`
 
-**⚠️ Planned — not implemented:** Phase 2 will require contract upgrades or new contracts (e.g. `DisputeModule`, `AgentMarketplace`) and corresponding SDK/MCP versions — see [upgrade-strategy.md](contracts/upgrade-strategy.md).
+**Planned — not implemented:** Phase 2 will require contract upgrades or new contracts (e.g. `DisputeModule`, `AgentMarketplace`) and corresponding SDK/MCP versions — see [upgrade-strategy.md](contracts/upgrade-strategy.md).

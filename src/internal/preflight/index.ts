@@ -14,6 +14,24 @@ export {
   rejectionReasonHash,
 } from "./hash.js";
 import { mockIsRegistered } from "../onboard/mockRegistry.js";
+import { resolveDisputeWindowSeconds, resolveTtlSeconds } from "../../shared/settlementDefaults.js";
+
+function hybridReleaseEnabled(input: TrustedSettlementInput): boolean {
+  return input.requiresHybridRelease ?? true;
+}
+
+function pushDealTimingChecks(input: TrustedSettlementInput, checks: CheckResult[]) {
+  if (!hybridReleaseEnabled(input)) return;
+  const ttl = resolveTtlSeconds(input.ttlSeconds);
+  const disputeWindow = resolveDisputeWindowSeconds(input.disputeWindowSeconds);
+  checks.push(
+    check(
+      "dispute_window_lt_ttl",
+      disputeWindow < ttl,
+      "disputeWindowSeconds must be < ttlSeconds"
+    )
+  );
+}
 
 export type PreflightResult = {
   ready: boolean;
@@ -33,6 +51,7 @@ export async function preflight(
       check("agent_a_registered", mockIsRegistered(input.agentA), "agent A not registered"),
       check("agent_b_registered", mockIsRegistered(input.agentB), "agent B not registered"),
     ];
+    pushDealTimingChecks(input, checks);
     const preflightHash = computePreflightHash(input, checks);
     return { ready: allPassed(checks), checks, preflightHash };
   }
@@ -46,6 +65,7 @@ export async function preflight(
   checks.push(check("agent_a_format", /^0x[a-fA-F0-9]{40}$/.test(input.agentA), "invalid agentA"));
   checks.push(check("agent_b_format", /^0x[a-fA-F0-9]{40}$/.test(input.agentB), "invalid agentB"));
   checks.push(check("amount_positive", BigInt(input.amount) > 0n, "amount must be > 0"));
+  pushDealTimingChecks(input, checks);
 
   try {
     const [regA, regB, allowed, balance, allowance] = await Promise.all([

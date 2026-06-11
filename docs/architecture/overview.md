@@ -97,7 +97,7 @@ stdio server (`npm run mcp`): **17 tools** (per-step + batch), resources (`pharo
 
 ## Deferred (Phase 2)
 
-**⚠️ Planned — not implemented.** See **[Phase 1 vs Phase 2](../PHASES.md)** for full roadmap.
+**Planned — not implemented.** See **[Phase 1 vs Phase 2](../PHASES.md)** for full roadmap.
 
 - `dispute` + owner `resolveDispute` arbitration
 - Marketplace / reputation (Agent Arena)

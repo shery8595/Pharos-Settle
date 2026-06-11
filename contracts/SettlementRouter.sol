@@ -37,6 +37,7 @@ contract SettlementRouter {
         bytes32 preflightHash,
         bytes32 proofHash
     ) external returns (uint256 dealId) {
+        require(msg.sender == payer, "only payer");
         registry.requireRegistered(payer);
         registry.requireRegistered(payee);
         allowlist.requireAllowed(token);
@@ -97,6 +98,7 @@ contract SettlementRouter {
         uint64 disputeWindow,
         address arbiter
     ) public returns (uint256 dealId) {
+        require(msg.sender == payer, "only payer");
         registry.requireRegistered(payer);
         registry.requireRegistered(payee);
         allowlist.requireAllowed(token);

@@ -1,6 +1,6 @@
 # Phase 1 threat model
 
-Honest security boundaries for **Pharos Settle** bilateral agent payments. **v1.2.0** adds auditable rejection and optional per-deal arbiter disputes. Phase 2 (reputation indexing, marketplace, bonds) is planned — see [PHASES.md](../PHASES.md).
+Honest security boundaries for **Pharos Settle** bilateral agent payments. **v1.3.0 (Atlantic)** enforces payer-only funding and hybrid `disputeWindow < ttl`. **v1.2.0** adds auditable rejection and optional arbiter disputes. Phase 2 is planned — see [PHASES.md](../PHASES.md).
 
 > Phase 1 ships **cooperative settlement with ghost protection** plus **auditable `reasonHash` on rejection**. Optional **arbiter mode** freezes funds on reject until a designated reviewer resolves. This is **not** trustless oracle arbitration. Phase 2 adds reputation and marketplace discovery.
 
@@ -23,6 +23,8 @@ Honest security boundaries for **Pharos Settle** bilateral agent payments. **v1.
 | Subjective quality disagreement | Arbiter `resolveDispute` split | Arbiter bias; no reputation slashing yet (Phase 2) |
 | Untrusted counterparty | Registry + allowlist + simulate-first + optional arbiter | No reputation signal until Phase 2 |
 | Payer bypasses simulate / fake preflight | `preflightHash` stored as audit log only | Contracts do not enforce hash — verify off-chain |
+| Third party funds deal as payer (v1.2 and earlier) | **v1.3+:** `msg.sender == payer` on all fund paths | Prior Atlantic deploys: griefing if payer pre-approved escrow |
+| Hybrid `disputeWindow >= ttl` (bad defaults) | **v1.3+:** on-chain revert; SDK defaults 7d TTL / 3d window | Prior deploys + bad params: ghost-payer auto-claim impossible |
 | Contract logic bug | Immutable deploy; redeploy patched version | See [upgrade-strategy.md](../contracts/upgrade-strategy.md) |
 
 ## Dual-ghost protection (Phase 1)

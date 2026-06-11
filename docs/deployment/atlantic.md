@@ -9,12 +9,29 @@ Pharos Atlantic testnet — chain ID **688689**.
 npm run deploy:pharos
 ```
 
-Writes `deployments/atlantic.json`.
+Writes `deployments/atlantic.json` (currently **v1.3.0**).
+
+## Live addresses (v1.3.0)
+
+Canonical source: [`deployments/atlantic.json`](../../deployments/atlantic.json).
+
+| Contract | Address |
+|----------|---------|
+| SettlementRouter | `0xb39f403f7f36a2a1f4c35a0808f3a024fb73452e` |
+| DealEscrow | `0x2911c456bf766661572eb8ab92f8cfd656661a9b` |
+| AgentRegistry | `0xe4991f5a54b35cfbcf952c31ec7dfcf432a8c173` |
+| TokenAllowlist | `0x456848b1a38954a61ee7f34a997d468831f2d224` |
+| TEST token | `0x008f64b4da7ffcafad2706585cae349bd59b48bf` |
+
+Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz)
+
+v1.2.0 contracts remain on-chain for in-flight deals — see `notes` in `atlantic.json`.
 
 ## deployments/atlantic.json schema
 
 | Field | Description |
 |-------|-------------|
+| `version` | Contract release (e.g. `1.3.0`) |
 | `settlementRouter` | Router address |
 | `dealEscrow` | Escrow address |
 | `agentRegistry` | Registry address |

@@ -119,6 +119,7 @@ contract DealEscrow is ReentrancyGuard {
         require(ttlSeconds > 0, "zero ttl");
         if (requiresHybridRelease_) {
             require(disputeWindow_ > 0, "zero dispute window");
+            require(disputeWindow_ < ttlSeconds, "dispute window >= ttl");
         }
 
         dealId = ++dealNonce;

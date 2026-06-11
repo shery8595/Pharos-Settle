@@ -9,6 +9,11 @@ import { privateKeyToAccount } from "viem/accounts";
 import { ATLANTIC, loadDeployments, resolveDeploymentNetwork } from "../../shared/chain.js";
 import { settlementRouterAbi } from "../../shared/abis.js";
 import type { SettlementConfig, SettlementMode, TrustedSettlementInput } from "../../shared/schemas.js";
+import {
+  assertDisputeWindowLtTtl,
+  resolveDisputeWindowSeconds,
+  resolveTtlSeconds,
+} from "../../shared/settlementDefaults.js";
 import { workHash } from "../preflight/index.js";
 import { computeProofHash } from "../prove/index.js";
 import { transportFromConfig } from "../../shared/clients.js";
@@ -74,11 +79,14 @@ export async function fundDeal(
     transport,
   });
 
-  const ttl = BigInt(input.ttlSeconds ?? 3600);
+  const ttlN = resolveTtlSeconds(input.ttlSeconds);
+  const ttl = BigInt(ttlN);
   const amount = BigInt(input.amount);
   const wh = workHash(input.workDescription);
   const useHybrid = hybridEnabled(input);
-  const disputeWindow = BigInt(input.disputeWindowSeconds ?? 72 * 3600);
+  const disputeN = resolveDisputeWindowSeconds(input.disputeWindowSeconds);
+  assertDisputeWindowLtTtl(ttlN, disputeN, useHybrid);
+  const disputeWindow = BigInt(disputeN);
 
   const fundHash = useHybrid
     ? await payerClient.writeContract({
@@ -174,11 +182,14 @@ export async function settle(
     transport,
   });
 
-  const ttl = BigInt(input.ttlSeconds ?? 3600);
+  const ttlN = resolveTtlSeconds(input.ttlSeconds);
+  const ttl = BigInt(ttlN);
   const amount = BigInt(input.amount);
   const wh = workHash(input.workDescription);
   const useHybrid = hybridEnabled(input);
-  const disputeWindow = BigInt(input.disputeWindowSeconds ?? 72 * 3600);
+  const disputeN = resolveDisputeWindowSeconds(input.disputeWindowSeconds);
+  assertDisputeWindowLtTtl(ttlN, disputeN, useHybrid);
+  const disputeWindow = BigInt(disputeN);
 
   const fundHash = useHybrid
     ? await payerClient.writeContract({
