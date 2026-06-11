@@ -103,9 +103,12 @@ Pharos Settle: Payer attested. Claim complete. dealId=42 · PharosScan ✓
 | Piece | Description |
 |-------|-------------|
 | **Contracts** | SettlementRouter · DealEscrow · AgentRegistry · TokenAllowlist |
-| **SDK** | `simulateTrustedSettlement` / `executeTrustedSettlement` + `nextAction` hints |
-| **MCP** | `npm run mcp` — 17 tools; payer/payee split + batch (`saliFast` / `hybridWork`) |
-| **Skill** | [`SKILL.md`](SKILL.md) + `assets/` + `references/` — Skill Engine (cast-first, MCP-supported) |
+| **Cast (tier 1)** | Foundry `cast`/`forge` — atomic on-chain ([`references/settlement.md`](references/settlement.md)) |
+| **npm scripts (tier 2)** | `pay:once`, `demo:judge`, `batch:fund` — CLI wrappers around the SDK |
+| **SDK** | `pharos-trusted-settlement` — `simulateTrustedSettlement` / `executeTrustedSettlement` (used by npm + MCP) |
+| **MCP (tier 3)** | `npm run mcp` — 17 tools; payer/payee split + batch (`saliFast` / `hybridWork`) |
+| **Skill** | [`SKILL.md`](SKILL.md) + `assets/` + `references/` — Skill Engine entry point |
+| **Execution ladder** | cast → npm scripts → MCP → setup — [`references/execution.md`](references/execution.md) |
 
 **Why four contracts?** [SettlementRouter enforces access, DealEscrow owns state and funds, AgentRegistry separates identity from payment logic, TokenAllowlist keeps the attack surface minimal.](docs/architecture/overview.md#on-chain-contracts)
 
@@ -124,16 +127,19 @@ if (sim.stages.preflight.ready) {
 
 ## Quick start (< 2 minutes)
 
-**Judges (no keys):** `npm run demo:judge` — see [JUDGES.md](JUDGES.md).
+**Judges (no keys):** `npm run demo:judge` — tier 2 mock; see [JUDGES.md](JUDGES.md).
 
-**Live Atlantic:** Both demo wallets are pre-registered — clone, add keys to `.env`, run `npm run demo:pharos`.
+**Agent / cast-first:** Read [`SKILL.md`](SKILL.md). Install [Foundry](https://book.getfoundry.sh/) separately (`cast --version`) — clone does not install it. Pre-checks: Foundry → RPC → keys → balance — [`references/execution.md`](references/execution.md).
+
+**Live Atlantic (npm tier 2 — no cast):** `cp .env.example .env`, add keys, `npm run pay:once -- --payee 0x... --amount 1 --work "task"`.
+
+**Live Atlantic (MCP tier 3):** `npm run setup`, reload MCP, use `fund_deal` / `execute_trusted_settlement`.
 
 ```bash
-npm run setup          # install, build, skill + MCP mode (project or global)
-# Project: open this repo as workspace root → Reload MCP
-# Global: paste .pharos-settle/mcp-bin.generated.json into Cursor global MCP
+npm install
 cp .env.example .env   # PRIVATE_KEY + AGENT_B_PRIVATE_KEY
-npm run demo:pharos    # first time only: deploy:pharos && seed:pharos once before this
+npm run demo:judge     # mock — no keys
+# optional: npm run setup  # skill copy + MCP config (tier 3 only)
 ```
 
 Deploy from scratch:
@@ -148,15 +154,15 @@ npm run demo:pharos
 
 ## Live on Pharos Atlantic
 
-Addresses in [`deployments/atlantic.json`](deployments/atlantic.json) (on-chain verified).
+Addresses in [`deployments/atlantic.json`](deployments/atlantic.json) and [`assets/deployments.json`](assets/deployments.json) (v1.2.0, on-chain verified).
 
 | Contract | Address |
 |----------|---------|
-| SettlementRouter | `0xb5291b7342a6588ba675b08be7cebc7c6e547bdb` |
-| DealEscrow | `0xff528f1ee4cb5a22d68d1c9f29bf70ca4c4197d1` |
-| AgentRegistry | `0x42aff253e3e07d8b1a7a54aafd72cf9dbafeaa5d` |
-| TokenAllowlist | `0x9d8e069ce233e2c14b5a6194784043b73d51299a` |
-| TEST token | `0xf32692cc87145bb9b9892ca449fee889363ebe26` |
+| SettlementRouter | `0x16bb93a34af2a4d32dbfd03d4b82f5f2bba084ca` |
+| DealEscrow | `0x611012929c84e1de6cbe0ed998dd617a8bdeaa7a` |
+| AgentRegistry | `0x59f98951f5755b8fbb78f65f949ae7541eeeac19` |
+| TokenAllowlist | `0xd3346371182356c5ffa1975cf13d04b0663497dc` |
+| TEST token | `0x625e10db28639bc663f2e32e781804984b2dc6b3` |
 
 Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) · RPC: `https://atlantic.dplabs-internal.com`
 

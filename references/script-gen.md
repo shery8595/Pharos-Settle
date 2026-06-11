@@ -17,9 +17,9 @@ Generate JS/TS/Python interaction scripts from SettlementRouter ABI or `assets/t
 | `assets/templates/template_read.ts.tpl` | View calls (`canClaim`, `getDeal`) |
 | `assets/templates/template_write.ts.tpl` | Router writes (`fundAndAcceptHybrid`, etc.) |
 
-## SDK alternative
+## SDK / npm alternative (tier 2)
 
-For production apps, prefer `pharos-trusted-settlement` npm package instead of generated scripts:
+For production apps, use tier 2 npm scripts (`pay:once`) or import `pharos-trusted-settlement` instead of one-off generated scripts. Escalation ladder: [execution.md](execution.md).
 
 ```typescript
 import { simulateTrustedSettlement, executeTrustedSettlement } from "pharos-trusted-settlement";

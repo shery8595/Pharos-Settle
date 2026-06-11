@@ -107,11 +107,11 @@ Proof: [`deployments/atlantic.json`](deployments/atlantic.json) · Explorer: [at
 
 | Contract | Address |
 |----------|---------|
-| SettlementRouter | `0xb5291b7342a6588ba675b08be7cebc7c6e547bdb` |
-| DealEscrow | `0xff528f1ee4cb5a22d68d1c9f29bf70ca4c4197d1` |
-| AgentRegistry | `0x42aff253e3e07d8b1a7a54aafd72cf9dbafeaa5d` |
-| TokenAllowlist | `0x9d8e069ce233e2c14b5a6194784043b73d51299a` |
-| TEST token | `0xf32692cc87145bb9b9892ca449fee889363ebe26` |
+| SettlementRouter | `0x16bb93a34af2a4d32dbfd03d4b82f5f2bba084ca` |
+| DealEscrow | `0x611012929c84e1de6cbe0ed998dd617a8bdeaa7a` |
+| AgentRegistry | `0x59f98951f5755b8fbb78f65f949ae7541eeeac19` |
+| TokenAllowlist | `0xd3346371182356c5ffa1975cf13d04b0663497dc` |
+| TEST token | `0x625e10db28639bc663f2e32e781804984b2dc6b3` |
 
 Chain ID **688689** · RPC `https://atlantic.dplabs-internal.com` · Gas: **PHRS** on Atlantic
 
@@ -119,16 +119,15 @@ Chain ID **688689** · RPC `https://atlantic.dplabs-internal.com` · Gas: **PHRS
 
 ## 4. Mock demo — no keys (try this first)
 
+Tier 2 — no Foundry, keys, or MCP required:
+
 ```bash
 git clone https://github.com/shery8595/Pharos-Settle.git && cd Pharos-Settle
-npm run setup
-```
-
-Then **open `Pharos-Settle` as the workspace root** (not a parent folder), **reload MCP** (Cursor: Settings → MCP; Claude: see [docs/mcp/other-ides.md](docs/mcp/other-ides.md)), and let the agent confirm both (yes/no) per [AGENTS.md](AGENTS.md).
-
-```bash
+npm install
 npm run demo:judge
 ```
+
+Optional tier 3 (MCP): `npm run setup`, reload MCP, then use `simulate_trusted_settlement` with `mock: true`. See [AGENTS.md](AGENTS.md) § MCP (tier 3).
 
 Or step-by-step:
 

@@ -11,6 +11,10 @@ The **Pharos Settle Skill** follows the [Pharos Skill Engine](https://docs.pharo
 | MCP tools | **17** — [MCP README](../mcp/README.md), [`references/mcp.md`](../../references/mcp.md) |
 | npm package | `pharos-trusted-settlement` |
 
+## Progressive execution
+
+Agents follow a 4-tier ladder: **cast → npm scripts → MCP → setup guidance**. If cast cannot fully express a workflow, escalate upward — MCP is never auto-enabled. Full matrix: [`references/execution.md`](../../references/execution.md).
+
 ## Workflow parameters
 
 Every integration uses the same inputs — swap values for your agents, tokens, and tasks:
@@ -43,7 +47,8 @@ npm run skill:sync
 
 # Or manually:
 mkdir -p ~/.cursor/skills/trusted-agent-settlement
-cp SKILL.md assets references -r ~/.cursor/skills/trusted-agent-settlement/
+cp SKILL.md ~/.cursor/skills/trusted-agent-settlement/
+cp -r assets references ~/.cursor/skills/trusted-agent-settlement/
 ```
 
 ## When to use
@@ -68,7 +73,9 @@ Pharos Settle exposes **two composability layers**: an ergonomic **Skill/MCP lay
 
 | Layer | Surface |
 |-------|---------|
-| Skill / MCP | 17 tools — see [roles](../mcp/roles.md) |
+| Cast (tier 1) | `cast send` / `cast call` — [settlement.md](../../references/settlement.md) Method A |
+| npm scripts (tier 2) | `pay:once`, `demo:judge`, `batch:fund` — SDK CLI wrappers |
+| MCP (tier 3) | 17 tools — see [roles](../mcp/roles.md) |
 | SDK ergonomic | `trustedAgentSettlement.ts` |
 | Primitives | `steps.ts` — `preflight`, `submitDelivery`, `claimDeal`, … |
 
@@ -93,13 +100,29 @@ See [SALI FastPay](../mcp/batch-sali.md) and the Skill's batch section.
 
 ## Integration options
 
-### Option A: MCP (recommended for Cursor)
+Follow the execution ladder: **cast → npm scripts → MCP → setup**. See [`references/execution.md`](../../references/execution.md).
 
-Plug in MCP server — **17 tools**; payer/payee split or demo shortcuts.
+### Option A: Cast (tier 1 — default)
+
+Foundry `cast` / `forge` for atomic on-chain ops. See [`references/settlement.md`](../../references/settlement.md) Method A and [`references/query.md`](../../references/query.md).
+
+### Option B: npm scripts (tier 2 — SDK CLI)
+
+```bash
+npm run demo:judge                              # mock — no keys
+npm run pay:once -- --payee 0x... --amount 1 --work "task"
+npm run batch:fund -- --payees 0xA,0xB --amount 1 --work-prefix "batch"
+```
+
+Wraps the SDK; reads `.env`. See [SDK README](../sdk/README.md) § One-shot CLI.
+
+### Option C: MCP (tier 3)
+
+Plug in MCP server — **17 tools**; payer/payee split or demo shortcuts. Only when npm is insufficient or user requests MCP.
 
 See [MCP setup](../mcp/setup.md) and [roles](../mcp/roles.md).
 
-### Option B: TypeScript SDK
+### Option D: TypeScript SDK import
 
 ```typescript
 import {
@@ -110,7 +133,7 @@ import {
 
 See [SDK README](../sdk/README.md).
 
-### Option C: Composable steps
+### Option E: Composable steps
 
 ```typescript
 import { preflight, settle, prove } from "pharos-trusted-settlement/steps";

@@ -6,7 +6,9 @@ Agent-to-agent escrow with ghost protection on Pharos Atlantic.
 > **Contracts:** `assets/deployments.json`  
 > **Private key:** `--private-key $PRIVATE_KEY` on every write (Foundry does not auto-read env)
 
-**Default pre-checks** (before any write): RPC reachable → `$PRIVATE_KEY` set → contracts in `assets/deployments.json` → payer balance sufficient.
+**Default pre-checks** (tier 1 cast): **Foundry** (`cast --version` — [foundry-gate](execution.md#foundry-gate)) → RPC → `$PRIVATE_KEY` in shell (load `.env` on "proceed" — [when-user-confirms-keys-are-set--stay-on-cast](execution.md#when-user-confirms-keys-are-set--stay-on-cast)) → contracts → balance.
+
+**Execution tiers:** Method A = tier 1 (cast). Method B = tier 3 (MCP). Method C = tier 2 (npm). Escalation rules: [execution.md](execution.md).
 
 ---
 
@@ -78,6 +80,13 @@ Tool: `fund_deal`
 Returns `{ "dealId", "fundTx", "nextAction": "deliver" }`.
 
 Preflight first: `simulate_trusted_settlement` with same fields.
+
+### Method C (npm) — tier 2
+
+```bash
+npm run pay:once -- --payee 0xPayee... --amount 1 --work "my-task-id"
+npm run pay:once -- --payee 0xPayee... --amount 1 --work "my-task-id" --simulate
+```
 
 ---
 
@@ -207,7 +216,16 @@ Repeat fund + claim per job. For N payees, run `fundAndAcceptHybrid` N times, ha
 - Payee: `complete_claims_batch`
 - Demo (both keys): `execute_batch_settlement` with `batchMode: "saliFast"`
 
-CLI: `npm run batch:fund` → `npm run batch:claim`. See `docs/mcp/batch-sali.md`.
+### Method C (npm) — tier 2
+
+```bash
+npm run batch:fund -- --payees 0xA,0xB,0xC --amount 1 --work-prefix "payroll"
+npm run batch:claim -- --manifest ./manifest.json
+npm run pay:batch -- --payees 0xA,0xB --amount 1   # demo: both keys
+npm run demo:judge                                  # mock, no keys
+```
+
+See `docs/mcp/batch-sali.md` and [execution.md](execution.md).
 
 ---
 

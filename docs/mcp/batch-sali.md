@@ -67,7 +67,7 @@ One MCP with both keys: `execute_batch_settlement` with `batchMode` `saliFast` o
 
 ## CLI
 
-**Production (split — prefer MCP when connected):**
+**Production (split — tier 2 npm or tier 3 MCP):**
 
 ```bash
 # Payer only — writes manifest

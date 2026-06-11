@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
- * One-shot live payment via SDK — do not duplicate as pay-custom.ts.
- * Prefer MCP: simulate_trusted_settlement → execute_trusted_settlement.
+ * One-shot live payment via SDK (tier 2) — do not duplicate as pay-custom.ts.
+ * Escalation: cast (tier 1) → this script (tier 2) → MCP (tier 3).
  *
  * Usage:
  *   npm run pay:once -- --payee 0x... --amount 5 --work "task-id"

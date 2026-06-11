@@ -65,7 +65,7 @@ Tutorials show “10 TEST on Atlantic” as one instance — the Skill is parame
 |---------------|-----------|
 | Dry-run before paying | Preflight / `simulateTrustedSettlement` |
 | Cursor / Claude plug-in | MCP (`npm run mcp`) |
-| Agent how-to file | Skill (`SKILL.md (Skill Engine: assets/ + references/)/`) |
+| Agent how-to file | Skill (`SKILL.md` + `assets/` + `references/`) |
 | Pay after work proof | Hybrid release |
 | Pay many workers at once | SALI FastPay (`saliFast` batch) |
 
@@ -78,7 +78,7 @@ Tutorials show “10 TEST on Atlantic” as one instance — the Skill is parame
 | On-chain | Router + escrow + registry + allowlist — [live addresses](deployments/atlantic.json) |
 | SDK | `simulateTrustedSettlement` → `executeTrustedSettlement` + `nextAction` |
 | MCP | 17 tools — payer/payee split + batch |
-| Skill | `SKILL.md (Skill Engine: assets/ + references/)/` — composable agent economy primitive |
+| Skill | `SKILL.md` + `assets/` + `references/` — composable agent economy primitive |
 
 ### Composability design
 
@@ -101,7 +101,7 @@ Tutorials show “10 TEST on Atlantic” as one instance — the Skill is parame
 
 > **v1.2.0:** Auditable `reasonHash` on reject; optional **arbiter** → `Disputed` → `resolve_dispute`. Cooperative mode: payer-rug risk documented in [threat-model](docs/security/threat-model.md). Phase 2: reputation + marketplace.
 
-→ [SKILL.md](SKILL.md (Skill Engine: assets/ + references/)/SKILL.md) · [JUDGES.md](JUDGES.md)
+→ [SKILL.md](SKILL.md) · [JUDGES.md](JUDGES.md)
 
 ### Agent scenarios
 
@@ -161,11 +161,11 @@ Full list: [docs/examples/demos.md](docs/examples/demos.md) · `demo:reclaim` al
 
 | Contract | Address |
 |----------|---------|
-| SettlementRouter | `0xb5291b7342a6588ba675b08be7cebc7c6e547bdb` |
-| DealEscrow | `0xff528f1ee4cb5a22d68d1c9f29bf70ca4c4197d1` |
-| AgentRegistry | `0x42aff253e3e07d8b1a7a54aafd72cf9dbafeaa5d` |
-| TokenAllowlist | `0x9d8e069ce233e2c14b5a6194784043b73d51299a` |
-| TEST token | `0xf32692cc87145bb9b9892ca449fee889363ebe26` |
+| SettlementRouter | `0x16bb93a34af2a4d32dbfd03d4b82f5f2bba084ca` |
+| DealEscrow | `0x611012929c84e1de6cbe0ed998dd617a8bdeaa7a` |
+| AgentRegistry | `0x59f98951f5755b8fbb78f65f949ae7541eeeac19` |
+| TokenAllowlist | `0xd3346371182356c5ffa1975cf13d04b0663497dc` |
+| TEST token | `0x625e10db28639bc663f2e32e781804984b2dc6b3` |
 
 Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) · Proof: [`deployments/atlantic.json`](deployments/atlantic.json)
 
@@ -202,4 +202,4 @@ Explorer: [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) · Contract
 | [docs/PHASES.md](docs/PHASES.md) | Phase 1 vs Phase 2 |
 | [docs/README.md](docs/README.md) | Full handbook |
 | [docs/mcp/batch-sali.md](docs/mcp/batch-sali.md) | SALI FastPay |
-| [SKILL.md (Skill Engine: assets/ + references/)/SKILL.md](SKILL.md (Skill Engine: assets/ + references/)/SKILL.md) | Agent Skill |
+| [SKILL.md](SKILL.md) | Agent Skill |

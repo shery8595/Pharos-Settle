@@ -2,7 +2,18 @@
 
 Portable guide for **Cursor**, **Claude Desktop**, **Windsurf**, **Cline**, and other MCP-capable agents.
 
-**Cast-first, MCP-supported.** Read root [`SKILL.md`](SKILL.md) first. Default path is Foundry (`cast`/`forge`). MCP is optional.
+**Cast-first, MCP-supported.** Read root [`SKILL.md`](SKILL.md) first.
+
+## Execution Priority Order
+
+1. **cast** — atomic on-chain (default)
+2. **npm scripts** — SDK shortcuts when cast cannot express the workflow
+3. **MCP** — orchestration when npm is insufficient and tools are connected
+4. **setup guidance** — if nothing above is available
+
+Full matrix: [`references/execution.md`](references/execution.md)
+
+**Rule:** If cast cannot safely or fully express the task → escalate upward. Agents decide; MCP is never auto-enabled.
 
 ## Quick setup
 
@@ -18,10 +29,11 @@ Optional: `npm run setup` (creates `.env`, installs skill, optional MCP config).
 
 ## Default pre-checks (cast-first — use before any settlement)
 
-Do **not** ask about MCP global/local or demo/live unless the user explicitly wants MCP tools.
+Do **not** ask about MCP global/local or demo/live unless escalation reaches **tier 3** (MCP required).
 
 | # | Check | How |
 |---|-------|-----|
+| 0 | Foundry | `cast --version` — if missing, offer install or tier 2/3/4 per [`execution.md#foundry-gate`](references/execution.md#foundry-gate) |
 | 1 | RPC | `cast chain-id --rpc-url $RPC` → `688689` |
 | 2 | Private key | `cast wallet address --private-key $PRIVATE_KEY` |
 | 3 | Contracts | `assets/deployments.json` → `settlementRouter` |
@@ -29,13 +41,23 @@ Do **not** ask about MCP global/local or demo/live unless the user explicitly wa
 
 Then execute per [`references/settlement.md`](references/settlement.md) Method A (cast). Pass `--private-key $PRIVATE_KEY` and `--rpc-url $RPC` on every write.
 
+### If pre-check #2 fails (no key)
+
+Before live `cast send`: **stop and prompt** the user to set `PRIVATE_KEY` in `.env` and `export PRIVATE_KEY=0x...` (cast does not load `.env`). Add `AGENT_B_PRIVATE_KEY` when payee deliver/claim steps are needed. Fund PHRS on Atlantic.
+
+If user wants mock/no keys: escalate to tier 2 (`demo:judge`) or tier 3 — do not prompt for keys.
+
+**When user says keys are set / proceed:** agent loads `.env` into the shell (`source .env` or PowerShell equivalent), re-runs pre-check #2, **continues cast** — do not change tier.
+
+Template: [`references/execution.md#cast-key-gate`](references/execution.md#cast-key-gate)
+
 ## Skill Engine layout
 
 | Path | Role |
 |------|------|
 | [`SKILL.md`](SKILL.md) | Agent entry — Capability Index |
 | `assets/` | networks, tokens, deployments, contract templates |
-| `references/` | cast (preferred) + MCP (optional) operation specs |
+| `references/` | cast (tier 1), npm (tier 2), MCP (tier 3) — [`execution.md`](references/execution.md) |
 | `docs/` | Human handbook (architecture, threat model, SDK depth) |
 
 Sync assets after deploy: `npm run skill:sync-assets`
@@ -54,9 +76,10 @@ Sync assets after deploy: `npm run skill:sync-assets`
 
 ---
 
-## MCP (optional — only when user wants MCP tools)
+## MCP (tier 3 — only when escalation reaches MCP)
 
-Skip this entire section for cast-first workflows. Apply only when:
+Skip this entire section for tier 1–2 workflows. Apply only when:
+- Cast/npm cannot express the workflow (see [`references/execution.md`](references/execution.md)), **or**
 - User explicitly asks for MCP tools, **or**
 - `pharos-settle` MCP tools are already available in the session
 
@@ -90,7 +113,7 @@ Otherwise confirm per `mcpMode` (project: workspace root + MCP connected; global
 
 Live keys: `PRIVATE_KEY` + `AGENT_B_PRIVATE_KEY` (66+ char hex), PHRS funded.
 
-If MCP tools are **not** in session and user wanted MCP, say: **"Pharos Settle MCP is not connected."** Offer cast path or `npm run demo:judge`.
+If MCP tools are **not** in session and tier 3 is needed, say: **"Pharos Settle MCP is not connected."** Try tier 2 npm first (`demo:judge`, `pay:once --simulate`); then tier 4 setup instructions.
 
 ### MCP settlement flow
 
@@ -102,24 +125,24 @@ Details: [`references/mcp.md`](references/mcp.md) and [`references/settlement.md
 
 ## Custom payments (e.g. “pay 5 TEST to 0x…”)
 
-**Do not create new scripts** (`scripts/pay-custom.ts`, etc.). Use in order:
+**Do not create new scripts** (`scripts/pay-custom.ts`, etc.). Escalate per [`references/execution.md`](references/execution.md):
 
-### 1. Cast (preferred)
+### Tier 1 — Cast
 
-See [`references/settlement.md`](references/settlement.md) — approve → `fundAndAcceptHybrid` → deliver → attest → claim.
+[`references/settlement.md`](references/settlement.md) Method A — approve → `fundAndAcceptHybrid` → deliver → attest → claim.
 
-### 2. MCP (when connected)
-
-`simulate_trusted_settlement` → `execute_trusted_settlement` with `autoOnboardRecipients: true` if needed.
-
-### 3. Official CLI (SDK wrapper)
+### Tier 2 — npm
 
 ```bash
 npm run pay:once -- --payee 0x... --amount 5 --work "my-task"
 npm run pay:once -- --payee 0x... --amount 5 --simulate
 ```
 
-### 4. SDK import
+### Tier 3 — MCP (when connected)
+
+`simulate_trusted_settlement` → `execute_trusted_settlement` with `autoOnboardRecipients: true` if needed.
+
+### Tier 4 — SDK import
 
 Pattern: `examples/agent-consumer/openai-agent.ts`
 
@@ -127,12 +150,11 @@ Pattern: `examples/agent-consumer/openai-agent.ts`
 
 **Do not create** ad-hoc batch scripts.
 
-| Path | How |
+| Tier | How |
 |------|-----|
-| Cast | Loop fund + claim per job — [`references/settlement.md`](references/settlement.md) |
-| MCP split | `fund_deals_batch` → `complete_claims_batch` |
-| CLI split | `npm run batch:fund` → `npm run batch:claim` |
-| Demo | `npm run demo:batch` or `npm run pay:batch` |
+| 1 — Cast | Loop fund + claim per job — [`references/settlement.md`](references/settlement.md) |
+| 2 — npm | `npm run batch:fund` → `npm run batch:claim`; `demo:batch`, `pay:batch` |
+| 3 — MCP | `fund_deals_batch` → `complete_claims_batch` |
 
 See [docs/mcp/batch-sali.md](docs/mcp/batch-sali.md) and [docs/sdk/batch-settlements.md](docs/sdk/batch-settlements.md).
 

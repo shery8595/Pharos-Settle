@@ -11,6 +11,6 @@ The Pharos Settle skill now lives at the **repo root** (Skill Engine layout):
 |------|----------|
 | [`../../SKILL.md`](../../SKILL.md) | Agent entry — Capability Index |
 | [`../../assets/`](../../assets/) | networks, tokens, deployments, contracts |
-| [`../../references/`](../../references/) | cast (preferred) + MCP (optional) specs |
+| [`../../references/`](../../references/) | cast (tier 1), npm (tier 2), MCP (tier 3) — start with [`execution.md`](../../references/execution.md) |
 
 Run `npm run skill:sync` to copy the bundle to `.cursor/skills/trusted-agent-settlement/`.

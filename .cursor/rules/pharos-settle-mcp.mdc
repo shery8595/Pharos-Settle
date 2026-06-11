@@ -1,34 +1,51 @@
 ---
-description: Cast-first Pharos Settle skill; MCP gate only when calling pharos-settle MCP tools
+description: Cast-first Pharos Settle skill; progressive execution cast → npm → MCP → setup
 alwaysApply: true
 ---
 
 # Pharos Settle — agent gate
 
-## Default (cast-first)
+## Execution escalation
+
+Follow [`references/execution.md`](references/execution.md):
+
+**cast → npm scripts → MCP (if in session) → setup instructions**
+
+Never claim MCP is auto-enabled. Never ask MCP setup before cast pre-checks unless tier 3 is required.
+
+## Default (tier 1 — cast)
 
 Read root **`SKILL.md`** first. Before any on-chain settlement:
 
+0. Foundry installed (`cast --version`) — if missing, stop cast; offer install or tier 2 npm / tier 3 MCP / `demo:judge` — see `references/execution.md#foundry-gate`. No auto-install.
 1. RPC reachable (`cast chain-id --rpc-url $RPC`)
-2. `$PRIVATE_KEY` set
+2. `$PRIVATE_KEY` set — if missing and user wants live writes, **stop and prompt** (save in `.env`; never paste key in chat). When user says keys are set / proceed: **load `.env` into shell** (`source .env` or PowerShell `Get-Content .env`), re-check, **stay on cast**. Mock intent → tier 2/3, no key prompt.
 3. Contracts in `assets/deployments.json`
 4. Balance sufficient
 
-Execute via **`references/settlement.md` Method A (cast)**. Do **not** ask about MCP global/local or demo/live unless the user explicitly wants MCP tools.
+Execute via **`references/settlement.md` Method A (cast)**. Key gate: `references/execution.md#cast-key-gate`.
 
 Addresses: `assets/networks.json`, `assets/tokens.json`, `assets/deployments.json`.
 
-## MCP tools (optional — only when calling them)
+## Tier 2 — npm fallback
 
-Apply the gate below **only** before **pharos-settle** MCP tool calls (`fund_deal`, `simulate_trusted_settlement`, etc.) — not for cast/forge.
+When cast cannot express the workflow, try npm before MCP:
+
+- `npm run pay:once`, `pay:once --simulate`
+- `npm run batch:fund`, `batch:claim`
+- `npm run demo:judge`, `agent:doctor:mock`
+
+## Tier 3 — MCP tools (only when escalation reaches MCP)
+
+Apply the gate below **only** before **pharos-settle** MCP tool calls — not for cast/npm.
 
 Read **`.pharos-settle/setup-checklist.json`** when present. Guide: [docs/mcp/modes.md](docs/mcp/modes.md).
 
 **Auto-skip:** If pharos-settle MCP tools are in this session, set `awaitingConfirmation: false` in the checklist and proceed.
 
-If user wants MCP but tools are missing: say **"Pharos Settle MCP is not connected in this session."** Use cast path or `npm run demo:judge`.
+If tier 3 needed but tools missing: say **"Pharos Settle MCP is not connected in this session."** Try tier 2 npm first; then tier 4 setup.
 
-### MCP setup (only if user chose MCP)
+### Tier 4 — MCP setup (only if user chose MCP or tier 3 required)
 
 If `needsSetupChoices` or `mcpMode` / `runMode` is null — ask (AskQuestion):
 
@@ -39,8 +56,8 @@ Confirm MCP connected per `mcpMode`. Live: `PRIVATE_KEY` + `AGENT_B_PRIVATE_KEY`
 
 ## Custom payments
 
-Do **not** create `scripts/pay-custom.ts`. Use cast ([references/settlement.md](references/settlement.md)), MCP tools, or `npm run pay:once`. See `AGENTS.md`.
+Do **not** create `scripts/pay-custom.ts`. Escalate: cast → `npm run pay:once` → MCP. See `AGENTS.md`.
 
 ## Batch settlements
 
-Do **not** create ad-hoc batch scripts. Use cast loop, MCP `execute_batch_settlement`, or `npm run batch:fund` / `batch:claim`. See `AGENTS.md`.
+Do **not** create ad-hoc batch scripts. Escalate: cast loop → `batch:fund`/`batch:claim` → MCP batch tools. See `AGENTS.md`.

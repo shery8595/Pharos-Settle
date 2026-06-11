@@ -67,7 +67,7 @@ npm run batch:claim -- --manifest ./manifest.json
 npm run pay:batch -- --payee 0x... --count 10 --amount 2   # demo only (both keys)
 ```
 
-Thin SDK wrappers — prefer MCP (`execute_trusted_settlement`, `execute_batch_settlement`, or split batch tools). Agents must **not** create ad-hoc `pay-custom.ts` / `pay-batch-custom.ts` scripts.
+Tier 2 CLI wrappers around this SDK — use when cast (tier 1) cannot express the workflow. Escalate to MCP (tier 3) for orchestration (`execute_trusted_settlement`, batch manifests, `mock: true`). Agents must **not** create ad-hoc `pay-custom.ts` / `pay-batch-custom.ts` scripts. Ladder: [`references/execution.md`](../../references/execution.md).
 
 Batch details: [batch-settlements.md](batch-settlements.md) · MCP: [batch-sali.md](../mcp/batch-sali.md)
 
