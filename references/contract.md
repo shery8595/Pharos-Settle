@@ -1,13 +1,28 @@
 # Contract Deploy and Verify
 
+```bash
+# --- Environment Setup ---
+export RPC=$(jq -r '.atlantic.rpcUrl' assets/networks.json)
+export OWNER_PRIVATE_KEY=0xYourOwnerDeployerKey   # privileged — admin/deploy only
+export DEPLOYER=$(cast wallet address --private-key $OWNER_PRIVATE_KEY)
+export ROUTER=$(jq -r .settlementRouter assets/deployments.json)
+export ESCROW=$(jq -r .dealEscrow assets/deployments.json)
+export REGISTRY=$(jq -r .agentRegistry assets/deployments.json)
+export ALLOWLIST=$(jq -r .tokenAllowlist assets/deployments.json)
+# --------------------------
+```
+
 > Deploy your own stack for localhost. Atlantic testnet addresses are pre-deployed in `assets/deployments.json`.
+
+> [!IMPORTANT]
+> Use `$OWNER_PRIVATE_KEY` only for deploy/verify/admin. Routine agent settlements use `$PAYER_PRIVATE_KEY` / `$PAYEE_PRIVATE_KEY` — see [settlement.md](settlement.md).
 
 ---
 
 ## Pre-checks
 
 ```bash
-cast wallet address --private-key $PRIVATE_KEY
+cast wallet address --private-key $OWNER_PRIVATE_KEY
 cast balance $DEPLOYER --rpc-url $RPC --ether
 ```
 
@@ -19,7 +34,7 @@ From repo root:
 
 ```bash
 npm install
-cp .env.example .env   # set PRIVATE_KEY
+cp .env.example .env   # set PRIVATE_KEY (owner/deployer)
 npm run deploy:pharos
 npm run seed:pharos
 ```

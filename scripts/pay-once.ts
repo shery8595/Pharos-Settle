@@ -5,7 +5,7 @@
  *
  * Usage:
  *   npm run pay:once -- --payee 0x... --amount 5 --work "task-id"
- *   npm run pay:once -- --payee 0x... --amount 5 --simulate
+ *   npm run pay:once -- --payee 0x... --amount 5 --token 0x... --simulate
  */
 import { config as loadEnv } from "dotenv";
 loadEnv({ override: true });
@@ -36,6 +36,18 @@ function loadAtlantic() {
   };
 }
 
+function tokenDecimals(tokenAddress: string): number {
+  const path = join(process.cwd(), "assets", "tokens.json");
+  if (existsSync(path)) {
+    const tokens = JSON.parse(readFileSync(path, "utf-8")) as {
+      atlantic: { address: string; decimals: number; symbol: string }[];
+    };
+    const match = tokens.atlantic.find((t) => t.address.toLowerCase() === tokenAddress.toLowerCase());
+    if (match) return match.decimals;
+  }
+  return 18;
+}
+
 function payerAddress(deployer: string): string {
   const pk = process.env.PRIVATE_KEY?.trim();
   if (pk && pk.length >= 66) return new Wallet(pk).address;
@@ -62,12 +74,14 @@ async function main() {
 
   const atlantic = loadAtlantic();
   const agentA = payerAddress(atlantic.deployer);
-  const amount = toWei(amountHuman, 18);
+  const token = (arg("--token") ?? atlantic.mockToken).trim();
+  const decimals = tokenDecimals(token);
+  const amount = toWei(amountHuman, decimals);
 
   const input = {
     agentA,
     agentB: payee,
-    token: atlantic.mockToken,
+    token,
     amount,
     workDescription: work,
     ttlSeconds: 3600,
@@ -86,7 +100,8 @@ async function main() {
 
   console.log("Payer:", agentA);
   console.log("Payee:", payee);
-  console.log("Amount:", amountHuman, "TEST (", amount, "wei )");
+  console.log("Token:", token, `(${decimals} decimals)`);
+  console.log("Amount:", amountHuman, "(", amount, "wei )");
   console.log("Work:", work);
 
   console.log("\n→ simulate...");
