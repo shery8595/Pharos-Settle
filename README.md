@@ -31,8 +31,6 @@ flowchart TB
   Router --> Escrow
 ```
 
-![Agent A → Pharos Settle Skill → Escrow → Agent B](docs/architecture/agent-settlement-flow.png)
-
 **Hackathon judges:** `npm run demo:judge` (mock, no keys) · **[JUDGES.md](JUDGES.md)** · [SUBMISSION.md](SUBMISSION.md) · [agent scenario](examples/agent-hires-agent.md)
 
 ### What's novel
