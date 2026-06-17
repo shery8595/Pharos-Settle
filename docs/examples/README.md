@@ -27,9 +27,9 @@ Runnable demos and integration patterns.
 - [Ghost payer](ghost-payer.md)
 - [Agent consumer](agent-consumer.md)
 
-## Video script
+## Agent scenario
 
-[Demo video script](../demo-script.md) — <3 min recording guide.
+[Agent hires agent](../examples/agent-hires-agent.md) — plain-English walkthrough (report → delivery hash → claim/reclaim).
 
 ## Hackathon
 

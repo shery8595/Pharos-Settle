@@ -46,6 +46,7 @@ async function main() {
     amount: "1000000000000000000",
     workDescription: "labeling batch — ghost payee test",
     ttlSeconds: mock ? 5 : TTL_SECONDS,
+    disputeWindowSeconds: mock ? 3 : Math.max(60, TTL_SECONDS - 30),
     requiresHybridRelease: true,
   };
 

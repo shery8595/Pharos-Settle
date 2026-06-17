@@ -1,6 +1,6 @@
 # What's novel about Pharos Settle
 
-Pharos Settle is **not** generic escrow with a README. The novelty is an **agent commerce layer** on Pharos Atlantic: simulate-first flows, `nextAction` loops, dual-ghost protection, manifest handoff for split identities, and SALI FastPay batch payroll — exposed through **17 MCP tools** and a portable **Skill**. **v1.3.0** adds payer-only funding and hybrid timing guards. **v1.2.0** adds auditable rejection (`reasonHash`) and optional per-deal arbiter disputes.
+Pharos Settle is **not** generic escrow with a README. Generic escrow protects humans; Pharos Settle gives autonomous agents a **reusable payment Skill** with simulate-first execution, next-action polling, ghost recovery, and MCP/SDK parity.
 
 > **Terminology:** **Dual-ghost protection** is the umbrella term (payee ghosts + payer ghosts + junk delivery rejection). Escrow mechanics exist elsewhere; what ships here is the agent-native orchestration surface.
 

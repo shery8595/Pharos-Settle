@@ -134,4 +134,5 @@ flowchart TB
 - [Glossary](glossary.md)
 - [Judge quickstart](../JUDGES.md)
 - [Hackathon submission](SUBMISSION.md)
-- [Demo video script](demo-script.md)
+- [MCP tools table](mcp/tools-table.md)
+- [Agent hires agent](../examples/agent-hires-agent.md)

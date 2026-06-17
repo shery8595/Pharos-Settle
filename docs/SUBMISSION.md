@@ -17,6 +17,8 @@ That file includes live Atlantic contract addresses (from `deployments/atlantic.
 - [x] Ghost payee reclaim demo (`demo:ghost-payee`, `demo:reclaim` alias)
 - [x] Dual-ghost protection + threat model ([WHATS-NOVEL.md](WHATS-NOVEL.md), [security/threat-model.md](security/threat-model.md))
 
-## Demo video
+## Judge resources
 
-Follow [demo-script.md](demo-script.md). Paste the recording URL in root [SUBMISSION.md](../SUBMISSION.md) when ready.
+- [JUDGES.md](../JUDGES.md) — mock demo + expected output
+- [examples/agent-hires-agent.md](../examples/agent-hires-agent.md) — plain-English scenario
+- [mcp/tools-table.md](mcp/tools-table.md) — all 17 MCP tools

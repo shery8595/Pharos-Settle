@@ -98,7 +98,6 @@ async function runExecute(mock: boolean) {
       token: d!.mockToken,
       amount: "1000000000000000000",
       workDescription: "labeling task batch #1",
-      ttlSeconds: 3600,
     },
     settlementConfig(mock)
   );

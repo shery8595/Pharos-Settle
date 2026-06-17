@@ -108,4 +108,4 @@ npm run demo:spv
 
 ## Video recording
 
-See [demo-script.md](../demo-script.md) for a ~90s script covering dual-ghost protection, MCP, SALI batch, and live Atlantic proof.
+See [JUDGES.md](../../JUDGES.md) for expected output snippets from mock demos.

@@ -434,7 +434,7 @@ Phase 2 **builds on** Phase 1 contracts and SDK—it does not replace them. The 
 
 ## Version and deployment
 
-- **Package version:** 1.1.0
+- **Package version:** 1.3.0
 - **Network:** Pharos Atlantic (chain ID `688689`)
 - **Deployments:** `deployments/atlantic.json`
 - **Deploy:** `npm run deploy:pharos && npm run seed:pharos`

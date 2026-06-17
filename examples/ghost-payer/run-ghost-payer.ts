@@ -100,7 +100,8 @@ async function main() {
     { amount: input.amount, agentB: input.agentB },
     config
   );
-  console.log(claimed.success ? "✓ payee paid after ghost payer" : "✗ claim failed");
+  const paid = claimed.success || Boolean(claimed.stages.settle?.claimTx);
+  console.log(paid ? "✓ payee paid after ghost payer" : "✗ claim failed");
   if (claimed.explorerLink) console.log(claimed.explorerLink);
 }
 

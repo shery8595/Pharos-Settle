@@ -1,13 +1,14 @@
 # Pharos Settle
 
-**Stripe Checkout for AI agents on Pharos** — a trust layer for agents that hire each other.
+**Hackathon judges:** start with **[JUDGES.md](JUDGES.md)** · `npm run demo:judge` (mock, no keys) · [SUBMISSION.md](SUBMISSION.md)
 
-[![Tests](https://img.shields.io/badge/tests-147-brightgreen)](#tests) [![Chain](https://img.shields.io/badge/chain-Pharos%20Atlantic%20(688689)-blue)](deployments/atlantic.json) [![Phase](https://img.shields.io/badge/phase-1%20shipped-success)](docs/PHASES.md)
+**Stripe Checkout for AI agents on Pharos** — a reusable **Skill** for agents that hire each other.
 
-> **Agent-to-agent work settlement with ghost protection.**  
-> Payee ghosts → payer reclaims. Junk delivery → payer safety valve. Payer ghosts → payee still gets paid. Both behave → instant settlement.
+[![Tests](https://img.shields.io/badge/tests-147-brightgreen)](#tests) [![Contracts](https://img.shields.io/badge/contracts-live%20Atlantic-blue)](deployments/atlantic.json) [![MCP](https://img.shields.io/badge/MCP-17%20tools-purple)](docs/mcp/tools-table.md) [![Phase](https://img.shields.io/badge/phase-1%20shipped-success)](docs/PHASES.md) [![Docs](https://img.shields.io/badge/judge%20guide-JUDGES.md-orange)](JUDGES.md)
 
-> **v1.3.0 (Atlantic):** Payer-only funding (`msg.sender == payer`); hybrid deals require `disputeWindow < ttlSeconds`. **v1.2.0:** auditable `reasonHash` on reject; optional **arbiter** disputes. Phase 2 adds reputation indexing, marketplace, and bonds.
+> Generic escrow protects humans; Pharos Settle gives autonomous agents a **reusable payment Skill** with simulate-first execution, next-action polling, ghost recovery, and MCP/SDK parity.
+
+> **Phase 1 shipped:** Skill + 17 MCP tools + SDK + live Atlantic contracts. **Phase 2 roadmap only:** marketplace, reputation, neutral arbitration.
 
 ### Reusable surfaces
 
@@ -30,7 +31,9 @@ flowchart TB
   Router --> Escrow
 ```
 
-**Hackathon judges:** `npm run demo:judge` (mock, no keys) · [JUDGES.md](JUDGES.md) · [SUBMISSION.md](SUBMISSION.md)
+![Agent A → Pharos Settle Skill → Escrow → Agent B](docs/architecture/agent-settlement-flow.png)
+
+**Hackathon judges:** `npm run demo:judge` (mock, no keys) · **[JUDGES.md](JUDGES.md)** · [SUBMISSION.md](SUBMISSION.md) · [agent scenario](examples/agent-hires-agent.md)
 
 ### What's novel
 
@@ -198,7 +201,7 @@ Cursor setup: [docs/mcp/setup.md](docs/mcp/setup.md)
 
 ### Tools (17)
 
-**17 tools** — single-payment + batch — see [docs/mcp/tools.md](docs/mcp/tools.md) and [docs/mcp/batch-sali.md](docs/mcp/batch-sali.md) for `saliFast` vs `hybridWork`
+**17 tools** — single-payment + batch — see [docs/mcp/tools-table.md](docs/mcp/tools-table.md) · [docs/mcp/tools.md](docs/mcp/tools.md) · [docs/mcp/batch-sali.md](docs/mcp/batch-sali.md)
 
 ```bash
 npm run agent:doctor        # readiness check
@@ -272,6 +275,8 @@ npm test   # 147 tests — 52 Hardhat + 95 Vitest (Atlantic smoke needs seeded w
 | Doc | Purpose |
 |-----|---------|
 | **[JUDGES.md](JUDGES.md)** | Judge quickstart (mock first) |
+| **[docs/mcp/tools-table.md](docs/mcp/tools-table.md)** | All 17 MCP tools at a glance |
+| **[examples/agent-hires-agent.md](examples/agent-hires-agent.md)** | Plain-English agent scenario |
 | **[SUBMISSION.md](SUBMISSION.md)** | Full submission + DoraHacks |
 | **[docs/README.md](docs/README.md)** | Full handbook |
 | **[docs/mcp/batch-sali.md](docs/mcp/batch-sali.md)** | SALI FastPay — batch agent payroll |

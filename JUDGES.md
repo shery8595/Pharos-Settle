@@ -5,18 +5,26 @@
 ## Judge in 3 minutes
 
 1. `npm run demo:judge` — one-command mock flow (no keys)
-2. Watch demo video for live Atlantic txs _(link in [SUBMISSION.md](SUBMISSION.md))_
-3. Reusable surfaces: [SKILL.md](SKILL.md) · 17 MCP tools · TypeScript SDK · smart contracts · batch manifest handoff
-4. Click PharosScan proofs: [SUBMISSION.md](SUBMISSION.md#live-proof-pharosscan)
+2. Reusable surfaces: [SKILL.md](SKILL.md) · 17 MCP tools · TypeScript SDK · smart contracts · batch manifest handoff
+3. Click PharosScan proofs: [SUBMISSION.md](SUBMISSION.md#live-proof-pharosscan)
+4. Plain scenario: [examples/agent-hires-agent.md](examples/agent-hires-agent.md)
 
 ## Why this wins Phase 1
 
 Agents cannot safely hire each other with raw transfers. Pharos Settle gives them a **reusable settlement Skill**: simulate first, escrow funds, prove delivery, recover from ghosting, and batch-pay workers on Pharos.
 
+> Generic escrow protects humans; Pharos Settle gives autonomous agents a reusable payment Skill with simulate-first execution, next-action polling, ghost recovery, and MCP/SDK parity.
+
+| Label | Meaning |
+|-------|---------|
+| **Phase 1 shipped** | Skill + 17 MCP tools + SDK + live contracts + ghost demos |
+| **Phase 2 roadmap only** | Marketplace, reputation, neutral arbitration |
+| **Skill usable today** | `npm run demo:judge` in <30s, no keys |
+
 | Reusable surface | Where |
 |------------------|-------|
 | Agent Skill | `SKILL.md` + `assets/` + `references/` |
-| MCP (17 tools) | `npm run mcp` |
+| MCP (17 tools) | `npm run mcp` · [tools-table](docs/mcp/tools-table.md) |
 | TypeScript SDK | `src/trustedAgentSettlement.ts` + `steps.ts` |
 | Smart contracts | `deployments/atlantic.json` |
 | Batch manifest handoff | payer `fund_deals_batch` → payee `complete_claims_batch` |
@@ -41,6 +49,8 @@ One AI agent pays another for work. Money sits in escrow until the job is proven
 | Both do their part | Instant settlement |
 
 ### What's novel
+
+> Generic escrow protects humans; Pharos Settle gives autonomous agents a reusable payment Skill with simulate-first execution, next-action polling, ghost recovery, and MCP/SDK parity.
 
 - **Dual-ghost protection** — both ghost paths demonstrated (`demo:ghost-payee`, `demo:ghost-payer`) + junk delivery reject
 - **`nextAction` loops** — single hint per poll (`fund`, `claim`, `reclaim`, …)
@@ -87,8 +97,8 @@ Pharos Settle ships that primitive today: contracts live on Atlantic, agents plu
 
 ## Shipped vs planned
 
-| **Shipped** (Phase 1) | **Planned** (Phase 2 roadmap) |
-|----------------------|-----------------------------------|
+| **Phase 1 shipped** (usable today) | **Phase 2 roadmap only** |
+|-----------------------------------|--------------------------|
 | Smart contracts | Agent marketplace |
 | TypeScript SDK | Reputation scores |
 | MCP server (17 tools) | On-chain arbitration |
@@ -182,11 +192,45 @@ Key demos table: [docs/examples/demos.md](docs/examples/demos.md).
 
 ## 6. What to look for in the output
 
+### `npm run demo:judge` (recommended)
+
+```
+"ready": true
+"role": "mock"
+allowedTools: [ ... 17 tools ... ]
+✓ simulation passed — ready to execute
+```
+
 ### `npm run agent:doctor:mock`
 
 - `ready: true`
 - `role: "mock"` (or `demo` if both keys set)
-- List of allowed tools — should be **16**
+- List of allowed tools — should be **17**
+
+### `npm run demo:batch:simulate`
+
+```
+succeeded: 5
+maxParallelInBlock: 5
+endToEndDealsPerSec: '357.14'
+SALI: 5 fund txs in same block
+```
+
+### `npm run demo:ghost-payee:simulate`
+
+```
+→ fund deal (payee will NOT deliver)
+→ deal 1 nextAction: deliver
+✓ funds returned to payer (Refunded) [mock]
+```
+
+### `npm run demo:ghost-payer:simulate`
+
+```
+→ fund + deliver (payer will NOT attest)
+→ deal 1 nextAction: wait
+✓ payee paid after ghost payer
+```
 
 ### `npm run demo:simulate`
 
@@ -277,4 +321,5 @@ Pharos Settle: Claim complete. dealId=42 · PharosScan (confirmed)
 |-----|---------|
 | [SUBMISSION.md](SUBMISSION.md) | Full submission + DoraHacks copy-paste |
 | [SKILL.md](SKILL.md) | Agent Skill module |
-| [docs/demo-script.md](docs/demo-script.md) | 3-minute video script |
+| [docs/mcp/tools-table.md](docs/mcp/tools-table.md) | All 17 MCP tools |
+| [examples/agent-hires-agent.md](examples/agent-hires-agent.md) | Plain-English agent scenario |
